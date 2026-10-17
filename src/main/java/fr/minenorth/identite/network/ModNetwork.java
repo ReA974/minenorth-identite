@@ -24,9 +24,9 @@ public final class ModNetwork {
     private static int id = 0;
 
     public static void register() {
-        CHANNEL.registerMessage(id++, IdentityViewPacket.class, IdentityViewPacket::encode, IdentityViewPacket::decode, IdentityViewPacket::handle);
-        CHANNEL.registerMessage(id++, IdentitySavePacket.class, IdentitySavePacket::encode, IdentitySavePacket::decode, IdentitySavePacket::handle);
-        CHANNEL.registerMessage(id++, IdentityLostPacket.class, IdentityLostPacket::encode, IdentityLostPacket::decode, IdentityLostPacket::handle);
+        CHANNEL.registerMessage(id++, IdentityViewPacket.class, IdentityViewPacket::encode, IdentityViewPacket::decode, IdentityViewPacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT));
+        CHANNEL.registerMessage(id++, IdentitySavePacket.class, IdentitySavePacket::encode, IdentitySavePacket::decode, IdentitySavePacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_SERVER));
+        CHANNEL.registerMessage(id++, IdentityLostPacket.class, IdentityLostPacket::encode, IdentityLostPacket::decode, IdentityLostPacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_SERVER));
     }
 
     public static void sendIdentityCreation(ServerPlayer player, UUID subjectUuid) {
