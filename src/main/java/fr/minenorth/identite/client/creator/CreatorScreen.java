@@ -105,15 +105,15 @@ public final class CreatorScreen extends Screen {
     }
 
     private void buildIdentityBoxes() {
-        int x = optX + 6, w = optW - 12, y = optTop + 14;
+        int x = optX + 6, w = optW - 12, y = optTop + 26;
         firstNameBox = box(x, y, w, "Prénom", state.firstName(), 32, null);
-        lastNameBox = box(x, y + 30, w, "Nom", state.lastName(), 32, null);
-        placeBox = box(x, y + 60, w, "Lieu de naissance", state.birthPlace(), 32, null);
-        nationBox = box(x, y + 90, w, "Nationalité", state.nationality(), 32, null);
+        lastNameBox = box(x, y + 25, w, "Nom", state.lastName(), 32, null);
+        placeBox = box(x, y + 50, w, "Lieu de naissance", state.birthPlace(), 32, null);
+        nationBox = box(x, y + 75, w, "Nationalité", state.nationality(), 32, null);
         int dw = (w - 12) / 3;
-        dayBox = box(x, y + 120, dw, "JJ", state.day(), 2, s -> s.matches("\\d*"));
-        monthBox = box(x + dw + 6, y + 120, dw, "MM", state.month(), 2, s -> s.matches("\\d*"));
-        yearBox = box(x + 2 * (dw + 6), y + 120, dw, "AAAA", state.year(), 4, s -> s.matches("\\d*"));
+        dayBox = box(x, y + 100, dw, "JJ", state.day(), 2, s -> s.matches("\\d*"));
+        monthBox = box(x + dw + 6, y + 100, dw, "MM", state.month(), 2, s -> s.matches("\\d*"));
+        yearBox = box(x + 2 * (dw + 6), y + 100, dw, "AAAA", state.year(), 4, s -> s.matches("\\d*"));
     }
 
     private EditBox box(int x, int y, int w, String hint, String value, int max, java.util.function.Predicate<String> filter) {
@@ -162,7 +162,7 @@ public final class CreatorScreen extends Screen {
         g.fill(px, py, px + pw, py + ph, MineNorthStyle.PANEL);
         RenderSystem.enableBlend();
         g.blit(MineNorthStyle.LOGO, px + 8, py + 6, 24, 24, 0, 0, 256, 256, 256, 256);
-        MineNorthStyle.scaled(g, MineNorthStyle.bold("MINENORTHRP · BUREAU DE L'IMMIGRATION"), px + 38, py + 8, 1.15f, MineNorthStyle.WHITE);
+        MineNorthStyle.scaled(g, MineNorthStyle.bold("MINENORTHRP · BUREAU D'ENREGISTREMENT"), px + 38, py + 8, 1.15f, MineNorthStyle.WHITE);
         g.drawString(font, creation ? "Terminez votre dossier pour entrer à MineNorthRP." : "Modification de l'apparence.", px + 38, py + 22, MineNorthStyle.MUTED, false);
         g.fill(px + 8, py + 34, px + pw - 8, py + 35, MineNorthStyle.HOVER);
         for (int i = 0; i < tabs.size(); i++) {
@@ -293,7 +293,7 @@ public final class CreatorScreen extends Screen {
 
     private int drawHome(GuiGraphics g, List<Hit> hits, int y) {
         int x = optX + 8, w = optW - 16;
-        g.drawString(font, MineNorthStyle.bold("BUREAU DE L'IMMIGRATION"), x, y, MineNorthStyle.BLUE, false);
+        g.drawString(font, MineNorthStyle.bold("BUREAU D'ENREGISTREMENT"), x, y, MineNorthStyle.BLUE, false);
         y += 14;
         String[] lines = {
                 "Composez votre personnage puis votre identité.",
@@ -395,6 +395,7 @@ public final class CreatorScreen extends Screen {
     }
 
     private static int swatchColor(String key, int v) {
+        if (key.equals("blushColor")) return fr.minenorth.identite.skin.Palette.lipColor(v);
         if (key.equals("tone")) return fr.minenorth.identite.skin.Palette.skinTone(v);
         if (key.equals("lipColor")) return fr.minenorth.identite.skin.Palette.lipColor(v);
         if (key.equals("eyeColor")) return fr.minenorth.identite.skin.Palette.eyeColor(v);
@@ -411,11 +412,11 @@ public final class CreatorScreen extends Screen {
         int x = optX + 6;
         g.drawString(font, MineNorthStyle.bold("IDENTITÉ"), x, y, MineNorthStyle.BLUE, false);
         g.drawString(font, "Définitive", optX + optW - 6 - font.width("Définitive"), y, MineNorthStyle.WARN, false);
-        int by = optTop + 14;
+        int by = optTop + 26;
         String[] labels = {"Prénom", "Nom", "Lieu de naissance", "Nationalité", "Date de naissance"};
-        for (int i = 0; i < labels.length; i++) g.drawString(font, labels[i], x, by + i * 30 - 10, MineNorthStyle.MUTED, false);
+        for (int i = 0; i < labels.length; i++) g.drawString(font, labels[i], x, by + i * 25 - 10, MineNorthStyle.MUTED, false);
         LocalDate today = LocalDate.now();
-        int line = by + 5 * 30 - 4;
+        int line = by + 4 * 25 + 20;
         state.age(today).ifPresent(age -> g.drawString(font, age + " ans · sexe : " + state.gender().label(), x, line, MineNorthStyle.OK, false));
         state.identityError(today).filter(e -> !state.lastName().isBlank() || !state.day().isBlank())
                 .ifPresent(e -> g.drawString(font, font.plainSubstrByWidth(e, optW - 12), x, line + 11, MineNorthStyle.ALERT, false));

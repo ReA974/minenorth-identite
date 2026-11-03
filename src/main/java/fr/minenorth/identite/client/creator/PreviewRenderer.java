@@ -29,9 +29,9 @@ public final class PreviewRenderer {
     public record Cam(String label, float yaw, float zoom, float focus) {}
 
     public static final Cam[] CAMS = {
-            new Cam("Corps", 0, 1.0f, 0.9f), new Cam("Buste", 0, 1.9f, 1.25f), new Cam("Visage", 0, 4.0f, 1.62f),
-            new Cam("Dos", 180, 1.0f, 0.9f), new Cam("Br. G", -65, 2.2f, 1.1f), new Cam("Br. D", 65, 2.2f, 1.1f),
-            new Cam("Jambes", 0, 2.0f, 0.45f)};
+            new Cam("Corps", 0, 1.0f, 1.0f), new Cam("Buste", 0, 1.9f, 1.4f), new Cam("Visage", 0, 3.6f, 1.75f),
+            new Cam("Dos", 180, 1.0f, 1.0f), new Cam("Br. G", -65, 2.0f, 1.25f), new Cam("Br. D", 65, 2.0f, 1.25f),
+            new Cam("Jambes", 0, 2.0f, 0.5f)};
 
     private static PlayerModel<?> classic, slim;
 
@@ -47,7 +47,7 @@ public final class PreviewRenderer {
     /** Dessine le modèle dans le rectangle donné ; texture déjà à jour (ClientSkins.preview). */
     public static void render(GuiGraphics g, int x, int y, int w, int h, Gender gender, ResourceLocation texture,
                               float yaw, float zoom, float focus) {
-        float scale = h / 2.1f * zoom;
+        float scale = h / 2.3f * zoom;
         float cx = x + w / 2f;
         float feetY = y + h / 2f + focus * scale;
         g.enableScissor(x, y, x + w, y + h);

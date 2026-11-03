@@ -14,7 +14,7 @@
 
 - Paquets Java sous `fr.minenorth.identite` ; mod id `minenorthidentite`.
 - Protocole du canal : `"3"` (aujourd'hui `"2"`).
-- Tous les textes visibles en français ; titre d'écran « MineNorthRP · Bureau de l'immigration » ; aucune mention de Vice City.
+- Tous les textes visibles en français ; titre d'écran « MineNorthRP · Bureau d'enregistrement » ; aucune mention de Vice City.
 - Identité (nom, prénom, date et lieu de naissance, nationalité, sexe) : jamais modifiable, sauf reset staff. Le sexe n'est jamais modifiable par l'API d'apparence.
 - Apparence (corps, visage, peau, cheveux, pilosité, maquillage, tatouages) : modifiable plus tard par l'API, section par section, validée contre le catalogue.
 - Le serveur ne reçoit et ne stocke que des entiers de catalogue, jamais d'image.
@@ -222,7 +222,7 @@ Disposition du skin : format standard 1.8+ (tête 8,8 face, bras gauche/droit en
 - [ ] **Step 1: Tests `CreatorStateTest`** : `changingGenderResetsInvalidHair` ; `undoRedoRestoresPreviousChoice` ; `randomizeSectionStaysValid` ; `resetSectionRestoresDefaults` ; `undoOnEmptyHistoryIsNoOp`.
 - [ ] **Step 2: Run** — Expected: FAIL.
 - [ ] **Step 3: Implémenter `CreatorState`** (pur).
-- [ ] **Step 4: Écran** (titre « MineNorthRP · Bureau de l'immigration », mise en page de la maquette validée) : colonne d'onglets Accueil, Corps, Visage, Peau, Cheveux, Pilosité, Maquillage, Tatouages, Identité, Récapitulatif ; aperçu au centre ; options à droite (`OptionGrid` pour les styles, `SwatchRow` pour les couleurs, générés depuis `Catalog.slots`) ; boutons Précédent / Aléatoire / Annuler / Rétablir / Suivant ; raccourcis de la capture (Tab, flèches, Espace, R, Ctrl+Z/Ctrl+Y). Échap ne ferme pas en mode création. Le sexe se choisit dans l'onglet Corps ; en mode éditeur il est affiché en lecture seule.
+- [ ] **Step 4: Écran** (titre « MineNorthRP · Bureau d'enregistrement », mise en page de la maquette validée) : colonne d'onglets Accueil, Corps, Visage, Peau, Cheveux, Pilosité, Maquillage, Tatouages, Identité, Récapitulatif ; aperçu au centre ; options à droite (`OptionGrid` pour les styles, `SwatchRow` pour les couleurs, générés depuis `Catalog.slots`) ; boutons Précédent / Aléatoire / Annuler / Rétablir / Suivant ; raccourcis de la capture (Tab, flèches, Espace, R, Ctrl+Z/Ctrl+Y). Échap ne ferme pas en mode création. Le sexe se choisit dans l'onglet Corps ; en mode éditeur il est affiché en lecture seule.
 - [ ] **Step 5: `PreviewRenderer`** : bake `PlayerModel` avec `ModelLayers.PLAYER` ou `PLAYER_SLIM` selon `Gender.slimArms()`, texture = `ClientSkins.textureFor`, rendu `RenderType.entityTranslucent` dans un `PoseStack` ; glisser = tourner, molette = zoom, double-clic = de face, présélections de caméra Corps/Buste/Visage/Dos/Br.G/Br.D/Jambes. Texture régénérée à chaque changement.
 - [ ] **Step 6: `IdentityTab`** : champs prénom, nom, lieu de naissance, nationalité (défaut « Française »), date en trois sélecteurs JJ/MM/AAAA avec âge calculé (`CharacterValidator.age`), bouton « Supprimer un nom » absent, sexe rappelé en lecture seule. **`RecapTab`** : liste des sections avec « OK », case « Je confirme que mon nom respecte le règlement RP (pas de célébrité, pas de jeu de mots). », puis deux boutons « Choisir mon skin » (customSkin = vrai) et « Garder mon skin Minecraft » (customSkin = faux) qui envoient `CreateCharacterPacket` ; boutons désactivés tant que la case est décochée ou que l'identité est invalide (message d'erreur d'après `CharacterValidator`).
 - [ ] **Step 7: Run** `./gradlew test build` — Expected: PASS.

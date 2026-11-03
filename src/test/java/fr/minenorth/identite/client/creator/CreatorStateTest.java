@@ -28,9 +28,9 @@ class CreatorStateTest {
     @Test
     void changingGenderKeepsStillValidChoices() {
         CreatorState s = CreatorState.forCreation();
-        s.set(AppearanceSection.HAIR, new int[]{5, 7});          // coupe commune
+        s.set(AppearanceSection.HAIR, new int[]{9, 7});          // coupe commune
         s.setGender(Gender.FEMALE);
-        assertArrayEquals(new int[]{5, 7}, s.appearance().get(AppearanceSection.HAIR));
+        assertArrayEquals(new int[]{9, 7}, s.appearance().get(AppearanceSection.HAIR));
     }
 
     @Test

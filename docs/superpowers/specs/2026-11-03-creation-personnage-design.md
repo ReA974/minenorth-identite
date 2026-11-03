@@ -84,7 +84,7 @@ seule. L'âge n'est pas saisi : il se calcule depuis la date de naissance et s'a
   création sur ouverture staff est remplacé par un état « création en cours » côté serveur.
 
 ### Écran
-- Style MineNorth existant (`MineNorthStyle`), titre « MineNorthRP · Bureau de l'immigration », maquette
+- Style MineNorth existant (`MineNorthStyle`), titre « MineNorthRP · Bureau d'enregistrement », maquette
   validée avec l'utilisateur (onglets à gauche, aperçu 3D au centre avec présélections de caméra, options à
   droite). Navigation clavier comme sur la capture.
 - Annuler / Rétablir : historique local des choix de l'onglet courant.

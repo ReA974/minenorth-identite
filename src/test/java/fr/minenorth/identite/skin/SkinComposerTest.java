@@ -50,14 +50,14 @@ class SkinComposerTest {
 
     @Test
     void hairStyleChangesTopOfHead() {
-        int[] p = SkinComposer.compose(Gender.MALE, bare(Gender.MALE).with(AppearanceSection.HAIR, new int[]{5, 1}));
+        int[] p = SkinComposer.compose(Gender.MALE, bare(Gender.MALE).with(AppearanceSection.HAIR, new int[]{9, 1}));
         assertEquals(255, alpha(px(p, 44, 3)));
     }
 
     @Test
     void hairColorApplied() {
-        int[] a = SkinComposer.compose(Gender.MALE, bare(Gender.MALE).with(AppearanceSection.HAIR, new int[]{5, 0}));
-        int[] b = SkinComposer.compose(Gender.MALE, bare(Gender.MALE).with(AppearanceSection.HAIR, new int[]{5, 3}));
+        int[] a = SkinComposer.compose(Gender.MALE, bare(Gender.MALE).with(AppearanceSection.HAIR, new int[]{9, 0}));
+        int[] b = SkinComposer.compose(Gender.MALE, bare(Gender.MALE).with(AppearanceSection.HAIR, new int[]{9, 3}));
         assertNotEquals(px(a, 44, 3), px(b, 44, 3));
     }
 

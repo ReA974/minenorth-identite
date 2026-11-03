@@ -72,11 +72,13 @@ class CatalogTest {
     @Test
     void catalogSizesMatchSpec() {
         assertEquals(1, Catalog.slots(AppearanceSection.BODY).size());
-        assertEquals(3, Catalog.slots(AppearanceSection.BODY).get(0).options());
-        assertEquals(4, Catalog.slots(AppearanceSection.FACE).size());
+        assertEquals(6, Catalog.slots(AppearanceSection.BODY).get(0).options());
+        assertEquals(5, Catalog.slots(AppearanceSection.FACE).size());
         assertEquals(2, Catalog.slots(AppearanceSection.SKIN).size());
-        assertEquals(12, Catalog.slots(AppearanceSection.HAIR).get(0).options());
+        assertEquals(28, Catalog.slots(AppearanceSection.HAIR).get(0).options());
+        assertEquals(12, Catalog.slots(AppearanceSection.FACIAL_HAIR).get(0).options());
+        assertEquals(6, Catalog.slots(AppearanceSection.MAKEUP).size());
         assertEquals(6, Catalog.slots(AppearanceSection.TATTOOS).size());
-        assertEquals(7, Catalog.slots(AppearanceSection.TATTOOS).get(0).options());
+        assertEquals(13, Catalog.slots(AppearanceSection.TATTOOS).get(0).options());
     }
 }

@@ -32,19 +32,27 @@ public final class Catalog {
     private static final Map<AppearanceSection, List<Slot>> SLOTS = new EnumMap<>(AppearanceSection.class);
 
     static {
-        SLOTS.put(AppearanceSection.BODY, List.of(new Slot("build", 3)));
+        // corpulence : 0 normale, 1 athlétique, 2 ronde, 3 mince (F), 4 sablier (F), 5 costaud (H)
+        SLOTS.put(AppearanceSection.BODY, List.of(new Slot("build", 6, Set.of(5), Set.of(3, 4))));
+        // yeux : 6 à 9 réservés aux femmes (cils) ; bouche 4 (boudeuse) réservée aux femmes
         SLOTS.put(AppearanceSection.FACE, List.of(
-                new Slot("eyes", 6), new Slot("eyeColor", 8), new Slot("nose", 3), new Slot("mouth", 4)));
-        SLOTS.put(AppearanceSection.SKIN, List.of(new Slot("tone", 10), new Slot("marks", 4)));
+                new Slot("eyes", 10, Set.of(), Set.of(6, 7, 8, 9)), new Slot("eyeColor", 8), new Slot("brows", 6),
+                new Slot("nose", 5), new Slot("mouth", 6, Set.of(), Set.of(4))));
+        SLOTS.put(AppearanceSection.SKIN, List.of(new Slot("tone", 10), new Slot("marks", 7)));
+        // coupes : 0 aucune, 1 à 8 hommes, 9 à 14 communes, 15 à 27 femmes
         SLOTS.put(AppearanceSection.HAIR, List.of(
-                new Slot("style", 12, Set.of(1, 2, 3, 4), Set.of(7, 8, 9, 10, 11)), new Slot("color", 12)));
+                new Slot("style", 28, Set.of(1, 2, 3, 4, 5, 6, 7, 8),
+                        Set.of(15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27)),
+                new Slot("color", 12)));
+        // pilosité : 1 à 11 réservés aux hommes
         SLOTS.put(AppearanceSection.FACIAL_HAIR, List.of(
-                new Slot("style", 5, Set.of(1, 2, 3, 4), Set.of()), new Slot("color", 12)));
+                new Slot("style", 12, Set.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11), Set.of()), new Slot("color", 12)));
         SLOTS.put(AppearanceSection.MAKEUP, List.of(
-                new Slot("lips", 4), new Slot("lipColor", 8), new Slot("eyes", 4), new Slot("eyeColor", 8)));
+                new Slot("lips", 6), new Slot("lipColor", 8), new Slot("eyes", 6), new Slot("eyeColor", 8),
+                new Slot("blush", 5), new Slot("blushColor", 6)));
         SLOTS.put(AppearanceSection.TATTOOS, List.of(
-                new Slot("faceNeck", 7), new Slot("torso", 7), new Slot("back", 7),
-                new Slot("rightArm", 7), new Slot("leftArm", 7), new Slot("legs", 7)));
+                new Slot("faceNeck", 13), new Slot("torso", 13), new Slot("back", 13),
+                new Slot("rightArm", 13), new Slot("leftArm", 13), new Slot("legs", 13)));
     }
 
     public static List<Slot> slots(AppearanceSection section) { return SLOTS.get(section); }
@@ -54,7 +62,7 @@ public final class Catalog {
         Map<AppearanceSection, int[]> values = new EnumMap<>(AppearanceSection.class);
         for (AppearanceSection s : AppearanceSection.values()) values.put(s, new int[slots(s).size()]);
         values.get(AppearanceSection.SKIN)[0] = 3;
-        values.get(AppearanceSection.HAIR)[0] = 5;
+        values.get(AppearanceSection.HAIR)[0] = 9;
         values.get(AppearanceSection.HAIR)[1] = 1;
         return new Appearance(values, false);
     }
