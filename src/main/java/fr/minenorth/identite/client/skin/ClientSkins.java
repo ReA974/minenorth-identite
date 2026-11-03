@@ -55,6 +55,8 @@ public final class ClientSkins {
         return e != null && e.appearance().customSkin() ? Optional.of(e) : Optional.empty();
     }
 
+    public static ResourceLocation previewLocation() { return PREVIEW; }
+
     /** Texture d'aperçu de l'écran de création, régénérée à chaque appel. */
     public static ResourceLocation preview(Gender gender, Appearance appearance) {
         if (previewTexture == null) {
