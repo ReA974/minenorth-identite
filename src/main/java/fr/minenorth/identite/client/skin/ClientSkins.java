@@ -50,6 +50,9 @@ public final class ClientSkins {
     }
 
     /** La fiche du joueur, seulement s'il a choisi « Choisir mon skin ». */
+    /** La fiche du joueur, qu'il ait choisi son skin ou non. */
+    public static Optional<Entry> entry(UUID player) { return Optional.ofNullable(ENTRIES.get(player)); }
+
     public static Optional<Entry> active(UUID player) {
         Entry e = ENTRIES.get(player);
         return e != null && e.appearance().customSkin() ? Optional.of(e) : Optional.empty();

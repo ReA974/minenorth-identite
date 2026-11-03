@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 
 public final class ModNetwork {
     private ModNetwork() {}
-    private static final String PROTOCOL = "3";   // 3 : création de personnage et fiches d'apparence
+    private static final String PROTOCOL = "4";   // 4 : tenue portée dans la fiche d'apparence
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(MineNorthIdentite.MOD_ID, "network"),
             () -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);
@@ -31,6 +31,7 @@ public final class ModNetwork {
         CHANNEL.registerMessage(id++, CreateCharacterPacket.class, CreateCharacterPacket::encode, CreateCharacterPacket::decode, CreateCharacterPacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_SERVER));
         CHANNEL.registerMessage(id++, OpenEditorPacket.class, OpenEditorPacket::encode, OpenEditorPacket::decode, OpenEditorPacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT));
         CHANNEL.registerMessage(id++, EditorSavePacket.class, EditorSavePacket::encode, EditorSavePacket::decode, EditorSavePacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_SERVER));
+        CHANNEL.registerMessage(id++, RemoveClothingPacket.class, RemoveClothingPacket::encode, RemoveClothingPacket::decode, RemoveClothingPacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_SERVER));
     }
 
     public static void sendIdentityAlreadyExists(ServerPlayer player, IdentityData.Profile profile, UUID subjectUuid) {
