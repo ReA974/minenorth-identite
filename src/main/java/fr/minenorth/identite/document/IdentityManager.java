@@ -59,6 +59,8 @@ public final class IdentityManager {
 
         event.setCanceled(true);
         player.server.getPlayerList().broadcastSystemMessage(formatted, false);
+        // Mc2Discord ignore les événements annulés : on lui transmet le message avec le nom RP affiché.
+        Mc2DiscordRelay.chat(player, player.getDisplayName().getString(), event.getMessage().getString());
     }
 
     @SubscribeEvent

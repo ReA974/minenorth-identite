@@ -11,6 +11,8 @@ public class MineNorthIdentite {
         IEventBus bus=FMLJavaModLoadingContext.get().getModEventBus();
         ModItems.ITEMS.register(bus);
         ModNetwork.register();
+        net.minecraftforge.fml.ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON,
+                IdentityConfig.SPEC, "minenorth_identite.toml");
         fr.minenorth.api.MineNorth.provide(fr.minenorth.api.IdentityService.class, new IdentityProvider());
         fr.minenorth.api.MineNorth.provide(fr.minenorth.api.AppearanceService.class, new AppearanceProvider());
     }
