@@ -2,6 +2,9 @@ package fr.minenorth.identite.skin;
 
 import fr.minenorth.identite.appearance.Appearance;
 import fr.minenorth.identite.appearance.AppearanceSection;
+import fr.minenorth.identite.clothing.Clothing;
+import fr.minenorth.identite.clothing.ClothingSlot;
+import fr.minenorth.identite.clothing.Outfit;
 import fr.minenorth.identite.document.Gender;
 
 /**
@@ -100,6 +103,7 @@ public final class SkinComposer {
         paintMakeup(c, makeup, tone);
         paintFacialHair(c, beard, tone);
         paintTattoos(c, tattoos, rArm, lArm);
+        paintOutfit(c, a.outfit());
         paintHair(c, hair);
         return c.px;
     }
@@ -451,6 +455,61 @@ public final class SkinComposer {
         if (topFace && dy >= 2 && dy <= 3) f *= 1.1;
         if (style == 22 && rect == BODY_O.back()) f *= (dy % 2 == 0) ? 1.0 : 0.82;
         c.rel(rect, dx, dy, Palette.shade(base, f));
+    }
+
+    // ------------------------------------------------------------------ vêtements (couche extérieure)
+
+    private static final Box R_LEG_O = new Box(0, 32, 4, 12, 4);
+    private static final Box L_LEG_O = new Box(0, 48, 4, 12, 4);
+
+    private static void paintOutfit(Canvas c, Outfit outfit) {
+        for (ClothingSlot slot : ClothingSlot.values()) {
+            Clothing worn = outfit.get(slot);
+            if (worn == null) continue;
+            switch (worn) {
+                case UNDERWEAR_MALE -> paintBoxers(c);
+                case UNDERWEAR_FEMALE -> paintLingerie(c);
+            }
+        }
+    }
+
+    /** Caleçon : ceinture claire, tissu rayé en finesse, bas de jambe ourlé. */
+    private static void paintBoxers(Canvas c) {
+        int cloth = 0xFF222B45;
+        int band = 0xFFC9CFE0;
+        for (int[] side : BODY_O.sides()) {
+            garmentRows(c, side, 9, 11, cloth, band, 9);
+        }
+        for (Box leg : new Box[]{R_LEG_O, L_LEG_O}) {
+            for (int[] side : leg.sides()) {
+                garmentRows(c, side, 0, 2, cloth, Palette.shade(cloth, 0.8), 2);
+            }
+        }
+    }
+
+    /** Haut et culotte : dentelle claire en bordure, tissu prune. */
+    private static void paintLingerie(Canvas c) {
+        int cloth = 0xFF3A3048;
+        int lace = 0xFFC8B4D8;
+        for (int[] side : BODY_O.sides()) {
+            garmentRows(c, side, 3, 5, cloth, lace, 3);
+            garmentRows(c, side, 10, 11, cloth, lace, 10);
+        }
+        for (Box leg : new Box[]{R_LEG_O, L_LEG_O}) {
+            for (int[] side : leg.sides()) {
+                garmentRows(c, side, 0, 1, cloth, Palette.shade(cloth, 0.8), 1);
+            }
+        }
+    }
+
+    /** Remplit les lignes de from à to ; la ligne trimRow reçoit la couleur de bordure, les autres un léger rayage. */
+    private static void garmentRows(Canvas c, int[] rect, int from, int to, int cloth, int trim, int trimRow) {
+        for (int dy = from; dy <= to; dy++) {
+            for (int dx = 0; dx < rect[2]; dx++) {
+                int color = dy == trimRow ? trim : (dx % 2 == 0 ? cloth : Palette.shade(cloth, 0.93));
+                c.rel(rect, dx, dy, color);
+            }
+        }
     }
 
     // ------------------------------------------------------------------ tatouages
