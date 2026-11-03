@@ -7,8 +7,11 @@ public final class ClientNetworkHandler {
     public static void openIdentity(ModNetwork.IdentityViewPacket p) { Minecraft.getInstance().setScreen(new IdentityScreen(p)); }
     /** Ouverture de l'écran de création de personnage (envoyée par le serveur à la connexion ou après un reset). */
     public static void openCreation() {
-        // Le serveur redemande l'écran périodiquement : ne pas écraser les choix d'un écran déjà ouvert.
-        if (Minecraft.getInstance().screen instanceof fr.minenorth.identite.client.creator.CreatorScreen c && c.isCreation()) return;
+        // Le serveur redemande l'écran périodiquement : ne rien faire si la création (ou un dessin qui en dépend) est à l'écran.
+        net.minecraft.client.gui.screens.Screen current = Minecraft.getInstance().screen;
+        boolean creator = current instanceof fr.minenorth.identite.client.creator.CreatorScreen c && c.isCreation();
+        boolean drawing = current instanceof fr.minenorth.identite.client.creator.DrawScreen d && d.belongsToCreation();
+        if (!fr.minenorth.identite.client.creator.CreationScreens.shouldOpen(creator, drawing)) return;
         Minecraft.getInstance().setScreen(fr.minenorth.identite.client.creator.CreatorScreen.creation());
     }
     /** Réception d'une fiche d'apparence : régénère le skin du joueur, ou le retire (reset). */

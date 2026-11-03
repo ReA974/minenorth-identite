@@ -233,6 +233,9 @@ public final class DrawScreen extends Screen {
         return super.keyPressed(key, scan, mods);
     }
 
+    /** Vrai si cet écran a été ouvert depuis la création de personnage (pas depuis l'éditeur d'un autre mod). */
+    public boolean belongsToCreation() { return parent instanceof CreatorScreen c && c.isCreation(); }
+
     @Override public void onClose() { close(); }
 
     @Override public boolean isPauseScreen() { return false; }
