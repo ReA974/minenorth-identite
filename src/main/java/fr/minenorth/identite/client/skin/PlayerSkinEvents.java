@@ -1,0 +1,79 @@
+package fr.minenorth.identite.client.skin;
+
+import fr.minenorth.identite.MineNorthIdentite;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RenderArmEvent;
+import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+/**
+ * Substitue le rendu d'un joueur (et de sa main en vue subjective) par celui qui porte le skin créé. Le sexe
+ * choisit le modèle : bras fins pour Femme, classiques pour Homme. Sans mixin.
+ */
+public final class PlayerSkinEvents {
+    private PlayerSkinEvents() {}
+
+    private static PlayerRenderer defaultRenderer, slimRenderer;
+    private static boolean rendering, renderingArm;
+
+    @Mod.EventBusSubscriber(modid = MineNorthIdentite.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    public static final class ModBus {
+        @SubscribeEvent
+        public static void onAddLayers(EntityRenderersEvent.AddLayers e) {
+            defaultRenderer = new SkinPlayerRenderer(e.getContext(), false);
+            slimRenderer = new SkinPlayerRenderer(e.getContext(), true);
+        }
+    }
+
+    @Mod.EventBusSubscriber(modid = MineNorthIdentite.MOD_ID, value = Dist.CLIENT)
+    public static final class ForgeBus {
+        @SubscribeEvent
+        public static void onRenderPlayer(RenderPlayerEvent.Pre e) {
+            if (rendering || !(e.getEntity() instanceof AbstractClientPlayer p)) return;
+            PlayerRenderer r = rendererFor(p);
+            if (r == null) return;
+            e.setCanceled(true);
+            rendering = true;   // notre propre rendu renvoie un RenderPlayerEvent.Pre
+            try {
+                r.render(p, p.getYRot(), e.getPartialTick(), e.getPoseStack(), e.getMultiBufferSource(), e.getPackedLight());
+            } finally {
+                rendering = false;
+            }
+        }
+
+        @SubscribeEvent
+        public static void onRenderArm(RenderArmEvent e) {
+            if (renderingArm) return;
+            PlayerRenderer r = rendererFor(e.getPlayer());
+            if (r == null) return;
+            e.setCanceled(true);
+            renderingArm = true;   // renderRightHand/LeftHand renvoient eux-mêmes un RenderArmEvent
+            try {
+                if (e.getArm() == HumanoidArm.RIGHT) {
+                    r.renderRightHand(e.getPoseStack(), e.getMultiBufferSource(), e.getPackedLight(), e.getPlayer());
+                } else {
+                    r.renderLeftHand(e.getPoseStack(), e.getMultiBufferSource(), e.getPackedLight(), e.getPlayer());
+                }
+            } finally {
+                renderingArm = false;
+            }
+        }
+
+        @SubscribeEvent
+        public static void onLogout(ClientPlayerNetworkEvent.LoggingOut e) {
+            ClientSkins.clear();
+        }
+    }
+
+    private static PlayerRenderer rendererFor(AbstractClientPlayer player) {
+        return ClientSkins.active(player.getUUID())
+                .map(entry -> entry.gender().slimArms() ? slimRenderer : defaultRenderer)
+                .orElse(null);
+    }
+}

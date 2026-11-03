@@ -28,6 +28,11 @@ public final class Palette {
     /** Encre d'un motif de tatouage (1 à 6). */
     public static int ink(int motif) { return INK[motif]; }
 
+    /** ARGB vers ABGR (ordre des octets de NativeImage.setPixelRGBA). */
+    public static int argbToAbgr(int argb) {
+        return (argb & 0xFF00FF00) | ((argb >> 16) & 0xFF) | ((argb & 0xFF) << 16);
+    }
+
     /** Multiplie les canaux RVB (facteur &lt; 1 assombrit, &gt; 1 éclaircit). */
     public static int shade(int argb, double factor) {
         int a = argb >>> 24;
