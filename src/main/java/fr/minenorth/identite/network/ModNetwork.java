@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 
 public final class ModNetwork {
     private ModNetwork() {}
-    private static final String PROTOCOL = "2";   // 2 : champs limités à 64 caractères
+    private static final String PROTOCOL = "3";   // 3 : création de personnage et fiches d'apparence
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(MineNorthIdentite.MOD_ID, "network"),
             () -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);
@@ -26,6 +26,9 @@ public final class ModNetwork {
     public static void register() {
         CHANNEL.registerMessage(id++, IdentityViewPacket.class, IdentityViewPacket::encode, IdentityViewPacket::decode, IdentityViewPacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT));
         CHANNEL.registerMessage(id++, IdentityLostPacket.class, IdentityLostPacket::encode, IdentityLostPacket::decode, IdentityLostPacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_SERVER));
+        CHANNEL.registerMessage(id++, OpenCreationPacket.class, OpenCreationPacket::encode, OpenCreationPacket::decode, OpenCreationPacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT));
+        CHANNEL.registerMessage(id++, SheetPacket.class, SheetPacket::encode, SheetPacket::decode, SheetPacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT));
+        CHANNEL.registerMessage(id++, CreateCharacterPacket.class, CreateCharacterPacket::encode, CreateCharacterPacket::decode, CreateCharacterPacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_SERVER));
     }
 
     public static void sendIdentityAlreadyExists(ServerPlayer player, IdentityData.Profile profile, UUID subjectUuid) {
@@ -36,10 +39,18 @@ public final class ModNetwork {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new IdentityViewPacket(true,false,staff,creation,subjectUuid,presenter,profile.lastName(),profile.firstName(),profile.birthDate(),profile.birthPlace(),profile.nationality(),profile.cardNumber()));
     }
 
-    /** Squelettes complétés à la tâche 6 (paquets de création et de diffusion des fiches). */
-    public static void sendOpenCreation(ServerPlayer player) {}
-    public static void sendSheet(ServerPlayer target, UUID subject, fr.minenorth.identite.document.Gender gender, fr.minenorth.identite.appearance.Appearance appearance) {}
-    public static void broadcastSheet(net.minecraft.server.MinecraftServer server, UUID subject, fr.minenorth.identite.document.Gender gender, fr.minenorth.identite.appearance.Appearance appearance) {}
+    public static void sendOpenCreation(ServerPlayer player) {
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new OpenCreationPacket());
+    }
+
+    /** Envoie la fiche de `subject` à un joueur ; `appearance` null = aucune fiche (le client retire le skin). */
+    public static void sendSheet(ServerPlayer target, UUID subject, fr.minenorth.identite.document.Gender gender, fr.minenorth.identite.appearance.Appearance appearance) {
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> target), new SheetPacket(subject, appearance != null, gender, appearance));
+    }
+
+    public static void broadcastSheet(net.minecraft.server.MinecraftServer server, UUID subject, fr.minenorth.identite.document.Gender gender, fr.minenorth.identite.appearance.Appearance appearance) {
+        CHANNEL.send(PacketDistributor.ALL.noArg(), new SheetPacket(subject, appearance != null, gender, appearance));
+    }
 
     public record IdentityViewPacket(boolean exists, boolean editable, boolean staff, boolean creation, UUID subjectUuid, String presenter, String lastName, String firstName, String birthDate, String birthPlace, String nationality, String cardNumber) {
         static void encode(IdentityViewPacket p, FriendlyByteBuf b) { b.writeBoolean(p.exists); b.writeBoolean(p.editable); b.writeBoolean(p.staff); b.writeBoolean(p.creation); b.writeUUID(p.subjectUuid); b.writeUtf(p.presenter); b.writeUtf(p.lastName); b.writeUtf(p.firstName); b.writeUtf(p.birthDate); b.writeUtf(p.birthPlace); b.writeUtf(p.nationality); b.writeUtf(p.cardNumber); }
