@@ -34,7 +34,7 @@ public final class CreatorState {
 
     /** Création : sexe Homme par défaut, modifiable ; apparence de départ du catalogue. */
     public static CreatorState forCreation() {
-        return new CreatorState(Gender.MALE, Catalog.defaults(Gender.MALE), false);
+        return new CreatorState(Gender.MALE, Catalog.defaults(Gender.MALE).withOutfit(fr.minenorth.identite.clothing.Outfit.starter(Gender.MALE)), false);
     }
 
     /** Éditeur ouvert par un autre mod : le sexe de l'identité est affiché mais ne change pas. */
@@ -65,7 +65,8 @@ public final class CreatorState {
                 next = next.with(s, Catalog.defaults(newGender).get(s));
             }
         }
-        apply(new Snapshot(newGender, next));
+        // la tenue de départ suit le sexe : l'aperçu montre ce que le joueur portera à son arrivée
+        apply(new Snapshot(newGender, next.withOutfit(fr.minenorth.identite.clothing.Outfit.starter(newGender))));
     }
 
     public void randomizeSection(AppearanceSection section, Random random) {

@@ -119,4 +119,21 @@ class CreatorStateTest {
         s.setGender(Gender.MALE);
         assertEquals(Gender.FEMALE, s.gender());
     }
+
+    @Test
+    void creationPreviewWearsTheStarterUnderwearOfTheChosenGender() {
+        CreatorState s = CreatorState.forCreation();
+        assertEquals(fr.minenorth.identite.clothing.Outfit.starter(Gender.MALE), s.appearance().outfit());
+        s.setGender(Gender.FEMALE);
+        assertEquals(fr.minenorth.identite.clothing.Outfit.starter(Gender.FEMALE), s.appearance().outfit());
+        s.undo();
+        assertEquals(fr.minenorth.identite.clothing.Outfit.starter(Gender.MALE), s.appearance().outfit());
+    }
+
+    @Test
+    void editorKeepsTheOutfitItWasGiven() {
+        Appearance current = Catalog.defaults(Gender.FEMALE);
+        CreatorState s = CreatorState.forEditor(Gender.FEMALE, current);
+        assertTrue(s.appearance().outfit().isEmpty());
+    }
 }

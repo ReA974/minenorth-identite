@@ -126,14 +126,16 @@ public final class CharacterManager {
                 IdentityManager.generateCardNumber(data),
                 r.gender());
         data.set(profile);
-        AppearanceData.get(level).set(player.getUUID(), r.appearance());
+        // le personnage arrive en sous-vêtements : la tenue de départ est posée par le serveur, jamais par le client
+        Appearance sheet = r.appearance().withOutfit(fr.minenorth.identite.clothing.Outfit.starter(r.gender()));
+        AppearanceData.get(level).set(player.getUUID(), sheet);
 
         CREATING.finish(player.getUUID());
         FROZEN_AT.remove(player.getUUID());
         player.refreshTabListName();
         player.refreshDisplayName();
         IdentityManager.giveCard(player, profile);
-        ModNetwork.broadcastSheet(player.server, player.getUUID(), r.gender(), r.appearance());
+        ModNetwork.broadcastSheet(player.server, player.getUUID(), r.gender(), sheet);
         ModNetwork.sendIdentityView(player, profile, player.getUUID(), "", false, false);
         player.displayClientMessage(Component.literal("§aVotre personnage a été créé définitivement."), true);
     }
@@ -218,7 +220,7 @@ public final class CharacterManager {
             return;
         }
         EDITS.close(player.getUUID());
-        store(player.server, player.getUUID(), profile.gender(), applyEdit(current, edits).orElse(current));
+        updateAppearance(player.server, player.getUUID(), profile.gender(), applyEdit(current, edits).orElse(current));
         player.displayClientMessage(Component.literal("§aApparence mise à jour."), true);
     }
 
@@ -234,11 +236,12 @@ public final class CharacterManager {
         IdentityData.Profile profile = IdentityData.get(server.overworld()).get(target);
         Appearance current = AppearanceData.get(server.overworld()).get(target);
         if (Catalog.validate(profile.gender(), section, values).isPresent()) return false;
-        store(server, target, profile.gender(), current.with(section, values));
+        updateAppearance(server, target, profile.gender(), current.with(section, values));
         return true;
     }
 
-    private static void store(MinecraftServer server, UUID target, Gender gender, Appearance appearance) {
+    /** Enregistre la fiche d'un joueur et la diffuse à tous les clients. */
+    public static void updateAppearance(MinecraftServer server, UUID target, Gender gender, Appearance appearance) {
         AppearanceData.get(server.overworld()).set(target, appearance);
         ModNetwork.broadcastSheet(server, target, gender, appearance);
     }
