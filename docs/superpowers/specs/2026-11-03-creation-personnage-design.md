@@ -66,7 +66,7 @@ seule. L'âge n'est pas saisi : il se calcule depuis la date de naissance et s'a
 
 ### Skin
 - Chaque client assemble un skin 64×64 à partir d'une fiche : calques générés par code (peau, yeux, nez, bouche,
-  cheveux, pilosité, maquillage, tatouages, sous-vêtements), cache en mémoire, texture dynamique.
+  cheveux, pilosité, maquillage, tatouages), cache en mémoire, texture dynamique.
 - Le serveur envoie la fiche (quelques dizaines d'octets) à la connexion d'un joueur, à l'arrivée d'un autre
   joueur et à chaque modification. À l'affichage, le client remplace le skin des joueurs ayant choisi « Choisir
   mon skin ». Le gabarit des bras (classique / fin) suit le sexe.

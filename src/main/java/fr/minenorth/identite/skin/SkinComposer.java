@@ -98,8 +98,6 @@ public final class SkinComposer {
         paintMakeup(c, makeup, tone);
         paintFacialHair(c, beard, tone);
         paintTattoos(c, tattoos, rArm, lArm);
-        paintUnderwear(c, gender);
-        if (gender == Gender.FEMALE) paintChest(c);
         paintHair(c, hair);
         return c.px;
     }
@@ -109,15 +107,13 @@ public final class SkinComposer {
     private static void paintBuild(Canvas c, int build, Box rArm, Box lArm) {
         int[] t = BODY.front();
         switch (build) {
-            case 1 -> {   // athlétique : abdominaux, pectoraux, biceps
-                for (int dy = 4; dy <= 8; dy++) { c.shadeRel(t, 3, dy, 0.9); c.shadeRel(t, 4, dy, 0.9); }
-                for (int dx : new int[]{1, 2, 5, 6}) c.shadeRel(t, dx, 6, 0.9);
-                for (int dy = 5; dy <= 7; dy += 2) { c.shadeRel(t, 2, dy, 0.94); c.shadeRel(t, 5, dy, 0.94); }
+            case 1 -> {   // athlétique : abdominaux et biceps
+                for (int dy = 7; dy <= 9; dy++) { c.shadeRel(t, 3, dy, 0.9); c.shadeRel(t, 4, dy, 0.9); }
+                for (int dy = 7; dy <= 9; dy += 2) { c.shadeRel(t, 2, dy, 0.94); c.shadeRel(t, 5, dy, 0.94); }
                 for (Box arm : new Box[]{rArm, lArm}) { c.shadeRel(arm.front(), 1, 3, 0.9); c.shadeRel(arm.front(), 1, 4, 0.9); }
             }
             case 2 -> {   // ronde
                 for (int dx = 1; dx <= 6; dx++) { c.shadeRel(t, dx, 7, 0.93); c.shadeRel(t, dx, 8, 0.93); }
-                for (int dx = 2; dx <= 5; dx++) c.shadeRel(t, dx, 6, 1.04);
                 c.shadeRel(t, 0, 7, 0.9);
                 c.shadeRel(t, 7, 7, 0.9);
             }
@@ -128,21 +124,11 @@ public final class SkinComposer {
                 for (int dy = 6; dy <= 8; dy++) { c.shadeRel(t, 0, dy, 0.86); c.shadeRel(t, 7, dy, 0.86); c.shadeRel(t, 1, dy, 0.94); c.shadeRel(t, 6, dy, 0.94); }
                 for (int dy = 9; dy <= 10; dy++) { c.shadeRel(t, 0, dy, 1.06); c.shadeRel(t, 7, dy, 1.06); }
             }
-            case 5 -> {   // costaud : épaules et pectoraux marqués
+            case 5 -> {   // costaud : épaules et bras marqués
                 for (int dy = 0; dy <= 3; dy++) { c.shadeRel(t, 0, dy, 1.07); c.shadeRel(t, 7, dy, 1.07); }
-                for (int dx : new int[]{1, 2, 5, 6}) c.shadeRel(t, dx, 4, 0.88);
-                for (int dy = 5; dy <= 8; dy++) { c.shadeRel(t, 3, dy, 0.92); c.shadeRel(t, 4, dy, 0.92); }
                 for (Box arm : new Box[]{rArm, lArm}) for (int dy = 1; dy <= 5; dy++) c.shadeRel(arm.front(), 1, dy, 0.92);
             }
             default -> { }
-        }
-    }
-
-    private static void paintChest(Canvas c) {
-        int[] t = BODY.front();
-        for (int dx : new int[]{1, 2, 5, 6}) {
-            c.shadeRel(t, dx, 2, 1.06);
-            c.shadeRel(t, dx, 6, 0.88);
         }
     }
 
@@ -415,21 +401,5 @@ public final class SkinComposer {
                         Palette.mix(c.relGet(rect, ox + x, oy + y), edge ? Palette.shade(color, 0.8) : color, 0.88));
             }
         }
-    }
-
-    // ------------------------------------------------------------------ sous-vêtements
-
-    private static void paintUnderwear(Canvas c, Gender gender) {
-        for (int[] side : BODY.sides()) rows(c, side, 9, 11, Palette.UNDERWEAR);
-        for (Box leg : new Box[]{R_LEG, L_LEG}) {
-            for (int[] side : leg.sides()) rows(c, side, 0, 2, Palette.UNDERWEAR);
-        }
-        if (gender == Gender.FEMALE) {
-            for (int[] side : BODY.sides()) rows(c, side, 3, 5, Palette.UNDERWEAR);
-        }
-    }
-
-    private static void rows(Canvas c, int[] rect, int from, int to, int argb) {
-        for (int dy = from; dy <= to; dy++) for (int dx = 0; dx < rect[2]; dx++) c.rel(rect, dx, dy, argb);
     }
 }

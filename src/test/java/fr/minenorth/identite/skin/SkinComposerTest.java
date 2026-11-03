@@ -91,18 +91,30 @@ class SkinComposerTest {
     }
 
     @Test
-    void femaleHasChestShadingMaleDoesNot() {
-        int[] m = SkinComposer.compose(Gender.MALE, bare(Gender.MALE));
-        int[] f = SkinComposer.compose(Gender.FEMALE, bare(Gender.FEMALE));
-        boolean differs = false;
-        for (int y = 20; y <= 31; y++) for (int x = 20; x <= 27; x++) differs |= px(m, x, y) != px(f, x, y);
-        assertTrue(differs);
+    void bodyIsPlainSkinWithoutChestDetail() {
+        int tone = Palette.skinTone(3);
+        for (Gender g : Gender.values()) {
+            int[] p = SkinComposer.compose(g, bare(g));
+            for (int y = 20; y <= 31; y++) for (int x = 16; x <= 39; x++) assertEquals(tone, px(p, x, y), g + " torse " + x + "," + y);
+        }
     }
 
     @Test
-    void underwearCoversLowerTorso() {
-        int[] p = SkinComposer.compose(Gender.MALE, bare(Gender.MALE));
-        assertNotEquals(Palette.skinTone(3), px(p, 22, 30));
+    void noUnderwearOnLegsOrHips() {
+        int tone = Palette.skinTone(3);
+        for (Gender g : Gender.values()) {
+            int[] p = SkinComposer.compose(g, bare(g));
+            for (int y = 20; y <= 31; y++) for (int x = 0; x <= 15; x++) assertEquals(tone, px(p, x, y), g + " jambe droite " + x + "," + y);
+            for (int y = 52; y <= 63; y++) for (int x = 16; x <= 31; x++) assertEquals(tone, px(p, x, y), g + " jambe gauche " + x + "," + y);
+        }
+    }
+
+    @Test
+    void bodyOverlayLayerIsEmptyForClothesToUseLater() {
+        for (Gender g : Gender.values()) {
+            int[] p = SkinComposer.compose(g, bare(g));
+            for (int y = 32; y <= 47; y++) for (int x = 0; x <= 39; x++) assertEquals(0, p[y * W + x] >>> 24, g + " calque " + x + "," + y);
+        }
     }
 
     @Test
