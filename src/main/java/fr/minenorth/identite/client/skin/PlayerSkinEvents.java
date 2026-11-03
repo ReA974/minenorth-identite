@@ -1,6 +1,7 @@
 package fr.minenorth.identite.client.skin;
 
 import fr.minenorth.identite.MineNorthIdentite;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.world.entity.HumanoidArm;
@@ -21,13 +22,25 @@ public final class PlayerSkinEvents {
 
     private static PlayerRenderer defaultRenderer, slimRenderer;
     private static boolean rendering, renderingArm;
+    private static boolean layersSynced;
+
+    /** Recopie sur nos rendus les calques ajoutés par les autres mods au rendu vanilla (une fois tous les mods chargés). */
+    private static void syncLayers() {
+        layersSynced = true;
+        var skins = Minecraft.getInstance().getEntityRenderDispatcher().getSkinMap();
+        ExtraLayers.copy(skins.get("default") instanceof PlayerRenderer p ? p : null, defaultRenderer);
+        ExtraLayers.copy(skins.get("slim") instanceof PlayerRenderer p ? p : null, slimRenderer);
+    }
 
     @Mod.EventBusSubscriber(modid = MineNorthIdentite.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static final class ModBus {
+        // Chaque mod a son propre bus : la priorité ne garantit pas de passer après les autres mods. On crée donc
+        // nos rendus ici, et on leur recopie les calques des autres mods plus tard (premier affichage, voir syncLayers).
         @SubscribeEvent
         public static void onAddLayers(EntityRenderersEvent.AddLayers e) {
             defaultRenderer = new SkinPlayerRenderer(e.getContext(), false);
             slimRenderer = new SkinPlayerRenderer(e.getContext(), true);
+            layersSynced = false;
         }
     }
 
@@ -38,6 +51,7 @@ public final class PlayerSkinEvents {
             if (rendering || !(e.getEntity() instanceof AbstractClientPlayer p)) return;
             PlayerRenderer r = rendererFor(p);
             if (r == null) return;
+            if (!layersSynced) syncLayers();
             e.setCanceled(true);
             rendering = true;   // notre propre rendu renvoie un RenderPlayerEvent.Pre
             try {

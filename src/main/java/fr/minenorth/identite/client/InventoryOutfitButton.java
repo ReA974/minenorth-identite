@@ -38,7 +38,7 @@ public final class InventoryOutfitButton {
                 && screen.getClass().getName().equals(MINENORTH_INVENTORY)) {
             // inventaire du mod minenorth-inventaire (sans dépendance directe) : colonne de droite du panneau
             // Équipement, sous l'emplacement de la main gauche (InvLayout.HAND_X / HAND_Y + 24)
-            event.addListener(new Toggle(screen.getGuiLeft() + 276, screen.getGuiTop() + 78, true));
+            event.addListener(new Toggle(screen.getGuiLeft() + 304, screen.getGuiTop() + 78, true));
         }
     }
 
