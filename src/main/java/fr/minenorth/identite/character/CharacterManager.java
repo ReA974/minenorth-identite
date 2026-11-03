@@ -5,6 +5,8 @@ import fr.minenorth.identite.appearance.AppearanceData;
 import fr.minenorth.identite.appearance.AppearanceSection;
 import fr.minenorth.identite.appearance.Catalog;
 import fr.minenorth.identite.document.CharacterValidator;
+import fr.minenorth.identite.drawing.DrawingKind;
+import fr.minenorth.identite.drawing.Drawings;
 import fr.minenorth.identite.document.Gender;
 import fr.minenorth.identite.document.IdentityData;
 import fr.minenorth.identite.document.IdentityManager;
@@ -177,20 +179,46 @@ public final class CharacterManager {
 
     /** Message d'erreur ou vide : seules les sections ouvertes, valides pour le sexe de l'identité. */
     public static Optional<String> validateEdit(Gender gender, Set<AppearanceSection> allowed, Map<AppearanceSection, int[]> edits) {
-        if (edits.isEmpty()) return Optional.of("Aucune modification.");
+        return validateEdit(gender, allowed, edits, Map.of());
+    }
+
+    /**
+     * Idem avec des dessins : chacun doit appartenir à une section ouverte, avoir la bonne taille et ne contenir que des
+     * numéros de la palette de son type.
+     */
+    public static Optional<String> validateEdit(Gender gender, Set<AppearanceSection> allowed,
+                                                Map<AppearanceSection, int[]> edits, Map<DrawingKind, byte[]> drawings) {
+        if (edits.isEmpty() && drawings.isEmpty()) return Optional.of("Aucune modification.");
         for (Map.Entry<AppearanceSection, int[]> e : edits.entrySet()) {
             if (!allowed.contains(e.getKey())) return Optional.of(e.getKey().label() + " : modification non autorisée.");
             Optional<String> error = Catalog.validate(gender, e.getKey(), e.getValue());
             if (error.isPresent()) return error;
+        }
+        for (Map.Entry<DrawingKind, byte[]> e : drawings.entrySet()) {
+            DrawingKind kind = e.getKey();
+            if (!allowed.contains(kind.section())) return Optional.of(kind.label() + " : modification non autorisée.");
+            try {
+                Drawings.EMPTY.with(kind, e.getValue());
+            } catch (IllegalArgumentException ex) {
+                return Optional.of(kind.label() + " : dessin invalide.");
+            }
         }
         return Optional.empty();
     }
 
     /** Nouvelle fiche avec les sections remplacées ; le choix « mon skin » est conservé. */
     public static Optional<Appearance> applyEdit(Appearance current, Map<AppearanceSection, int[]> edits) {
+        return applyEdit(current, edits, Map.of());
+    }
+
+    /** Idem avec des dessins (déjà validés) ; un dessin entièrement transparent efface l'ancien. */
+    public static Optional<Appearance> applyEdit(Appearance current, Map<AppearanceSection, int[]> edits,
+                                                 Map<DrawingKind, byte[]> drawings) {
         Appearance next = current;
         for (Map.Entry<AppearanceSection, int[]> e : edits.entrySet()) next = next.with(e.getKey(), e.getValue());
-        return Optional.of(next);
+        Drawings merged = next.drawings();
+        for (Map.Entry<DrawingKind, byte[]> e : drawings.entrySet()) merged = merged.with(e.getKey(), e.getValue());
+        return Optional.of(next.withDrawings(merged));
     }
 
     /** Ouvre l'éditeur limité à ces sections chez un joueur en ligne qui a un personnage. */
@@ -205,7 +233,7 @@ public final class CharacterManager {
     }
 
     /** Enregistre la modification envoyée par le client de l'éditeur (une seule fois par session). */
-    public static void applyClientEdit(ServerPlayer player, Map<AppearanceSection, int[]> edits) {
+    public static void applyClientEdit(ServerPlayer player, Map<AppearanceSection, int[]> edits, Map<DrawingKind, byte[]> drawings) {
         ServerLevel level = player.serverLevel();
         Set<AppearanceSection> allowed = EDITS.allowed(player.getUUID(), System.currentTimeMillis());
         IdentityData.Profile profile = IdentityData.get(level).get(player.getUUID());
@@ -214,13 +242,13 @@ public final class CharacterManager {
             player.displayClientMessage(Component.literal("§cAucune modification d'apparence n'est ouverte."), true);
             return;
         }
-        Optional<String> error = validateEdit(profile.gender(), allowed, edits);
+        Optional<String> error = validateEdit(profile.gender(), allowed, edits, drawings);
         if (error.isPresent()) {
             player.displayClientMessage(Component.literal("§c" + error.get()), true);
             return;
         }
         EDITS.close(player.getUUID());
-        updateAppearance(player.server, player.getUUID(), profile.gender(), applyEdit(current, edits).orElse(current));
+        updateAppearance(player.server, player.getUUID(), profile.gender(), applyEdit(current, edits, drawings).orElse(current));
         player.displayClientMessage(Component.literal("§aApparence mise à jour."), true);
     }
 

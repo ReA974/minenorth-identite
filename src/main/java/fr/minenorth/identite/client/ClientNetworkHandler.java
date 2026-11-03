@@ -21,7 +21,11 @@ public final class ClientNetworkHandler {
         Minecraft.getInstance().setScreen(fr.minenorth.identite.client.creator.CreatorScreen.editor(p.gender(), p.appearance(), p.sections(), state -> {
             java.util.Map<fr.minenorth.identite.appearance.AppearanceSection, int[]> edits = new java.util.EnumMap<>(fr.minenorth.identite.appearance.AppearanceSection.class);
             for (fr.minenorth.identite.appearance.AppearanceSection s : p.sections()) edits.put(s, state.appearance().get(s));
-            ModNetwork.CHANNEL.sendToServer(new fr.minenorth.identite.network.EditorSavePacket(edits));
+            java.util.Map<fr.minenorth.identite.drawing.DrawingKind, byte[]> drawings = new java.util.EnumMap<>(fr.minenorth.identite.drawing.DrawingKind.class);
+            for (fr.minenorth.identite.drawing.DrawingKind k : fr.minenorth.identite.drawing.DrawingKind.values()) {
+                if (p.sections().contains(k.section())) drawings.put(k, state.appearance().drawings().get(k));
+            }
+            ModNetwork.CHANNEL.sendToServer(new fr.minenorth.identite.network.EditorSavePacket(edits, drawings));
         }));
     }
 }

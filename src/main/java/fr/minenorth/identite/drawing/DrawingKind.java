@@ -36,6 +36,13 @@ public enum DrawingKind {
     public int height() { return height; }
     public int paletteSize() { return palette.length; }
 
+    /** Retrouve un type de dessin par son nom d'enum ; null si inconnu. */
+    public static DrawingKind fromName(String name) {
+        if (name == null) return null;
+        for (DrawingKind k : values()) if (k.name().equals(name)) return k;
+        return null;
+    }
+
     /** Couleur ARGB du numéro donné, de 1 à {@link #paletteSize()}. */
     public int color(int index) { return palette[index - 1]; }
 
