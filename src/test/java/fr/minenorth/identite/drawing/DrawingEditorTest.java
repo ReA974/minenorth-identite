@@ -155,4 +155,36 @@ class DrawingEditorTest {
     void initialDrawingMustMatchTheKind() {
         assertThrows(IllegalArgumentException.class, () -> new DrawingEditor(DrawingKind.FACE, new byte[3]));
     }
+
+    @Test
+    void replaceSetsTheWholeGridAndCanBeUndone() {
+        DrawingEditor e = editor(DrawingKind.FACE);
+        e.paint(0, 0, 2);
+        byte[] other = new byte[64];
+        other[63] = 5;
+        e.replace(other);
+        assertEquals(0, e.get(0, 0));
+        assertEquals(5, e.get(7, 7));
+        e.undo();
+        assertEquals(2, e.get(0, 0));
+        assertEquals(0, e.get(7, 7));
+    }
+
+    @Test
+    void replaceRejectsAnInvalidGridAndKeepsTheOldOne() {
+        DrawingEditor e = editor(DrawingKind.FACE);
+        e.paint(1, 1, 3);
+        assertThrows(IllegalArgumentException.class, () -> e.replace(new byte[3]));
+        byte[] bad = new byte[64];
+        bad[0] = 99;
+        assertThrows(IllegalArgumentException.class, () -> e.replace(bad));
+        assertEquals(3, e.get(1, 1));
+    }
+
+    @Test
+    void replacingWithTheSameGridChangesNothing() {
+        DrawingEditor e = editor(DrawingKind.FACE);
+        e.replace(new byte[64]);
+        assertFalse(e.canUndo());
+    }
 }

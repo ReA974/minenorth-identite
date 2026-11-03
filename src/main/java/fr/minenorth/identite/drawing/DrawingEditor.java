@@ -66,6 +66,14 @@ public final class DrawingEditor {
         }
     }
 
+    /** Remplace toute la grille (import de la tête) ; une seule étape d'annulation. Lève IllegalArgumentException si invalide. */
+    public void replace(byte[] grid) {
+        Drawings.EMPTY.with(kind, grid);
+        if (Arrays.equals(cells, grid)) return;
+        record();
+        cells = grid.clone();
+    }
+
     public void clear() {
         boolean blank = true;
         for (byte b : cells) if (b != 0) { blank = false; break; }

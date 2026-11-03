@@ -69,6 +69,11 @@ public final class CreatorState {
         apply(new Snapshot(newGender, next.withOutfit(fr.minenorth.identite.clothing.Outfit.starter(newGender))));
     }
 
+    /** Remplace un dessin (palette limitée vérifiée) ; annulable comme les autres choix. */
+    public void setDrawing(fr.minenorth.identite.drawing.DrawingKind kind, byte[] grid) {
+        apply(new Snapshot(gender, appearance.withDrawings(appearance.drawings().with(kind, grid))));
+    }
+
     public void randomizeSection(AppearanceSection section, Random random) {
         set(section, Catalog.randomSection(gender, section, random));
     }
