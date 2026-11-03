@@ -73,13 +73,14 @@ public class IdentityScreen extends Screen {
         cardField(g,"2. PRÉNOM",data.firstName(),x2,y,CARD_W-12-(x2-l));
         cardField(g,"3. NÉ(E) LE",data.birthDate(),x,y+28,94);
         cardField(g,"4. À",data.birthPlace(),x2,y+28,CARD_W-12-(x2-l));
-        cardField(g,"5. NATIONALITÉ",data.nationality(),x,y+56,CARD_W-12-(x-l));
+        cardField(g,"5. NATIONALITÉ",data.nationality(),x,y+56,94);
+        cardField(g,"6. SEXE",data.gender(),x2,y+56,CARD_W-12-(x2-l));
         g.fill(l+2,t+CARD_H-6,l+CARD_W-2,t+CARD_H-4,CARD_BAND);
     }
     private void cardField(GuiGraphics g,String label,String value,int x,int y,int w){
         g.drawString(font,label,x,y,CARD_LABEL,false);
         g.drawString(font,MineNorthStyle.bold(font.plainSubstrByWidth(value==null?"":value,w-6)),x,y+10,CARD_DARK,false);
     }
-    private ResourceLocation findSkin(){Minecraft mc=Minecraft.getInstance();if(mc.getConnection()!=null){PlayerInfo i=mc.getConnection().getPlayerInfo(data.subjectUuid());if(i!=null)return i.getSkinLocation();}return DefaultPlayerSkin.getDefaultSkin(data.subjectUuid());}
+    private ResourceLocation findSkin(){java.util.Optional<fr.minenorth.identite.client.skin.ClientSkins.Entry> custom=fr.minenorth.identite.client.skin.ClientSkins.active(data.subjectUuid());if(custom.isPresent())return custom.get().texture();Minecraft mc=Minecraft.getInstance();if(mc.getConnection()!=null){PlayerInfo i=mc.getConnection().getPlayerInfo(data.subjectUuid());if(i!=null)return i.getSkinLocation();}return DefaultPlayerSkin.getDefaultSkin(data.subjectUuid());}
     @Override public boolean isPauseScreen(){return false;}
 }

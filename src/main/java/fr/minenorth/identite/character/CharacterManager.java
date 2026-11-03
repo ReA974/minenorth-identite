@@ -2,6 +2,7 @@ package fr.minenorth.identite.character;
 
 import fr.minenorth.identite.appearance.Appearance;
 import fr.minenorth.identite.appearance.AppearanceData;
+import fr.minenorth.identite.appearance.AppearanceSection;
 import fr.minenorth.identite.appearance.Catalog;
 import fr.minenorth.identite.document.CharacterValidator;
 import fr.minenorth.identite.document.Gender;
@@ -27,6 +28,7 @@ import net.minecraftforge.fml.common.Mod;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -140,6 +142,81 @@ public final class CharacterManager {
         return existed;
     }
 
+    // ------------------------------------------------------------------ modification par d'autres mods
+
+    private static final EditSessions EDITS = new EditSessions();
+    private static final long EDIT_MS = 10 * 60_000L;
+
+    /** Message d'erreur ou vide : seules les sections ouvertes, valides pour le sexe de l'identité. */
+    public static Optional<String> validateEdit(Gender gender, Set<AppearanceSection> allowed, Map<AppearanceSection, int[]> edits) {
+        if (edits.isEmpty()) return Optional.of("Aucune modification.");
+        for (Map.Entry<AppearanceSection, int[]> e : edits.entrySet()) {
+            if (!allowed.contains(e.getKey())) return Optional.of(e.getKey().label() + " : modification non autorisée.");
+            Optional<String> error = Catalog.validate(gender, e.getKey(), e.getValue());
+            if (error.isPresent()) return error;
+        }
+        return Optional.empty();
+    }
+
+    /** Nouvelle fiche avec les sections remplacées ; le choix « mon skin » est conservé. */
+    public static Optional<Appearance> applyEdit(Appearance current, Map<AppearanceSection, int[]> edits) {
+        Appearance next = current;
+        for (Map.Entry<AppearanceSection, int[]> e : edits.entrySet()) next = next.with(e.getKey(), e.getValue());
+        return Optional.of(next);
+    }
+
+    /** Ouvre l'éditeur limité à ces sections chez un joueur en ligne qui a un personnage. */
+    public static boolean openEditor(MinecraftServer server, UUID target, Set<AppearanceSection> sections) {
+        ServerPlayer player = server.getPlayerList().getPlayer(target);
+        if (player == null || sections.isEmpty() || !hasCharacter(server.overworld(), target)) return false;
+        IdentityData.Profile profile = IdentityData.get(server.overworld()).get(target);
+        Appearance current = AppearanceData.get(server.overworld()).get(target);
+        EDITS.open(target, sections, System.currentTimeMillis() + EDIT_MS);
+        ModNetwork.sendOpenEditor(player, sections, profile.gender(), current);
+        return true;
+    }
+
+    /** Enregistre la modification envoyée par le client de l'éditeur (une seule fois par session). */
+    public static void applyClientEdit(ServerPlayer player, Map<AppearanceSection, int[]> edits) {
+        ServerLevel level = player.serverLevel();
+        Set<AppearanceSection> allowed = EDITS.allowed(player.getUUID(), System.currentTimeMillis());
+        IdentityData.Profile profile = IdentityData.get(level).get(player.getUUID());
+        Appearance current = AppearanceData.get(level).get(player.getUUID());
+        if (allowed.isEmpty() || profile == null || profile.gender() == null || current == null) {
+            player.displayClientMessage(Component.literal("§cAucune modification d'apparence n'est ouverte."), true);
+            return;
+        }
+        Optional<String> error = validateEdit(profile.gender(), allowed, edits);
+        if (error.isPresent()) {
+            player.displayClientMessage(Component.literal("§c" + error.get()), true);
+            return;
+        }
+        EDITS.close(player.getUUID());
+        store(player.server, player.getUUID(), profile.gender(), applyEdit(current, edits).orElse(current));
+        player.displayClientMessage(Component.literal("§aApparence mise à jour."), true);
+    }
+
+    /** Fiche d'un joueur (en ligne ou non) ; vide s'il n'a pas de personnage. */
+    public static Optional<Appearance> appearanceOf(MinecraftServer server, UUID target) {
+        if (!hasCharacter(server.overworld(), target)) return Optional.empty();
+        return Optional.ofNullable(AppearanceData.get(server.overworld()).get(target));
+    }
+
+    /** Remplace une section (API des autres mods) : le sexe n'est jamais touché. Faux si invalide. */
+    public static boolean setSection(MinecraftServer server, UUID target, AppearanceSection section, int[] values) {
+        if (section == null || !hasCharacter(server.overworld(), target)) return false;
+        IdentityData.Profile profile = IdentityData.get(server.overworld()).get(target);
+        Appearance current = AppearanceData.get(server.overworld()).get(target);
+        if (Catalog.validate(profile.gender(), section, values).isPresent()) return false;
+        store(server, target, profile.gender(), current.with(section, values));
+        return true;
+    }
+
+    private static void store(MinecraftServer server, UUID target, Gender gender, Appearance appearance) {
+        AppearanceData.get(server.overworld()).set(target, appearance);
+        ModNetwork.broadcastSheet(server, target, gender, appearance);
+    }
+
     // ------------------------------------------------------------------ connexion
 
     @SubscribeEvent
@@ -165,6 +242,7 @@ public final class CharacterManager {
     @SubscribeEvent
     public static void onLeave(PlayerEvent.PlayerLoggedOutEvent event) {
         CREATING.clear(event.getEntity().getUUID());
+        EDITS.close(event.getEntity().getUUID());
         FROZEN_AT.remove(event.getEntity().getUUID());
     }
 

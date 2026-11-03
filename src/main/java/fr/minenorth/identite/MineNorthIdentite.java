@@ -12,5 +12,6 @@ public class MineNorthIdentite {
         ModItems.ITEMS.register(bus);
         ModNetwork.register();
         fr.minenorth.api.MineNorth.provide(fr.minenorth.api.IdentityService.class, new IdentityProvider());
+        fr.minenorth.api.MineNorth.provide(fr.minenorth.api.AppearanceService.class, new AppearanceProvider());
     }
 }

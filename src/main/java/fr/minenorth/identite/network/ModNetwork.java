@@ -29,14 +29,16 @@ public final class ModNetwork {
         CHANNEL.registerMessage(id++, OpenCreationPacket.class, OpenCreationPacket::encode, OpenCreationPacket::decode, OpenCreationPacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT));
         CHANNEL.registerMessage(id++, SheetPacket.class, SheetPacket::encode, SheetPacket::decode, SheetPacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT));
         CHANNEL.registerMessage(id++, CreateCharacterPacket.class, CreateCharacterPacket::encode, CreateCharacterPacket::decode, CreateCharacterPacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_SERVER));
+        CHANNEL.registerMessage(id++, OpenEditorPacket.class, OpenEditorPacket::encode, OpenEditorPacket::decode, OpenEditorPacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT));
+        CHANNEL.registerMessage(id++, EditorSavePacket.class, EditorSavePacket::encode, EditorSavePacket::decode, EditorSavePacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_SERVER));
     }
 
     public static void sendIdentityAlreadyExists(ServerPlayer player, IdentityData.Profile profile, UUID subjectUuid) {
-        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new IdentityViewPacket(true,false,true,true,subjectUuid,"",profile.lastName(),profile.firstName(),profile.birthDate(),profile.birthPlace(),profile.nationality(),profile.cardNumber()));
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new IdentityViewPacket(true,false,true,true,subjectUuid,"",profile.lastName(),profile.firstName(),profile.birthDate(),profile.birthPlace(),profile.nationality(),profile.cardNumber(),profile.gender()==null?"":profile.gender().label()));
     }
     public static void sendIdentityView(ServerPlayer player, IdentityData.Profile profile, UUID subjectUuid, String presenter, boolean staff, boolean creation) {
         if (profile == null) return;
-        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new IdentityViewPacket(true,false,staff,creation,subjectUuid,presenter,profile.lastName(),profile.firstName(),profile.birthDate(),profile.birthPlace(),profile.nationality(),profile.cardNumber()));
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new IdentityViewPacket(true,false,staff,creation,subjectUuid,presenter,profile.lastName(),profile.firstName(),profile.birthDate(),profile.birthPlace(),profile.nationality(),profile.cardNumber(),profile.gender()==null?"":profile.gender().label()));
     }
 
     public static void sendOpenCreation(ServerPlayer player) {
@@ -48,13 +50,17 @@ public final class ModNetwork {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> target), new SheetPacket(subject, appearance != null, gender, appearance));
     }
 
+    public static void sendOpenEditor(ServerPlayer player, java.util.Set<fr.minenorth.identite.appearance.AppearanceSection> sections, fr.minenorth.identite.document.Gender gender, fr.minenorth.identite.appearance.Appearance appearance) {
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new OpenEditorPacket(sections, gender, appearance));
+    }
+
     public static void broadcastSheet(net.minecraft.server.MinecraftServer server, UUID subject, fr.minenorth.identite.document.Gender gender, fr.minenorth.identite.appearance.Appearance appearance) {
         CHANNEL.send(PacketDistributor.ALL.noArg(), new SheetPacket(subject, appearance != null, gender, appearance));
     }
 
-    public record IdentityViewPacket(boolean exists, boolean editable, boolean staff, boolean creation, UUID subjectUuid, String presenter, String lastName, String firstName, String birthDate, String birthPlace, String nationality, String cardNumber) {
-        static void encode(IdentityViewPacket p, FriendlyByteBuf b) { b.writeBoolean(p.exists); b.writeBoolean(p.editable); b.writeBoolean(p.staff); b.writeBoolean(p.creation); b.writeUUID(p.subjectUuid); b.writeUtf(p.presenter); b.writeUtf(p.lastName); b.writeUtf(p.firstName); b.writeUtf(p.birthDate); b.writeUtf(p.birthPlace); b.writeUtf(p.nationality); b.writeUtf(p.cardNumber); }
-        static IdentityViewPacket decode(FriendlyByteBuf b) { return new IdentityViewPacket(b.readBoolean(),b.readBoolean(),b.readBoolean(),b.readBoolean(),b.readUUID(),b.readUtf(),b.readUtf(),b.readUtf(),b.readUtf(),b.readUtf(),b.readUtf(),b.readUtf()); }
+    public record IdentityViewPacket(boolean exists, boolean editable, boolean staff, boolean creation, UUID subjectUuid, String presenter, String lastName, String firstName, String birthDate, String birthPlace, String nationality, String cardNumber, String gender) {
+        static void encode(IdentityViewPacket p, FriendlyByteBuf b) { b.writeBoolean(p.exists); b.writeBoolean(p.editable); b.writeBoolean(p.staff); b.writeBoolean(p.creation); b.writeUUID(p.subjectUuid); b.writeUtf(p.presenter); b.writeUtf(p.lastName); b.writeUtf(p.firstName); b.writeUtf(p.birthDate); b.writeUtf(p.birthPlace); b.writeUtf(p.nationality); b.writeUtf(p.cardNumber); b.writeUtf(p.gender); }
+        static IdentityViewPacket decode(FriendlyByteBuf b) { return new IdentityViewPacket(b.readBoolean(),b.readBoolean(),b.readBoolean(),b.readBoolean(),b.readUUID(),b.readUtf(),b.readUtf(),b.readUtf(),b.readUtf(),b.readUtf(),b.readUtf(),b.readUtf(),b.readUtf()); }
         static void handle(IdentityViewPacket p, Supplier<NetworkEvent.Context> c) { c.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> fr.minenorth.identite.client.ClientNetworkHandler.openIdentity(p))); c.get().setPacketHandled(true); }
     }
     public record IdentityLostPacket() {
