@@ -93,6 +93,7 @@ public final class SkinComposer {
         }
 
         paintBuild(c, body[0], rArm, lArm);
+        if (gender == Gender.FEMALE) paintChest(c, body[0]);
         paintMarks(c, skin[1], tone);
         paintFace(c, face, Palette.hairColor(hair[1]), tone);
         paintMakeup(c, makeup, tone);
@@ -130,6 +131,23 @@ public final class SkinComposer {
             }
             default -> { }
         }
+    }
+
+    /**
+     * Modelé doux de la poitrine pour Femme (reflet en haut, ombre dessous), sans détail anatomique : le corps reste une
+     * peau unie pour que les futurs calques de vêtements puissent épouser la forme. Plus marqué avec Ronde et Sablier.
+     */
+    private static void paintChest(Canvas c, int build) {
+        int[] t = BODY.front();
+        boolean small = build == 3;
+        boolean full = build == 2 || build == 4;
+        for (int dx : new int[]{1, 2, 5, 6}) {
+            c.shadeRel(t, dx, 2, 1.05);
+            if (!small) c.shadeRel(t, dx, 3, 1.03);
+            c.shadeRel(t, dx, small ? 4 : 5, 0.9);
+            if (full) c.shadeRel(t, dx, 6, 0.95);
+        }
+        for (int dy = 4; dy <= 5; dy++) { c.shadeRel(t, 3, dy, 0.95); c.shadeRel(t, 4, dy, 0.95); }
     }
 
     private static void paintMarks(Canvas c, int marks, int tone) {

@@ -91,11 +91,39 @@ class SkinComposerTest {
     }
 
     @Test
-    void bodyIsPlainSkinWithoutChestDetail() {
+    void maleBodyIsPlainSkin() {
         int tone = Palette.skinTone(3);
-        for (Gender g : Gender.values()) {
-            int[] p = SkinComposer.compose(g, bare(g));
-            for (int y = 20; y <= 31; y++) for (int x = 16; x <= 39; x++) assertEquals(tone, px(p, x, y), g + " torse " + x + "," + y);
+        int[] p = SkinComposer.compose(Gender.MALE, bare(Gender.MALE));
+        for (int y = 20; y <= 31; y++) for (int x = 16; x <= 39; x++) assertEquals(tone, px(p, x, y), "torse " + x + "," + y);
+    }
+
+    @Test
+    void femaleHasSoftBustShadingOnlyOnTheFrontOfTheTorso() {
+        int tone = Palette.skinTone(3);
+        int[] p = SkinComposer.compose(Gender.FEMALE, bare(Gender.FEMALE));
+        int shaded = 0;
+        for (int y = 20; y <= 31; y++) {
+            for (int x = 16; x <= 39; x++) {
+                boolean bustArea = x >= 21 && x <= 26 && y >= 22 && y <= 27;
+                if (bustArea) { if (px(p, x, y) != tone) shaded++; }
+                else assertEquals(tone, px(p, x, y), "hors poitrine " + x + "," + y);
+            }
+        }
+        assertTrue(shaded >= 6, "pixels modelés : " + shaded);
+    }
+
+    @Test
+    void bustShadingIsSubtleNeverDrasticallyDifferentFromSkin() {
+        int tone = Palette.skinTone(3);
+        int[] p = SkinComposer.compose(Gender.FEMALE, bare(Gender.FEMALE));
+        for (int y = 22; y <= 27; y++) {
+            for (int x = 21; x <= 26; x++) {
+                int c = px(p, x, y);
+                for (int shift : new int[]{16, 8, 0}) {
+                    int d = Math.abs(((c >> shift) & 0xFF) - ((tone >> shift) & 0xFF));
+                    assertTrue(d <= 40, "contraste trop fort en " + x + "," + y);
+                }
+            }
         }
     }
 
