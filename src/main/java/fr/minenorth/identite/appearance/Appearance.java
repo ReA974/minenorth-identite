@@ -1,6 +1,7 @@
 package fr.minenorth.identite.appearance;
 
 import fr.minenorth.identite.clothing.Outfit;
+import fr.minenorth.identite.drawing.Drawings;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 
@@ -10,19 +11,25 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Fiche d'un personnage : entiers de catalogue par section, choix du skin et tenue portée, jamais d'image. Immuable.
+ * Fiche d'un personnage : entiers de catalogue par section, choix du skin, tenue portée et dessins (numéros de couleur
+ * d'une palette limitée), jamais d'image libre. Immuable.
  */
 public final class Appearance {
     private final Map<AppearanceSection, int[]> values;
     private final boolean customSkin;
     private final Outfit outfit;
+    private final Drawings drawings;
 
-    /** Copie défensive ; toutes les sections doivent être présentes avec la bonne longueur. Tenue vide. */
+    /** Copie défensive ; toutes les sections doivent être présentes avec la bonne longueur. Tenue et dessins vides. */
     public Appearance(Map<AppearanceSection, int[]> values, boolean customSkin) {
-        this(values, customSkin, Outfit.EMPTY);
+        this(values, customSkin, Outfit.EMPTY, Drawings.EMPTY);
     }
 
     public Appearance(Map<AppearanceSection, int[]> values, boolean customSkin, Outfit outfit) {
+        this(values, customSkin, outfit, Drawings.EMPTY);
+    }
+
+    public Appearance(Map<AppearanceSection, int[]> values, boolean customSkin, Outfit outfit, Drawings drawings) {
         Map<AppearanceSection, int[]> copy = new EnumMap<>(AppearanceSection.class);
         for (AppearanceSection s : AppearanceSection.values()) {
             int[] v = values.get(s);
@@ -34,6 +41,7 @@ public final class Appearance {
         this.values = copy;
         this.customSkin = customSkin;
         this.outfit = outfit;
+        this.drawings = drawings;
     }
 
     public int[] get(AppearanceSection section) { return values.get(section).clone(); }
@@ -41,24 +49,30 @@ public final class Appearance {
     public Appearance with(AppearanceSection section, int[] newValues) {
         Map<AppearanceSection, int[]> copy = new EnumMap<>(values);
         copy.put(section, newValues);
-        return new Appearance(copy, customSkin, outfit);
+        return new Appearance(copy, customSkin, outfit, drawings);
     }
 
     /** Vrai si le joueur a choisi « Choisir mon skin » (le skin créé remplace son skin Minecraft). */
     public boolean customSkin() { return customSkin; }
 
-    public Appearance withCustomSkin(boolean value) { return new Appearance(values, value, outfit); }
+    public Appearance withCustomSkin(boolean value) { return new Appearance(values, value, outfit, drawings); }
 
     /** Vêtements portés (dessinés sur la couche extérieure du skin). */
     public Outfit outfit() { return outfit; }
 
-    public Appearance withOutfit(Outfit value) { return new Appearance(values, customSkin, value); }
+    public Appearance withOutfit(Outfit value) { return new Appearance(values, customSkin, value, drawings); }
+
+    /** Dessins du joueur (visage, barbe, tatouages) : palette limitée, posés par-dessus le catalogue. */
+    public Drawings drawings() { return drawings; }
+
+    public Appearance withDrawings(Drawings value) { return new Appearance(values, customSkin, outfit, value); }
 
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
         for (AppearanceSection s : AppearanceSection.values()) tag.putIntArray(s.name(), values.get(s));
         tag.putBoolean("CustomSkin", customSkin);
         tag.put("Outfit", outfit.toTag());
+        tag.put("Drawings", drawings.toTag());
         return tag;
     }
 
@@ -70,7 +84,8 @@ public final class Appearance {
             checkRange(s, v);
             values.put(s, v);
         }
-        return new Appearance(values, tag.getBoolean("CustomSkin"), Outfit.fromTag(tag.getCompound("Outfit")));
+        return new Appearance(values, tag.getBoolean("CustomSkin"), Outfit.fromTag(tag.getCompound("Outfit")),
+                Drawings.fromTag(tag.getCompound("Drawings")));
     }
 
     public void write(FriendlyByteBuf buf) {
@@ -79,6 +94,7 @@ public final class Appearance {
         }
         buf.writeBoolean(customSkin);
         outfit.write(buf);
+        drawings.write(buf);
     }
 
     /** Lève IllegalArgumentException (ou une exception de lecture) si les données sont invalides. */
@@ -91,7 +107,8 @@ public final class Appearance {
             values.put(s, v);
         }
         boolean customSkin = buf.readBoolean();
-        return new Appearance(values, customSkin, Outfit.read(buf));
+        Outfit outfit = Outfit.read(buf);
+        return new Appearance(values, customSkin, outfit, Drawings.read(buf));
     }
 
     private static void checkRange(AppearanceSection s, int[] v) {
@@ -105,13 +122,15 @@ public final class Appearance {
     }
 
     @Override public boolean equals(Object o) {
-        if (!(o instanceof Appearance a) || a.customSkin != customSkin || !a.outfit.equals(outfit)) return false;
+        if (!(o instanceof Appearance a) || a.customSkin != customSkin || !a.outfit.equals(outfit)
+                || !a.drawings.equals(drawings)) return false;
         for (AppearanceSection s : AppearanceSection.values()) if (!Arrays.equals(values.get(s), a.values.get(s))) return false;
         return true;
     }
 
     @Override public int hashCode() {
         int h = (customSkin ? 1 : 0) * 31 + outfit.hashCode();
+        h = 31 * h + drawings.hashCode();
         for (AppearanceSection s : AppearanceSection.values()) h = 31 * h + Arrays.hashCode(values.get(s));
         return h;
     }
