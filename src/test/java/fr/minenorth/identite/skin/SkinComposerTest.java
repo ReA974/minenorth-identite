@@ -91,10 +91,10 @@ class SkinComposerTest {
     }
 
     @Test
-    void maleBodyIsPlainSkin() {
+    void maleUpperBodyIsPlainSkin() {
         int tone = Palette.skinTone(3);
         int[] p = SkinComposer.compose(Gender.MALE, bare(Gender.MALE));
-        for (int y = 20; y <= 31; y++) for (int x = 16; x <= 39; x++) assertEquals(tone, px(p, x, y), "torse " + x + "," + y);
+        for (int y = 20; y <= 26; y++) for (int x = 16; x <= 39; x++) assertEquals(tone, px(p, x, y), "haut du torse " + x + "," + y);
     }
 
     @Test
@@ -102,7 +102,7 @@ class SkinComposerTest {
         int tone = Palette.skinTone(3);
         int[] p = SkinComposer.compose(Gender.FEMALE, bare(Gender.FEMALE));
         int shaded = 0;
-        for (int y = 20; y <= 31; y++) {
+        for (int y = 20; y <= 26; y++) {
             for (int x = 16; x <= 39; x++) {
                 boolean bustArea = x >= 21 && x <= 26 && y >= 22 && y <= 27;
                 if (bustArea) { if (px(p, x, y) != tone) shaded++; }
@@ -128,13 +128,38 @@ class SkinComposerTest {
     }
 
     @Test
-    void noUnderwearOnLegsOrHips() {
+    void lowerBodyHasSubtleDetailButNoUnderwear() {
         int tone = Palette.skinTone(3);
         for (Gender g : Gender.values()) {
             int[] p = SkinComposer.compose(g, bare(g));
-            for (int y = 20; y <= 31; y++) for (int x = 0; x <= 15; x++) assertEquals(tone, px(p, x, y), g + " jambe droite " + x + "," + y);
-            for (int y = 52; y <= 63; y++) for (int x = 16; x <= 31; x++) assertEquals(tone, px(p, x, y), g + " jambe gauche " + x + "," + y);
+            int detailed = 0;
+            for (int y = 20; y <= 63; y++) {
+                for (int x = 0; x <= 39; x++) {
+                    boolean rightLeg = y <= 31 && x <= 15;
+                    boolean leftLeg = y >= 52 && x >= 16 && x <= 31;
+                    boolean hips = y >= 27 && y <= 31 && x >= 16 && x <= 39;
+                    if (!(rightLeg || leftLeg || hips)) continue;
+                    int c = px(p, x, y);
+                    assertEquals(255, c >>> 24, g + " transparent en " + x + "," + y);
+                    if (c != tone) detailed++;
+                    for (int shift : new int[]{16, 8, 0}) {
+                        int d = Math.abs(((c >> shift) & 0xFF) - ((tone >> shift) & 0xFF));
+                        assertTrue(d <= 45, g + " contraste trop fort (sous-vêtement ?) en " + x + "," + y);
+                    }
+                }
+            }
+            assertTrue(detailed >= 60, g + " bas du corps trop vide : " + detailed + " pixels modelés");
         }
+    }
+
+    @Test
+    void lowerBodyDiffersBetweenMenAndWomen() {
+        int[] m = SkinComposer.compose(Gender.MALE, bare(Gender.MALE));
+        int[] f = SkinComposer.compose(Gender.FEMALE, bare(Gender.FEMALE));
+        int n = 0;
+        for (int y = 27; y <= 31; y++) for (int x = 16; x <= 39; x++) if (px(m, x, y) != px(f, x, y)) n++;
+        for (int y = 20; y <= 31; y++) for (int x = 0; x <= 15; x++) if (px(m, x, y) != px(f, x, y)) n++;
+        assertTrue(n >= 10, "différences bas du corps : " + n);
     }
 
     @Test

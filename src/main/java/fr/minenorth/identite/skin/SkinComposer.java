@@ -94,6 +94,7 @@ public final class SkinComposer {
 
         paintBuild(c, body[0], rArm, lArm);
         if (gender == Gender.FEMALE) paintChest(c, body[0]);
+        paintLowerBody(c, gender);
         paintMarks(c, skin[1], tone);
         paintFace(c, face, Palette.hairColor(hair[1]), tone);
         paintMakeup(c, makeup, tone);
@@ -148,6 +149,71 @@ public final class SkinComposer {
             if (full) c.shadeRel(t, dx, 6, 0.95);
         }
         for (int dy = 4; dy <= 5; dy++) { c.shadeRel(t, 3, dy, 0.95); c.shadeRel(t, 4, dy, 0.95); }
+    }
+
+    /**
+     * Modelé discret du bas du corps (hanches, nombril, genoux, mollets, chevilles, pieds, dos des jambes), différent
+     * pour Homme et Femme. Uniquement des variations de la couleur de peau : aucun sous-vêtement, pour que les futurs
+     * calques de vêtements restent propres.
+     */
+    private static void paintLowerBody(Canvas c, Gender gender) {
+        boolean female = gender == Gender.FEMALE;
+        int[] t = BODY.front();
+        c.shadeRel(t, 3, 7, 0.82);
+        for (int dy = 8; dy <= 11; dy++) {
+            c.shadeRel(t, 0, dy, female ? 1.04 : 0.95);
+            c.shadeRel(t, 7, dy, female ? 1.04 : 0.95);
+        }
+        for (int dx = 1; dx <= 6; dx++) c.shadeRel(t, dx, 11, 0.96);
+        c.shadeRel(t, 1, 10, 0.94);
+        c.shadeRel(t, 2, 11, 0.93);
+        c.shadeRel(t, 5, 11, 0.93);
+        c.shadeRel(t, 6, 10, 0.94);
+        int[] back = BODY.back();
+        c.shadeRel(back, 2, 8, 0.95);
+        c.shadeRel(back, 5, 8, 0.95);
+        legDetail(c, R_LEG, female, true);
+        legDetail(c, L_LEG, female, false);
+    }
+
+    private static void legDetail(Canvas c, Box leg, boolean female, boolean right) {
+        int[] f = leg.front();
+        int[] back = leg.back();
+        int inner = right ? 3 : 0;
+        int outer = 3 - inner;
+        int glow = right ? 2 : 1;
+        for (int dy = 1; dy <= 5; dy++) {
+            c.shadeRel(f, glow, dy, female ? 1.05 : 1.03);
+            c.shadeRel(f, outer, dy, female ? 0.97 : 0.93);
+        }
+        for (int dx = 0; dx < 4; dx++) {
+            c.shadeRel(f, dx, 6, 0.93);
+            c.shadeRel(f, dx, 7, 0.97);
+        }
+        c.shadeRel(f, 1, 6, 0.9);
+        c.shadeRel(f, 2, 6, 0.9);
+        for (int dy = 8; dy <= 9; dy++) {
+            c.shadeRel(f, outer, dy, female ? 0.97 : 0.92);
+            c.shadeRel(f, inner, dy, 0.98);
+        }
+        c.shadeRel(f, 0, 10, female ? 0.9 : 0.94);
+        c.shadeRel(f, 3, 10, female ? 0.9 : 0.94);
+        for (int dx = 0; dx < 4; dx++) c.shadeRel(f, dx, 11, dx % 2 == 0 ? 0.9 : 0.84);
+        for (int dx = 0; dx < 4; dx++) {
+            c.shadeRel(back, dx, 1, 0.92);
+            c.shadeRel(back, dx, 6, 0.9);
+            c.shadeRel(back, dx, 7, 0.96);
+        }
+        c.shadeRel(back, 1, 4, female ? 1.04 : 1.02);
+        c.shadeRel(back, 2, 4, female ? 1.04 : 1.02);
+        for (int dy = 8; dy <= 9; dy++) c.shadeRel(back, female ? 1 : 2, dy, female ? 1.02 : 1.04);
+        for (int[] side : new int[][]{leg.left(), leg.right()}) {
+            for (int dx = 0; dx < side[2]; dx++) {
+                c.shadeRel(side, dx, 6, 0.93);
+                c.shadeRel(side, dx, 10, 0.94);
+                c.shadeRel(side, dx, 11, 0.9);
+            }
+        }
     }
 
     private static void paintMarks(Canvas c, int marks, int tone) {
