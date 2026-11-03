@@ -23,10 +23,10 @@ public final class IdentityCommands {
         d.register(Commands.literal("cidreset").requires(s->s.hasPermission(2)).then(Commands.argument("joueur", GameProfileArgument.gameProfile()).executes(c->{
             int n=0;
             for(com.mojang.authlib.GameProfile gp:GameProfileArgument.getGameProfiles(c,"joueur")){
-                boolean done=IdentityManager.reset(c.getSource().getServer(),gp.getId());
+                boolean done=fr.minenorth.identite.character.CharacterManager.reset(c.getSource().getServer(),gp.getId());
                 String name=gp.getName();
-                if(done){ n++; c.getSource().sendSystemMessage(Component.literal("§aCarte d'identité de "+name+" réinitialisée.")); }
-                else c.getSource().sendFailure(Component.literal(name+" n'a pas de carte d'identité."));
+                if(done){ n++; c.getSource().sendSystemMessage(Component.literal("§aPersonnage de "+name+" réinitialisé (identité et apparence).")); }
+                else c.getSource().sendFailure(Component.literal(name+" n'a pas de personnage."));
             }
             return n;
         })));

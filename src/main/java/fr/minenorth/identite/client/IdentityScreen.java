@@ -14,7 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 
 public class IdentityScreen extends Screen {
     private final ModNetwork.IdentityViewPacket data;
-    private EditBox lastName, firstName, birthDate, birthPlace, nationality;
 
     public IdentityScreen(ModNetwork.IdentityViewPacket data) { super(Component.literal("Carte d'identité")); this.data=data; }
 
@@ -22,7 +21,6 @@ public class IdentityScreen extends Screen {
     private int panelY(){return Math.max(8,(height-PANEL_H)/2);}
 
     private MineNorthButton btn(int x,int y,int w,int h,String label,int color,Runnable r){return addRenderableWidget(new MineNorthButton(x,y,w,h,Component.literal(label),color,r));}
-    private EditBox field(int x,int y,int w,String hint,String value){EditBox b=new EditBox(font,x,y,w,18,Component.literal(hint));b.setMaxLength(32);b.setHint(Component.literal(hint));b.setValue(value);addRenderableWidget(b);return b;}
 
     @Override protected void init(){
         clearWidgets();
@@ -32,16 +30,9 @@ public class IdentityScreen extends Screen {
             if(data.exists()){
                 btn(x+24,y+210,w-48,22,"CARTE PERDUE — RÉÉDITER",MineNorthStyle.CYAN,()->{ModNetwork.CHANNEL.sendToServer(new ModNetwork.IdentityLostPacket());onClose();});
                 btn(x+24,y+238,w-48,20,"FERMER",MineNorthStyle.PINK,this::onClose);
-            } else {
-                // Chaque ligne : libellé à FIELD_TOP+i*FIELD_STEP, champ 11 px plus bas.
-                lastName=field(x+24,y+FIELD_TOP+11,w-48,"Ex : Dupont",""); firstName=field(x+24,y+FIELD_TOP+FIELD_STEP+11,w-48,"Ex : Jean","");
-                birthDate=field(x+24,y+FIELD_TOP+2*FIELD_STEP+11,w-48,"JJ/MM/AAAA",""); birthPlace=field(x+24,y+FIELD_TOP+3*FIELD_STEP+11,w-48,"Ex : Paris","");
-                nationality=field(x+24,y+FIELD_TOP+4*FIELD_STEP+11,w-48,"Ex : Française","Française");
-                btn(x+24,y+266,w-48,22,"CRÉER LA CARTE D'IDENTITÉ",MineNorthStyle.GREEN,this::save);
             }
         } else btn(width/2-60,Math.max(24,(height-CARD_H)/2-10)+CARD_H+12,120,18,"FERMER",MineNorthStyle.DARK,this::onClose);
     }
-    private void save(){ModNetwork.CHANNEL.sendToServer(new ModNetwork.IdentitySavePacket(lastName.getValue(),firstName.getValue(),birthDate.getValue(),birthPlace.getValue(),nationality.getValue()));}
     @Override public void render(GuiGraphics g,int mx,int my,float pt){
         renderBackground(g);
         if(data.creation()) renderCreation(g); else renderCard(g);
@@ -49,16 +40,12 @@ public class IdentityScreen extends Screen {
     }
     private void renderCreation(GuiGraphics g){
         int w=Math.min(560,width-30),x=(width-w)/2,y=panelY();
-        MineNorthStyle.panel(g,x,y,w,PANEL_H,data.exists()?"IDENTITÉ EXISTANTE":"CRÉATION DE L'IDENTITÉ","MINE NORTH RP • DOCUMENT PERSONNEL");
+        MineNorthStyle.panel(g,x,y,w,PANEL_H,data.exists()?"PERSONNAGE EXISTANT":"PERSONNAGE","MINE NORTH RP • DOCUMENT PERSONNEL");
         if(data.exists()){
             g.drawString(font,"Cette identité est déjà enregistrée.",x+24,y+78,MineNorthStyle.TEXT,false);
             g.drawString(font,"Elle est définitive et ne peut pas être modifiée par le joueur.",x+24,y+98,MineNorthStyle.MUTED,false);
             g.drawString(font,"Numéro : "+data.cardNumber(),x+24,y+135,MineNorthStyle.BLUE,false);
             g.drawString(font,"Vous pouvez uniquement demander une nouvelle carte si elle est perdue.",x+24,y+158,MineNorthStyle.TEXT,false);
-        } else {
-            g.drawString(font,"Les informations seront enregistrées définitivement.",x+24,y+66,MineNorthStyle.TEXT,false);
-            String[] labels={"Nom","Prénom","Date de naissance","Lieu de naissance","Nationalité"};
-            for(int i=0;i<labels.length;i++) g.drawString(font,labels[i],x+24,y+FIELD_TOP+i*FIELD_STEP,MineNorthStyle.BLUE,false);
         }
     }
     // Carte d'identité : même gabarit que la carte de permis (bandeau, photo, champs numérotés).

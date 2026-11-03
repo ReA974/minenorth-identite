@@ -25,30 +25,26 @@ public final class ModNetwork {
 
     public static void register() {
         CHANNEL.registerMessage(id++, IdentityViewPacket.class, IdentityViewPacket::encode, IdentityViewPacket::decode, IdentityViewPacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT));
-        CHANNEL.registerMessage(id++, IdentitySavePacket.class, IdentitySavePacket::encode, IdentitySavePacket::decode, IdentitySavePacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_SERVER));
         CHANNEL.registerMessage(id++, IdentityLostPacket.class, IdentityLostPacket::encode, IdentityLostPacket::decode, IdentityLostPacket::handle, java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_SERVER));
     }
 
-    public static void sendIdentityCreation(ServerPlayer player, UUID subjectUuid) {
-        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new IdentityViewPacket(false,true,false,true,subjectUuid,"","","","","","",""));
-    }
     public static void sendIdentityAlreadyExists(ServerPlayer player, IdentityData.Profile profile, UUID subjectUuid) {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new IdentityViewPacket(true,false,true,true,subjectUuid,"",profile.lastName(),profile.firstName(),profile.birthDate(),profile.birthPlace(),profile.nationality(),profile.cardNumber()));
     }
     public static void sendIdentityView(ServerPlayer player, IdentityData.Profile profile, UUID subjectUuid, String presenter, boolean staff, boolean creation) {
-        if (profile == null) { sendIdentityCreation(player, subjectUuid); return; }
+        if (profile == null) return;
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new IdentityViewPacket(true,false,staff,creation,subjectUuid,presenter,profile.lastName(),profile.firstName(),profile.birthDate(),profile.birthPlace(),profile.nationality(),profile.cardNumber()));
     }
+
+    /** Squelettes complétés à la tâche 6 (paquets de création et de diffusion des fiches). */
+    public static void sendOpenCreation(ServerPlayer player) {}
+    public static void sendSheet(ServerPlayer target, UUID subject, fr.minenorth.identite.document.Gender gender, fr.minenorth.identite.appearance.Appearance appearance) {}
+    public static void broadcastSheet(net.minecraft.server.MinecraftServer server, UUID subject, fr.minenorth.identite.document.Gender gender, fr.minenorth.identite.appearance.Appearance appearance) {}
 
     public record IdentityViewPacket(boolean exists, boolean editable, boolean staff, boolean creation, UUID subjectUuid, String presenter, String lastName, String firstName, String birthDate, String birthPlace, String nationality, String cardNumber) {
         static void encode(IdentityViewPacket p, FriendlyByteBuf b) { b.writeBoolean(p.exists); b.writeBoolean(p.editable); b.writeBoolean(p.staff); b.writeBoolean(p.creation); b.writeUUID(p.subjectUuid); b.writeUtf(p.presenter); b.writeUtf(p.lastName); b.writeUtf(p.firstName); b.writeUtf(p.birthDate); b.writeUtf(p.birthPlace); b.writeUtf(p.nationality); b.writeUtf(p.cardNumber); }
         static IdentityViewPacket decode(FriendlyByteBuf b) { return new IdentityViewPacket(b.readBoolean(),b.readBoolean(),b.readBoolean(),b.readBoolean(),b.readUUID(),b.readUtf(),b.readUtf(),b.readUtf(),b.readUtf(),b.readUtf(),b.readUtf(),b.readUtf()); }
         static void handle(IdentityViewPacket p, Supplier<NetworkEvent.Context> c) { c.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> fr.minenorth.identite.client.ClientNetworkHandler.openIdentity(p))); c.get().setPacketHandled(true); }
-    }
-    public record IdentitySavePacket(String lastName,String firstName,String birthDate,String birthPlace,String nationality) {
-        static void encode(IdentitySavePacket p,FriendlyByteBuf b){b.writeUtf(p.lastName);b.writeUtf(p.firstName);b.writeUtf(p.birthDate);b.writeUtf(p.birthPlace);b.writeUtf(p.nationality);}
-        static IdentitySavePacket decode(FriendlyByteBuf b){return new IdentitySavePacket(b.readUtf(64),b.readUtf(64),b.readUtf(64),b.readUtf(64),b.readUtf(64));}
-        static void handle(IdentitySavePacket p,Supplier<NetworkEvent.Context> c){c.get().enqueueWork(()->{ServerPlayer sp=c.get().getSender();if(sp!=null)IdentityManager.save(sp,p.lastName(),p.firstName(),p.birthDate(),p.birthPlace(),p.nationality());});c.get().setPacketHandled(true);}
     }
     public record IdentityLostPacket() {
         static void encode(IdentityLostPacket p,FriendlyByteBuf b){}

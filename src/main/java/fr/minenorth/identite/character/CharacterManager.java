@@ -1,0 +1,215 @@
+package fr.minenorth.identite.character;
+
+import fr.minenorth.identite.appearance.Appearance;
+import fr.minenorth.identite.appearance.AppearanceData;
+import fr.minenorth.identite.appearance.Catalog;
+import fr.minenorth.identite.document.CharacterValidator;
+import fr.minenorth.identite.document.Gender;
+import fr.minenorth.identite.document.IdentityData;
+import fr.minenorth.identite.document.IdentityManager;
+import fr.minenorth.identite.network.ModNetwork;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.CommandEvent;
+import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+import java.time.LocalDate;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * Cycle de vie du personnage : création obligatoire à la première connexion, reset complet, gel du joueur
+ * pendant la création et diffusion des fiches d'apparence aux clients.
+ */
+@Mod.EventBusSubscriber
+public final class CharacterManager {
+    private CharacterManager() {}
+
+    private static final CreationTracker CREATING = new CreationTracker();
+    /** Position où un joueur en création est retenu. */
+    private static final Map<UUID, Vec3> FROZEN_AT = new ConcurrentHashMap<>();
+
+    /** Tout ce que le client envoie pour terminer la création. */
+    public record CreateRequest(String lastName, String firstName, String birthDate, String birthPlace,
+                                String nationality, Gender gender, Appearance appearance, boolean rulesAccepted) {}
+
+    // ------------------------------------------------------------------ règles
+
+    /** Message d'erreur (français) ou vide si la demande est acceptable. */
+    public static Optional<String> check(CreateRequest r, LocalDate today) {
+        if (!r.rulesAccepted()) return Optional.of("Vous devez confirmer que votre nom respecte le règlement RP.");
+        if (r.gender() == null) return Optional.of("Choisissez un sexe.");
+        if (r.appearance() == null) return Optional.of("Apparence manquante.");
+        Optional<String> identity = CharacterValidator.validateIdentity(
+                r.lastName(), r.firstName(), r.birthDate(), r.birthPlace(), r.nationality(), today);
+        if (identity.isPresent()) return identity;
+        return Catalog.validate(r.gender(), r.appearance());
+    }
+
+    /** Un personnage = identité avec sexe ET apparence. Une ancienne identité sans sexe n'en est pas un. */
+    public static boolean hasCharacter(ServerLevel level, UUID player) {
+        IdentityData.Profile profile = IdentityData.get(level).get(player);
+        return profile != null && !profile.isLegacy() && AppearanceData.get(level).get(player) != null;
+    }
+
+    public static boolean isCreating(UUID player) { return CREATING.isCreating(player); }
+
+    // ------------------------------------------------------------------ création
+
+    /** Démarre (ou relance) la création : le joueur est retenu sur place et l'écran s'ouvre chez lui. */
+    public static void begin(ServerPlayer player) {
+        CREATING.begin(player.getUUID());
+        FROZEN_AT.put(player.getUUID(), player.position());
+        ModNetwork.sendOpenCreation(player);
+    }
+
+    public static void create(ServerPlayer player, CreateRequest r) {
+        if (!CREATING.isCreating(player.getUUID())) {
+            player.displayClientMessage(Component.literal("§cAucune création de personnage en cours."), true);
+            return;
+        }
+        Optional<String> error = check(r, LocalDate.now());
+        if (error.isPresent()) {
+            player.displayClientMessage(Component.literal("§c" + error.get()), true);
+            return;
+        }
+        String nationality = CharacterValidator.cleanName(r.nationality());
+        if (nationality.isBlank()) nationality = "Française";
+
+        ServerLevel level = player.serverLevel();
+        IdentityData data = IdentityData.get(level);
+        IdentityData.Profile profile = new IdentityData.Profile(
+                player.getUUID(),
+                CharacterValidator.cleanName(r.lastName()),
+                CharacterValidator.cleanName(r.firstName()),
+                CharacterValidator.clean(r.birthDate()),
+                CharacterValidator.cleanName(r.birthPlace()),
+                nationality,
+                IdentityManager.generateCardNumber(data),
+                r.gender());
+        data.set(profile);
+        AppearanceData.get(level).set(player.getUUID(), r.appearance());
+
+        CREATING.finish(player.getUUID());
+        FROZEN_AT.remove(player.getUUID());
+        player.refreshTabListName();
+        IdentityManager.giveCard(player, profile);
+        ModNetwork.broadcastSheet(player.server, player.getUUID(), r.gender(), r.appearance());
+        ModNetwork.sendIdentityView(player, profile, player.getUUID(), "", false, false);
+        player.displayClientMessage(Component.literal("§aVotre personnage a été créé définitivement."), true);
+    }
+
+    // ------------------------------------------------------------------ reset
+
+    /**
+     * Efface identité et apparence (joueur connecté ou non), retire son skin chez les autres joueurs et, s'il est
+     * en ligne, relance la création. Renvoie faux s'il n'y avait rien à effacer.
+     */
+    public static boolean reset(MinecraftServer server, UUID target) {
+        ServerLevel level = server.overworld();
+        IdentityData identities = IdentityData.get(level);
+        AppearanceData sheets = AppearanceData.get(level);
+        ServerPlayer online = server.getPlayerList().getPlayer(target);
+        boolean existed = identities.exists(target) || sheets.get(target) != null
+                || (online != null && CREATING.isCreating(target));
+        identities.reset(target);
+        sheets.remove(target);
+        ModNetwork.broadcastSheet(server, target, null, null);
+        if (online != null) {
+            online.refreshTabListName();
+            online.displayClientMessage(Component.literal(
+                    "§eVotre personnage a été réinitialisé par le staff. Vous devez en créer un nouveau."), false);
+            begin(online);
+        } else {
+            CREATING.clear(target);
+            FROZEN_AT.remove(target);
+        }
+        return existed;
+    }
+
+    // ------------------------------------------------------------------ connexion
+
+    @SubscribeEvent
+    public static void onJoin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        ServerLevel level = player.serverLevel();
+        AppearanceData sheets = AppearanceData.get(level);
+        IdentityData identities = IdentityData.get(level);
+        for (UUID id : sheets.uuids()) {
+            IdentityData.Profile profile = identities.get(id);
+            if (profile != null && profile.gender() != null) {
+                ModNetwork.sendSheet(player, id, profile.gender(), sheets.get(id));
+            }
+        }
+        if (hasCharacter(level, player.getUUID())) {
+            ModNetwork.broadcastSheet(player.server, player.getUUID(),
+                    identities.get(player.getUUID()).gender(), sheets.get(player.getUUID()));
+        } else {
+            begin(player);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLeave(PlayerEvent.PlayerLoggedOutEvent event) {
+        CREATING.clear(event.getEntity().getUUID());
+        FROZEN_AT.remove(event.getEntity().getUUID());
+    }
+
+    // ------------------------------------------------------------------ gel pendant la création
+
+    private static boolean frozen(net.minecraft.world.entity.Entity entity) {
+        return entity instanceof ServerPlayer p && CREATING.isCreating(p.getUUID());
+    }
+
+    @SubscribeEvent
+    public static void hold(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+        Vec3 at = FROZEN_AT.get(player.getUUID());
+        if (at == null || !CREATING.isCreating(player.getUUID())) return;
+        if (player.position().distanceToSqr(at) > 0.01) {
+            player.connection.teleport(at.x, at.y, at.z, player.getYRot(), player.getXRot());
+        }
+        player.setDeltaMovement(Vec3.ZERO);
+    }
+
+    @SubscribeEvent
+    public static void noInteract(PlayerInteractEvent event) {
+        if (event.isCancelable() && frozen(event.getEntity())) event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void noAttack(AttackEntityEvent event) {
+        if (frozen(event.getEntity())) event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void noDamage(LivingAttackEvent event) {
+        if (frozen(event.getEntity())) event.setCanceled(true);
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void noChat(ServerChatEvent event) {
+        if (frozen(event.getPlayer())) event.setCanceled(true);
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void noCommand(CommandEvent event) {
+        var source = event.getParseResults().getContext().getSource();
+        if (source.getEntity() instanceof ServerPlayer p && CREATING.isCreating(p.getUUID()) && !source.hasPermission(2)) {
+            event.setCanceled(true);
+        }
+    }
+}

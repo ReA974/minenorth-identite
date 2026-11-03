@@ -12,6 +12,6 @@ public final class IdentityWipe {
 
     @SubscribeEvent
     public static void onWipe(PlayerWipeEvent e) {
-        if (IdentityManager.reset(e.server(), e.player())) e.cleaned("identité");
+        if (fr.minenorth.identite.character.CharacterManager.reset(e.server(), e.player())) e.cleaned("personnage");
     }
 }

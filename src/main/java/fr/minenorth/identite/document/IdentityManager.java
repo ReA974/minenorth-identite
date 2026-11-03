@@ -30,7 +30,7 @@ public final class IdentityManager {
     public static void nameFormat(PlayerEvent.NameFormat event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         IdentityData.Profile profile = IdentityData.get(player.serverLevel()).get(player.getUUID());
-        if (profile != null) {
+        if (profile != null && fr.minenorth.identite.character.CharacterManager.hasCharacter(player.serverLevel(), player.getUUID())) {
             event.setDisplayname(Component.literal(profile.firstName() + " " + profile.lastName()));
         }
     }
@@ -42,7 +42,7 @@ public final class IdentityManager {
     public static void tabListNameFormat(PlayerEvent.TabListNameFormat event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         IdentityData.Profile profile = IdentityData.get(player.serverLevel()).get(player.getUUID());
-        if (profile != null) {
+        if (profile != null && fr.minenorth.identite.character.CharacterManager.hasCharacter(player.serverLevel(), player.getUUID())) {
             event.setDisplayName(Component.literal(profile.firstName() + " " + profile.lastName()));
         }
     }
@@ -55,7 +55,7 @@ public final class IdentityManager {
     public static void rpChat(ServerChatEvent event) {
         ServerPlayer player = event.getPlayer();
         IdentityData.Profile profile = IdentityData.get(player.serverLevel()).get(player.getUUID());
-        if (profile == null) return;
+        if (profile == null || !fr.minenorth.identite.character.CharacterManager.hasCharacter(player.serverLevel(), player.getUUID())) return;
 
         net.minecraft.network.chat.MutableComponent formatted = Component.literal(profile.firstName() + " " + profile.lastName());
         formatted.append(Component.literal(" » "));
@@ -151,7 +151,7 @@ public final class IdentityManager {
 
     // ------------------------------------------------------------------ sessions /cidmenu
     /**
-     * Joueurs à qui le staff a ouvert l'écran (/cidmenu) : seuls eux peuvent créer leur identité ou demander
+     * Joueurs à qui le staff a ouvert l'écran (/cidmenu) : seuls eux peuvent demander
      * une nouvelle carte. Sans ça, un client modifié pourrait envoyer les paquets à tout moment.
      */
     private static final java.util.Map<UUID, Long> SESSIONS = new java.util.concurrent.ConcurrentHashMap<>();
@@ -168,61 +168,18 @@ public final class IdentityManager {
         LAST_PRESENT.remove(event.getEntity().getUUID());
     }
 
-    /** Opens the /cidmenu management screen. Only a command source with permission can call this. */
+    /**
+     * Ouvre l'écran du staff (/cidmenu) sur un joueur qui a un personnage : consultation et carte perdue.
+     * La création du personnage, elle, se fait toute seule à la connexion (CharacterManager).
+     */
     public static void open(ServerPlayer viewer, UUID target, boolean staff, boolean forceCreation) {
-        SESSIONS.put(viewer.getUUID(), System.currentTimeMillis() + SESSION_MS);
         IdentityData.Profile profile = IdentityData.get(viewer.serverLevel()).get(target);
-        if (profile == null) ModNetwork.sendIdentityCreation(viewer, target);
-        else ModNetwork.sendIdentityAlreadyExists(viewer, profile, target);
-    }
-
-    /** Creates an identity exactly once. Players cannot overwrite their identity. */
-    public static void save(ServerPlayer actor, String lastName, String firstName, String birthDate,
-                            String birthPlace, String nationality) {
-        IdentityData data = IdentityData.get(actor.serverLevel());
-        if (data.exists(actor.getUUID())) {
-            SESSIONS.remove(actor.getUUID());
-            actor.displayClientMessage(Component.literal("§cVotre carte d'identité existe déjà. Elle ne peut pas être modifiée."), true);
+        if (profile == null || profile.isLegacy()) {
+            viewer.displayClientMessage(Component.literal("§cCe joueur n'a pas encore de personnage."), true);
             return;
         }
-        Long until = SESSIONS.get(actor.getUUID());
-        if (until == null || until < System.currentTimeMillis()) {
-            actor.displayClientMessage(Component.literal("§cAdressez-vous au staff (mairie) pour créer votre carte d'identité."), true);
-            return;
-        }
-
-        lastName = CharacterValidator.cleanName(lastName);
-        firstName = CharacterValidator.cleanName(firstName);
-        birthDate = CharacterValidator.clean(birthDate);
-        birthPlace = CharacterValidator.cleanName(birthPlace);
-        nationality = CharacterValidator.cleanName(nationality);
-
-        if (lastName.isBlank() || firstName.isBlank() || birthDate.isBlank() || birthPlace.isBlank()) {
-            actor.displayClientMessage(Component.literal("§cTous les champs doivent être remplis (lettres, espaces, - et ' uniquement)."), true);
-            return;
-        }
-        if (!CharacterValidator.validDate(birthDate)) {
-            actor.displayClientMessage(Component.literal("§cDate de naissance invalide : format JJ/MM/AAAA."), true);
-            return;
-        }
-        if (nationality.isBlank()) nationality = "Française";
-        SESSIONS.remove(actor.getUUID());
-
-        String cardNumber = generateCardNumber(data);
-        IdentityData.Profile profile = new IdentityData.Profile(
-                actor.getUUID(), lastName, firstName, birthDate, birthPlace, nationality, cardNumber, null
-        );
-        data.set(profile);
-        refreshTabName(actor);
-        giveCard(actor, profile);
-
-        ModNetwork.sendIdentityView(actor, profile, actor.getUUID(), "", false, false);
-        actor.displayClientMessage(Component.literal("§aVotre carte d'identité a été créée définitivement."), true);
-    }
-
-    /** Force le serveur et les clients à recalculer le nom affiché dans le TAB. */
-    private static void refreshTabName(ServerPlayer player) {
-        player.refreshTabListName();
+        SESSIONS.put(viewer.getUUID(), System.currentTimeMillis() + SESSION_MS);
+        ModNetwork.sendIdentityAlreadyExists(viewer, profile, target);
     }
 
     public static void giveCard(ServerPlayer player, IdentityData.Profile profile) {
@@ -254,25 +211,12 @@ public final class IdentityManager {
         player.displayClientMessage(Component.literal("§aNouvelle carte remise (n° " + renewed.cardNumber() + "). L'ancienne n'est plus valide."), true);
     }
 
-    private static String generateCardNumber(IdentityData data) {
+    public static String generateCardNumber(IdentityData data) {
         String number;
         do {
             long value = ThreadLocalRandom.current().nextLong(10_000_000L, 100_000_000L);
             number = "FR-" + value;
         } while (data.profilesContainsCard(number));
         return number;
-    }
-
-    /** Réinitialise l'identité (joueur connecté ou non). Renvoie faux s'il n'en avait pas. */
-    public static boolean reset(net.minecraft.server.MinecraftServer server, UUID target) {
-        IdentityData data = IdentityData.get(server.overworld());
-        if (!data.exists(target)) return false;
-        data.reset(target);
-        ServerPlayer targetPlayer = server.getPlayerList().getPlayer(target);
-        if (targetPlayer != null) {
-            targetPlayer.refreshTabListName();
-            targetPlayer.displayClientMessage(Component.literal("§eVotre carte d'identité a été réinitialisée par le staff. Vous devez en créer une nouvelle."), false);
-        }
-        return true;
     }
 }
