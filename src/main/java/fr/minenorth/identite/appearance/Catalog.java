@@ -105,6 +105,10 @@ public final class Catalog {
             Optional<String> error = validate(gender, s, appearance.get(s));
             if (error.isPresent()) return error;
         }
+        for (fr.minenorth.identite.clothing.ClothingSlot slot : fr.minenorth.identite.clothing.ClothingSlot.values()) {
+            fr.minenorth.identite.clothing.Clothing worn = appearance.outfit().get(slot);
+            if (worn != null && worn.gender() != gender) return Optional.of("Vêtement non adapté à votre sexe.");
+        }
         return Optional.empty();
     }
 }
