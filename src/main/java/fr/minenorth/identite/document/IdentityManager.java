@@ -100,6 +100,11 @@ public final class IdentityManager {
 
         if (!(presenter instanceof ServerPlayer viewer) || !(event.getTarget() instanceof ServerPlayer target)) return;
         event.setCanceled(true);
+        if (fr.minenorth.identite.character.CharacterManager.isCreating(target.getUUID())) {
+            viewer.displayClientMessage(Component.literal("§cCe joueur n'est pas disponible pour le moment."), true);
+            event.setCancellationResult(InteractionResult.FAIL);
+            return;
+        }
         LAST_PRESENT.put(viewer.getUUID(), viewer.serverLevel().getGameTime());
 
         IdentityData.Profile profile = IdentityData.get(viewer.serverLevel()).get(viewer.getUUID());

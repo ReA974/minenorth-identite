@@ -69,6 +69,20 @@ public final class CharacterManager {
 
     public static boolean isCreating(UUID player) { return CREATING.isCreating(player); }
 
+    /** Fiches à envoyer à un joueur qui se connecte : seulement celles des joueurs en ligne qui en ont une. */
+    public static Set<UUID> sheetsToSend(Set<UUID> online, Set<UUID> withSheet) {
+        Set<UUID> out = new java.util.HashSet<>(online);
+        out.retainAll(withSheet);
+        return out;
+    }
+
+    /** Intervalle (en ticks) où le serveur redemande l'écran de création à un joueur retenu, si un autre écran l'a remplacé. */
+    public static final int RESEND_TICKS = 200;
+
+    public static boolean shouldResendCreation(int tickCount) {
+        return tickCount > 0 && tickCount % RESEND_TICKS == 0;
+    }
+
     // ------------------------------------------------------------------ création
 
     /** Démarre (ou relance) la création : le joueur est retenu sur place et l'écran s'ouvre chez lui. */
@@ -108,6 +122,7 @@ public final class CharacterManager {
         CREATING.finish(player.getUUID());
         FROZEN_AT.remove(player.getUUID());
         player.refreshTabListName();
+        player.refreshDisplayName();
         IdentityManager.giveCard(player, profile);
         ModNetwork.broadcastSheet(player.server, player.getUUID(), r.gender(), r.appearance());
         ModNetwork.sendIdentityView(player, profile, player.getUUID(), "", false, false);
@@ -128,10 +143,12 @@ public final class CharacterManager {
         boolean existed = identities.exists(target) || sheets.get(target) != null
                 || (online != null && CREATING.isCreating(target));
         identities.reset(target);
+        EDITS.close(target);
         sheets.remove(target);
         ModNetwork.broadcastSheet(server, target, null, null);
         if (online != null) {
             online.refreshTabListName();
+            online.refreshDisplayName();
             online.displayClientMessage(Component.literal(
                     "§eVotre personnage a été réinitialisé par le staff. Vous devez en créer un nouveau."), false);
             begin(online);
@@ -225,7 +242,9 @@ public final class CharacterManager {
         ServerLevel level = player.serverLevel();
         AppearanceData sheets = AppearanceData.get(level);
         IdentityData identities = IdentityData.get(level);
-        for (UUID id : sheets.uuids()) {
+        java.util.Set<UUID> online = new java.util.HashSet<>();
+        for (ServerPlayer p : player.server.getPlayerList().getPlayers()) online.add(p.getUUID());
+        for (UUID id : sheetsToSend(online, sheets.uuids())) {
             IdentityData.Profile profile = identities.get(id);
             if (profile != null && profile.gender() != null) {
                 ModNetwork.sendSheet(player, id, profile.gender(), sheets.get(id));
@@ -261,6 +280,7 @@ public final class CharacterManager {
             player.connection.teleport(at.x, at.y, at.z, player.getYRot(), player.getXRot());
         }
         player.setDeltaMovement(Vec3.ZERO);
+        if (shouldResendCreation(player.tickCount)) ModNetwork.sendOpenCreation(player);
     }
 
     @SubscribeEvent

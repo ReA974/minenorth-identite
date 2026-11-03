@@ -544,6 +544,8 @@ public final class CreatorScreen extends Screen {
         return super.keyPressed(key, scan, mods);
     }
 
+    public boolean isCreation() { return creation; }
+
     @Override public boolean shouldCloseOnEsc() { return !creation; }
     @Override public boolean isPauseScreen() { return false; }
 
