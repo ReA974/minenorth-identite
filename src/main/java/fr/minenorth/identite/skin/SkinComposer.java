@@ -6,6 +6,8 @@ import fr.minenorth.identite.clothing.Clothing;
 import fr.minenorth.identite.clothing.ClothingSlot;
 import fr.minenorth.identite.clothing.Outfit;
 import fr.minenorth.identite.document.Gender;
+import fr.minenorth.identite.drawing.DrawingKind;
+import fr.minenorth.identite.drawing.Drawings;
 
 /**
  * Assemble le skin 64x64 (ARGB, ligne par ligne) à partir d'une fiche de choix. Pur Java, déterministe :
@@ -103,6 +105,7 @@ public final class SkinComposer {
         paintMakeup(c, makeup, tone);
         paintFacialHair(c, beard, tone);
         paintTattoos(c, tattoos, rArm, lArm);
+        paintDrawings(c, a.drawings(), rArm, lArm);
         paintOutfit(c, a.outfit());
         paintHair(c, hair);
         return c.px;
@@ -455,6 +458,35 @@ public final class SkinComposer {
         if (topFace && dy >= 2 && dy <= 3) f *= 1.1;
         if (style == 22 && rect == BODY_O.back()) f *= (dy % 2 == 0) ? 1.0 : 0.82;
         c.rel(rect, dx, dy, Palette.shade(base, f));
+    }
+
+    // ------------------------------------------------------------------ dessins du joueur
+
+    /**
+     * Pose les dessins par-dessus ce que le catalogue a déjà dessiné : visage et barbe remplacent le pixel, les tatouages
+     * se mélangent à la peau. Une case transparente ne change rien ; ce qui dépasse la zone (bras fins) est coupé.
+     */
+    private static void paintDrawings(Canvas c, Drawings drawings, Box rArm, Box lArm) {
+        drawGrid(c, drawings, DrawingKind.FACE, HEAD.front(), false);
+        drawGrid(c, drawings, DrawingKind.BEARD, HEAD.front(), false);
+        drawGrid(c, drawings, DrawingKind.TATTOO_TORSO, BODY.front(), true);
+        drawGrid(c, drawings, DrawingKind.TATTOO_BACK, BODY.back(), true);
+        drawGrid(c, drawings, DrawingKind.TATTOO_RIGHT_ARM, rArm.front(), true);
+        drawGrid(c, drawings, DrawingKind.TATTOO_LEFT_ARM, lArm.front(), true);
+        drawGrid(c, drawings, DrawingKind.TATTOO_LEGS, R_LEG.front(), true);
+        drawGrid(c, drawings, DrawingKind.TATTOO_LEGS, L_LEG.front(), true);
+    }
+
+    private static void drawGrid(Canvas c, Drawings drawings, DrawingKind kind, int[] rect, boolean blend) {
+        byte[] grid = drawings.get(kind);
+        for (int y = 0; y < kind.height(); y++) {
+            for (int x = 0; x < kind.width(); x++) {
+                int index = grid[y * kind.width() + x];
+                if (index == 0 || !c.inside(rect, x, y)) continue;
+                int color = kind.color(index);
+                c.rel(rect, x, y, blend ? Palette.mix(c.relGet(rect, x, y), color, 0.88) : color);
+            }
+        }
     }
 
     // ------------------------------------------------------------------ vêtements (couche extérieure)
