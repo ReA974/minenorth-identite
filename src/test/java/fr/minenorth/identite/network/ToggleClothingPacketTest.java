@@ -7,21 +7,21 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class RemoveClothingPacketTest {
+class ToggleClothingPacketTest {
     private static FriendlyByteBuf buf() { return new FriendlyByteBuf(Unpooled.buffer()); }
 
     @Test
     void roundTrip() {
         FriendlyByteBuf b = buf();
-        RemoveClothingPacket.encode(new RemoveClothingPacket(ClothingSlot.UNDERWEAR), b);
-        assertEquals(ClothingSlot.UNDERWEAR, RemoveClothingPacket.decode(b).slot());
+        ToggleClothingPacket.encode(new ToggleClothingPacket(ClothingSlot.UNDERWEAR), b);
+        assertEquals(ClothingSlot.UNDERWEAR, ToggleClothingPacket.decode(b).slot());
     }
 
     @Test
     void forgedSlotNameDecodesToNullInsteadOfThrowing() {
         FriendlyByteBuf b = buf();
         b.writeUtf("HELMET");
-        assertNull(RemoveClothingPacket.decode(b).slot());
+        assertNull(ToggleClothingPacket.decode(b).slot());
     }
 
     @Test

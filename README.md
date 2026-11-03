@@ -12,7 +12,7 @@ Mod Forge 1.20.1 indépendant pour le système d'identité MineNorth RP.
 - « Choisir mon skin » : le skin créé s'applique au joueur et est visible par les autres (fiche de choix validée par le serveur, texture générée par chaque client) ; « Garder mon skin Minecraft » conserve le skin Mojang ;
 - identité et sexe définitifs (seul `/cidreset` les change) ; apparence modifiable plus tard par d'autres mods via l'API d'apparence de `minenorth-api` (`MineNorth.appearance()`), section par section, jamais le sexe ;
 - numéro de carte, carte d'identité physique (avec le sexe), présentation par sneak + clic droit sur un autre joueur, lecture par clic droit, réédition en cas de perte ;
-- sous-vêtements (items « Caleçon » et « Sous-vêtements (femme) », onglet créatif MineNorth) : le personnage les porte dès sa création ; clic droit sur l'item pour le porter, touche K (« Ma tenue ») pour les retirer, l'item revient dans l'inventaire ; ils se dessinent sur la couche extérieure du skin (visibles seulement avec « Choisir mon skin ») ;
+- sous-vêtements (items « Caleçon » et « Sous-vêtements (femme) », onglet créatif MineNorth) : le personnage les porte dès sa création ; clic droit sur l'item pour le porter, bouton à droite du livre de recettes dans l'inventaire pour les retirer ou les remettre, l'item revient dans l'inventaire ; ils se dessinent sur la couche extérieure du skin (visibles seulement avec « Choisir mon skin ») ;
 - nom RP dans le chat et le TAB une fois le personnage créé ;
 - migration : les joueurs qui avaient une identité d'avant cette version refont tout (nouvelle carte, l'ancienne n'est plus valide).
 

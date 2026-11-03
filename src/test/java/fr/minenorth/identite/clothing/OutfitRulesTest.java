@@ -44,4 +44,17 @@ class OutfitRulesTest {
         assertTrue(c.error().isPresent());
         assertTrue(c.returned().isEmpty());
     }
+
+    @Test
+    void pickFromInventoryTakesTheFirstClothingFitForTheSlotAndGender() {
+        java.util.List<Clothing> inventory = java.util.List.of(Clothing.UNDERWEAR_FEMALE, Clothing.UNDERWEAR_MALE, Clothing.UNDERWEAR_MALE);
+        assertEquals(1, OutfitRules.pickFromInventory(Gender.MALE, ClothingSlot.UNDERWEAR, inventory).orElseThrow());
+        assertEquals(0, OutfitRules.pickFromInventory(Gender.FEMALE, ClothingSlot.UNDERWEAR, inventory).orElseThrow());
+    }
+
+    @Test
+    void pickFromInventoryFindsNothingWhenNoneFits() {
+        assertTrue(OutfitRules.pickFromInventory(Gender.MALE, ClothingSlot.UNDERWEAR, java.util.List.of()).isEmpty());
+        assertTrue(OutfitRules.pickFromInventory(Gender.MALE, ClothingSlot.UNDERWEAR, java.util.List.of(Clothing.UNDERWEAR_FEMALE)).isEmpty());
+    }
 }

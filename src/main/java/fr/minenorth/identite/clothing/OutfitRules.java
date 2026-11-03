@@ -27,4 +27,13 @@ public final class OutfitRules {
         if (old == null) return new Change(current, Optional.empty(), Optional.of("Vous ne portez rien à cet endroit."));
         return new Change(current.without(slot), Optional.of(old), Optional.empty());
     }
+
+    /** Indice du premier vêtement de la liste qui va à ce sexe et à cet emplacement ; vide s'il n'y en a pas. */
+    public static java.util.OptionalInt pickFromInventory(Gender gender, ClothingSlot slot, java.util.List<Clothing> candidates) {
+        for (int i = 0; i < candidates.size(); i++) {
+            Clothing c = candidates.get(i);
+            if (c.slot() == slot && c.gender() == gender) return java.util.OptionalInt.of(i);
+        }
+        return java.util.OptionalInt.empty();
+    }
 }
