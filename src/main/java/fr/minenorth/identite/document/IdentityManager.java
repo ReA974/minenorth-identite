@@ -191,17 +191,17 @@ public final class IdentityManager {
             return;
         }
 
-        lastName = cleanName(lastName);
-        firstName = cleanName(firstName);
-        birthDate = clean(birthDate);
-        birthPlace = cleanName(birthPlace);
-        nationality = cleanName(nationality);
+        lastName = CharacterValidator.cleanName(lastName);
+        firstName = CharacterValidator.cleanName(firstName);
+        birthDate = CharacterValidator.clean(birthDate);
+        birthPlace = CharacterValidator.cleanName(birthPlace);
+        nationality = CharacterValidator.cleanName(nationality);
 
         if (lastName.isBlank() || firstName.isBlank() || birthDate.isBlank() || birthPlace.isBlank()) {
             actor.displayClientMessage(Component.literal("§cTous les champs doivent être remplis (lettres, espaces, - et ' uniquement)."), true);
             return;
         }
-        if (!validDate(birthDate)) {
+        if (!CharacterValidator.validDate(birthDate)) {
             actor.displayClientMessage(Component.literal("§cDate de naissance invalide : format JJ/MM/AAAA."), true);
             return;
         }
@@ -261,32 +261,6 @@ public final class IdentityManager {
             number = "FR-" + value;
         } while (data.profilesContainsCard(number));
         return number;
-    }
-
-    public static final int MAX_FIELD = 32;
-
-    /** Retire les codes couleur (§), les caractères de contrôle et les espaces en trop ; 32 caractères max. */
-    private static String clean(String value) {
-        if (value == null) return "";
-        String v = value.replaceAll("[\\p{Cntrl}§]", "").trim().replaceAll("\\s+", " ");
-        return v.length() > MAX_FIELD ? v.substring(0, MAX_FIELD).trim() : v;
-    }
-
-    /** Nom, prénom, lieu, nationalité : lettres (accents compris), espaces, tirets et apostrophes. Sinon vide. */
-    private static String cleanName(String value) {
-        String v = clean(value);
-        return v.matches("[\\p{L}][\\p{L} '\\-]*") ? v : "";
-    }
-
-    private static boolean validDate(String v) {
-        if (!v.matches("\\d{2}/\\d{2}/\\d{4}")) return false;
-        try {
-            java.time.LocalDate.parse(v, java.time.format.DateTimeFormatter.ofPattern("dd/MM/uuuu")
-                    .withResolverStyle(java.time.format.ResolverStyle.STRICT));
-            return true;
-        } catch (java.time.format.DateTimeParseException e) {
-            return false;
-        }
     }
 
     /** Réinitialise l'identité (joueur connecté ou non). Renvoie faux s'il n'en avait pas. */
