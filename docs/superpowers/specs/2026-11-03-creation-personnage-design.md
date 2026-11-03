@@ -26,8 +26,8 @@ créé peut ensuite s'appliquer au joueur. L'apparence doit pouvoir être modifi
 ## Hors périmètre (non-objectifs)
 
 - Les boutiques coiffeur / tatoueur elles-mêmes : c'est un autre mod. Ici on fournit seulement l'API.
-- Vêtements (le magasin de vêtements de la capture est à venir et hors de ce chantier). Seuls les sous-vêtements
-  de base sont affichés.
+- Vêtements (le magasin de vêtements de la capture est à venir et hors de ce chantier). Le corps est de la peau unie, sans sous-vêtement ni détail de poitrine, pour que les futurs
+  calques de vêtements s'adaptent proprement.
 - Les cadenas / pastilles « modifiable chez… » de la capture : supprimés.
 
 ## Anti-objectifs
