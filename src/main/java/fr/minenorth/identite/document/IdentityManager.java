@@ -210,7 +210,7 @@ public final class IdentityManager {
 
         String cardNumber = generateCardNumber(data);
         IdentityData.Profile profile = new IdentityData.Profile(
-                actor.getUUID(), lastName, firstName, birthDate, birthPlace, nationality, cardNumber
+                actor.getUUID(), lastName, firstName, birthDate, birthPlace, nationality, cardNumber, null
         );
         data.set(profile);
         refreshTabName(actor);
@@ -248,7 +248,7 @@ public final class IdentityManager {
             return;
         }
         IdentityData.Profile renewed = new IdentityData.Profile(profile.uuid(), profile.lastName(), profile.firstName(),
-                profile.birthDate(), profile.birthPlace(), profile.nationality(), generateCardNumber(data));
+                profile.birthDate(), profile.birthPlace(), profile.nationality(), generateCardNumber(data), profile.gender());
         data.set(renewed);
         giveCard(player, renewed);
         player.displayClientMessage(Component.literal("§aNouvelle carte remise (n° " + renewed.cardNumber() + "). L'ancienne n'est plus valide."), true);

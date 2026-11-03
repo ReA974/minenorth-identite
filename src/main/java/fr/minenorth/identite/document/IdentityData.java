@@ -21,8 +21,12 @@ public class IdentityData extends SavedData {
             String birthDate,
             String birthPlace,
             String nationality,
-            String cardNumber
-    ) {}
+            String cardNumber,
+            Gender gender
+    ) {
+        /** Identité d'avant la mise à jour : pas de sexe, donc pas un personnage valide. */
+        public boolean isLegacy() { return gender == null; }
+    }
 
     public static IdentityData get(ServerLevel level) {
         return level.getServer().overworld().getDataStorage()
@@ -54,7 +58,7 @@ public class IdentityData extends SavedData {
         setDirty();
     }
 
-    private static IdentityData load(CompoundTag tag) {
+    static IdentityData load(CompoundTag tag) {
         IdentityData data = new IdentityData();
         ListTag list = tag.getList("Profiles", 10);
         for (int i = 0; i < list.size(); i++) {
@@ -68,7 +72,8 @@ public class IdentityData extends SavedData {
                         t.getString("BirthDate"),
                         t.getString("BirthPlace"),
                         t.getString("Nationality"),
-                        t.getString("Card")
+                        t.getString("Card"),
+                        Gender.fromName(t.getString("Gender"))
                 ));
             } catch (Exception ignored) {}
         }
@@ -87,6 +92,7 @@ public class IdentityData extends SavedData {
             t.putString("BirthPlace", profile.birthPlace());
             t.putString("Nationality", profile.nationality());
             t.putString("Card", profile.cardNumber());
+            if (profile.gender() != null) t.putString("Gender", profile.gender().name());
             list.add(t);
         }
         tag.put("Profiles", list);

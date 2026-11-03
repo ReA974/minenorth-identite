@@ -29,3 +29,6 @@ crash-reports/
 *.log
 .DS_Store
 Thumbs.db
+
+# Suivi local des plans
+.superpowers/

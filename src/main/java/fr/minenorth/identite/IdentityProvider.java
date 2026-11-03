@@ -28,6 +28,6 @@ final class IdentityProvider implements IdentityService {
     }
 
     static Identity toApi(IdentityData.Profile p) {
-        return new Identity(p.uuid(), p.lastName(), p.firstName(), p.birthDate(), p.birthPlace(), p.nationality(), p.cardNumber());
+        return new Identity(p.uuid(), p.lastName(), p.firstName(), p.birthDate(), p.birthPlace(), p.nationality(), p.cardNumber(), p.gender() == null ? null : p.gender().name());
     }
 }
