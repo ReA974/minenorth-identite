@@ -105,16 +105,28 @@ public final class CreatorScreen extends Screen {
     }
 
     private void buildIdentityBoxes() {
-        int x = optX + 6, w = optW - 12, y = optTop + 26;
+        int x = optX + 6 + labelWidth(), w = optW - 12 - labelWidth(), y = identityRowY(0);
         firstNameBox = box(x, y, w, "Prénom", state.firstName(), 32, null);
-        lastNameBox = box(x, y + 25, w, "Nom", state.lastName(), 32, null);
-        placeBox = box(x, y + 50, w, "Lieu de naissance", state.birthPlace(), 32, null);
-        nationBox = box(x, y + 75, w, "Nationalité", state.nationality(), 32, null);
-        int dw = (w - 12) / 3;
-        dayBox = box(x, y + 100, dw, "JJ", state.day(), 2, s -> s.matches("\\d*"));
-        monthBox = box(x + dw + 6, y + 100, dw, "MM", state.month(), 2, s -> s.matches("\\d*"));
-        yearBox = box(x + 2 * (dw + 6), y + 100, dw, "AAAA", state.year(), 4, s -> s.matches("\\d*"));
+        lastNameBox = box(x, identityRowY(1), w, "Nom", state.lastName(), 32, null);
+        placeBox = box(x, identityRowY(2), w, "Ville", state.birthPlace(), 32, null);
+        nationBox = box(x, identityRowY(3), w, "Nationalité", state.nationality(), 32, null);
+        int dw = (w - 8) / 3;
+        int dy = identityRowY(4);
+        dayBox = box(x, dy, dw, "JJ", state.day(), 2, s -> s.matches("\\d*"));
+        monthBox = box(x + dw + 4, dy, dw, "MM", state.month(), 2, s -> s.matches("\\d*"));
+        yearBox = box(x + 2 * (dw + 4), dy, dw, "AAAA", state.year(), 4, s -> s.matches("\\d*"));
     }
+
+    private static final String[] IDENTITY_LABELS = {"Prénom", "Nom", "Né(e) à", "Nationalité", "Né(e) le"};
+
+    /** Largeur de la colonne des libellés : les champs sont à droite de leur libellé, sur la même ligne. */
+    private int labelWidth() {
+        int w = 0;
+        for (String s : IDENTITY_LABELS) w = Math.max(w, font.width(s));
+        return w + 8;
+    }
+
+    private int identityRowY(int row) { return optTop + 22 + row * 22; }
 
     private EditBox box(int x, int y, int w, String hint, String value, int max, java.util.function.Predicate<String> filter) {
         EditBox b = new EditBox(font, x, y, w, 16, Component.literal(hint));
@@ -412,11 +424,11 @@ public final class CreatorScreen extends Screen {
         int x = optX + 6;
         g.drawString(font, MineNorthStyle.bold("IDENTITÉ"), x, y, MineNorthStyle.BLUE, false);
         g.drawString(font, "Définitive", optX + optW - 6 - font.width("Définitive"), y, MineNorthStyle.WARN, false);
-        int by = optTop + 26;
-        String[] labels = {"Prénom", "Nom", "Lieu de naissance", "Nationalité", "Date de naissance"};
-        for (int i = 0; i < labels.length; i++) g.drawString(font, labels[i], x, by + i * 25 - 10, MineNorthStyle.MUTED, false);
+        for (int i = 0; i < IDENTITY_LABELS.length; i++) {
+            g.drawString(font, IDENTITY_LABELS[i], x, identityRowY(i) + 4, MineNorthStyle.MUTED, false);
+        }
         LocalDate today = LocalDate.now();
-        int line = by + 4 * 25 + 20;
+        int line = identityRowY(4) + 24;
         state.age(today).ifPresent(age -> g.drawString(font, age + " ans · sexe : " + state.gender().label(), x, line, MineNorthStyle.OK, false));
         state.identityError(today).filter(e -> !state.lastName().isBlank() || !state.day().isBlank())
                 .ifPresent(e -> g.drawString(font, font.plainSubstrByWidth(e, optW - 12), x, line + 11, MineNorthStyle.ALERT, false));
@@ -460,9 +472,13 @@ public final class CreatorScreen extends Screen {
         MineNorthStyle.button(g, x, y, w, 20, "Choisir mon skin", MineNorthStyle.GREEN, false, ready);
         if (ready) hits.add(new Hit(x, y, w, 20, () -> submit(true)));
         y += 24;
-        MineNorthStyle.button(g, x, y, w, 20, "Garder mon skin Minecraft", MineNorthStyle.DARK, false, ready);
-        if (ready) hits.add(new Hit(x, y, w, 20, () -> submit(false)));
-        return y + 24;
+        // « Garder mon skin Minecraft » est réservé au staff (le serveur le refuse aux autres)
+        if (net.minecraft.client.Minecraft.getInstance().player != null && net.minecraft.client.Minecraft.getInstance().player.hasPermissions(2)) {
+            MineNorthStyle.button(g, x, y, w, 20, "Garder mon skin Minecraft (staff)", MineNorthStyle.DARK, false, ready);
+            if (ready) hits.add(new Hit(x, y, w, 20, () -> submit(false)));
+            y += 24;
+        }
+        return y;
     }
 
     private void submit(boolean customSkin) {

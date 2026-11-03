@@ -62,4 +62,20 @@ class CharacterRequestTest {
     void missingAppearanceRejected() {
         assertTrue(CharacterManager.check(request(Gender.MALE, null, "Dupont", "14/10/1996", true), TODAY).isPresent());
     }
+
+    @Test
+    void keepingMinecraftSkinIsStaffOnly() {
+        assertTrue(CharacterManager.skinPolicyError(false, false).isPresent());
+    }
+
+    @Test
+    void staffMayKeepMinecraftSkin() {
+        assertTrue(CharacterManager.skinPolicyError(false, true).isEmpty());
+    }
+
+    @Test
+    void everyoneMayChooseTheCreatedSkin() {
+        assertTrue(CharacterManager.skinPolicyError(true, false).isEmpty());
+        assertTrue(CharacterManager.skinPolicyError(true, true).isEmpty());
+    }
 }
