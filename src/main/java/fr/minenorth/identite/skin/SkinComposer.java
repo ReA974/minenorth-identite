@@ -363,20 +363,53 @@ public final class SkinComposer {
             {{0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {7, 3}, {7, 4}, {7, 5}, {7, 6}, {7, 7}, {1, 6}, {1, 7}, {6, 6}, {6, 7}},   // 10 favoris
             {{2, 5}, {5, 5}, {1, 6}, {2, 6}, {5, 6}, {6, 6}, {3, 7}, {4, 7}, {3, 6}, {4, 6}}};        // 11 Van Dyke
 
+    /** Favoris et mâchoire sur les côtés de la tête (coordonnées du côté droit : colonne 7 touche le devant du visage). */
+    private static int[][] beardSides(int style) {
+        return switch (style) {
+            case 1 -> rect(4, 5, 7, 7, new int[0][]);
+            case 2 -> rect(5, 5, 7, 7, new int[][]{{4, 7}});
+            case 7 -> rect(4, 5, 7, 7, new int[0][]);
+            case 8 -> rect(5, 5, 7, 7, new int[][]{{4, 7}, {3, 7}});
+            case 9 -> rect(2, 4, 7, 7, new int[][]{{6, 3}, {7, 3}});
+            case 10 -> rect(6, 3, 7, 7, new int[][]{{4, 6}, {5, 6}, {4, 7}, {5, 7}});
+            default -> new int[0][];
+        };
+    }
+
+    private static int[][] rect(int x0, int y0, int x1, int y1, int[][] extra) {
+        java.util.List<int[]> out = new java.util.ArrayList<>();
+        for (int y = y0; y <= y1; y++) for (int x = x0; x <= x1; x++) out.add(new int[]{x, y});
+        out.addAll(java.util.Arrays.asList(extra));
+        return out.toArray(new int[0][]);
+    }
+
     private static void paintFacialHair(Canvas c, int[] beard, int tone) {
         int style = beard[0];
         if (style == 0) return;
         int[] f = HEAD.front();
         int hair = Palette.hairColor(beard[1]);
-        for (int[] p : BEARDS[style]) {
-            double n = noise(p[0], p[1], 31 + style);
-            if (style == 1) {
-                if (n > 0.3) c.set(f[0] + p[0], f[1] + p[1], Palette.mix(c.relGet(f, p[0], p[1]), hair, 0.5));
-            } else if (style == 2) {
-                c.set(f[0] + p[0], f[1] + p[1], Palette.mix(c.relGet(f, p[0], p[1]), hair, 0.25 + 0.15 * n));
-            } else {
-                c.set(f[0] + p[0], f[1] + p[1], Palette.shade(hair, 0.85 + 0.25 * n));
-            }
+        for (int[] p : BEARDS[style]) beardPixel(c, f, p[0], p[1], p[0], style, hair, 31 + style);
+        int[][] sides = beardSides(style);
+        int minX = 8;
+        for (int[] p : sides) minX = Math.min(minX, p[0]);
+        for (int[] p : sides) {
+            // la limite arrière de la barbe est irrégulière : quelques poils manquent
+            if (p[0] == minX && noise(p[0], p[1], 53) > 0.55) continue;
+            beardPixel(c, HEAD.right(), p[0], p[1], p[0], style, hair, 61 + style);
+            beardPixel(c, HEAD.left(), 7 - p[0], p[1], p[0], style, hair, 61 + style);
+        }
+    }
+
+    /** Un poil : barbe de quelques jours = peau teintée par endroits ; sinon poil plein, plus clair en haut, plus sombre en bas. */
+    private static void beardPixel(Canvas c, int[] rect, int dx, int dy, int noiseX, int style, int hair, int salt) {
+        double n = noise(noiseX, dy, salt);   // même bruit des deux côtés : la barbe est symétrique
+        if (style == 1) {
+            if (n > 0.3) c.mixRel(rect, dx, dy, hair, 0.5);
+        } else if (style == 2) {
+            c.mixRel(rect, dx, dy, hair, 0.25 + 0.15 * n);
+        } else {
+            double light = dy <= 5 ? 1.06 : 0.94;
+            c.rel(rect, dx, dy, Palette.shade(hair, (0.85 + 0.25 * n) * light));
         }
     }
 
