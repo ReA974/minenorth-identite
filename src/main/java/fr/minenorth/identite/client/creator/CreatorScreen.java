@@ -349,7 +349,38 @@ public final class CreatorScreen extends Screen {
                     : drawChips(g, hits, section, slot, i, values, x, y, right);
             y += 6;
         }
-        return y;
+        return drawingButtons(g, hits, section, y, x, right - x);
+    }
+
+    /** Boutons « Dessiner » des dessins de cette section (visage, barbe, tatouages), avec une pastille si déjà dessiné. */
+    private int drawingButtons(GuiGraphics g, List<Hit> hits, AppearanceSection section, int y, int x, int w) {
+        boolean any = false;
+        for (fr.minenorth.identite.drawing.DrawingKind kind : fr.minenorth.identite.drawing.DrawingKind.values()) {
+            if (kind.section() != section) continue;
+            if (!any) {
+                g.drawString(font, "Dessiner moi-même", x, y, MineNorthStyle.BLUE, false);
+                y += 12;
+                any = true;
+            }
+            boolean drawn = !isBlank(state.appearance().drawings().get(kind));
+            hits.add(button(g, x, y, w, 16, kind.label() + (drawn ? "  ●" : ""), drawn ? MineNorthStyle.GREEN : MineNorthStyle.CYAN, () -> openDraw(kind)));
+            y += 19;
+        }
+        return y + 4;
+    }
+
+    private static boolean isBlank(byte[] grid) {
+        for (byte b : grid) if (b != 0) return false;
+        return true;
+    }
+
+    /** Ouvre l'éditeur de pixels sur ce dessin ; la grille montre ce que le catalogue dessine déjà à cet endroit. */
+    private void openDraw(fr.minenorth.identite.drawing.DrawingKind kind) {
+        Appearance a = state.appearance();
+        Appearance withoutThis = a.withDrawings(a.drawings().with(kind, new byte[kind.width() * kind.height()]));
+        int[] underlay = fr.minenorth.identite.drawing.DrawingRegions.read(
+                fr.minenorth.identite.skin.SkinComposer.compose(state.gender(), withoutThis), kind, state.gender().slimArms());
+        minecraft.setScreen(new DrawScreen(this, kind, a.drawings().get(kind), underlay, grid -> state.setDrawing(kind, grid)));
     }
 
     private int drawGender(GuiGraphics g, List<Hit> hits, int y) {
