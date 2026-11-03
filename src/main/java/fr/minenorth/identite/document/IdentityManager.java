@@ -24,27 +24,20 @@ public final class IdentityManager {
     public static final String CARD_NUMBER_TAG = "MineNorthIdentityNumber";
 
     /**
-     * Utilise le prénom + nom RP dans le chat sans modifier le nom au-dessus de la tête.
+     * Nom du chat (prénom + nom RP, étiquette staff, préfixe VIP, cagoule : voir {@link DisplayNames}) sans modifier le nom au-dessus de la tête.
      */
     @SubscribeEvent
     public static void nameFormat(PlayerEvent.NameFormat event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        IdentityData.Profile profile = IdentityData.get(player.serverLevel()).get(player.getUUID());
-        if (profile != null) {
-            event.setDisplayname(Component.literal(profile.firstName() + " " + profile.lastName()));
-        }
+        if (event.getEntity() instanceof ServerPlayer player) event.setDisplayname(DisplayNames.compose(player, event.getDisplayname(), true));
     }
 
     /**
-     * Utilise le prénom + nom RP dans le TAB.
+     * Nom du TAB, composé de la même façon (sans la cagoule).
      */
     @SubscribeEvent
     public static void tabListNameFormat(PlayerEvent.TabListNameFormat event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        IdentityData.Profile profile = IdentityData.get(player.serverLevel()).get(player.getUUID());
-        if (profile != null) {
-            event.setDisplayName(Component.literal(profile.firstName() + " " + profile.lastName()));
-        }
+        event.setDisplayName(DisplayNames.compose(player, event.getDisplayName() != null ? event.getDisplayName() : player.getName(), false));
     }
 
     /**
@@ -57,7 +50,10 @@ public final class IdentityManager {
         IdentityData.Profile profile = IdentityData.get(player.serverLevel()).get(player.getUUID());
         if (profile == null) return;
 
-        net.minecraft.network.chat.MutableComponent formatted = Component.literal(profile.firstName() + " " + profile.lastName());
+        // Nom affiché recalculé (PlayerEvent.NameFormat, composé par DisplayNames : étiquette staff, préfixe VIP, cagoule).
+        // On retire le survol / clic de Minecraft, qui afficheraient le pseudo.
+        player.refreshDisplayName();
+        net.minecraft.network.chat.MutableComponent formatted = player.getDisplayName().copy().setStyle(net.minecraft.network.chat.Style.EMPTY);
         formatted.append(Component.literal(" » "));
         formatted.append(event.getMessage());
 
