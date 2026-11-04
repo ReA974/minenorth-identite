@@ -461,16 +461,16 @@ public final class SkinComposer {
             hair(255, fill(3), new int[]{8, 8, 8, 7, 6, 5, 4, 3}, fill(8), fill(2)),                                          // 10 mi-longue
             hair(255, new int[]{3, 2, 3, 2, 3, 2, 3, 2}, new int[]{5, 5, 5, 4, 3, 3, 2, 2}, fill(6), fill(0)),               // 11 bouclée courte
             hair(255, fill(4), new int[]{8, 8, 8, 8, 7, 6, 5, 4}, fill(8), fill(1)),                                          // 12 afro
-            hair(255, fill(2), new int[]{5, 5, 4, 3, 2, 1, 1, 0}, fill(6), new int[]{0, 0, 0, 5, 5, 0, 0, 0}),                // 13 queue basse
+            hair(255, fill(2), new int[]{5, 5, 4, 3, 2, 1, 1, 0}, fill(6), new int[]{0, 0, 4, 6, 6, 4, 0, 0}),                // 13 queue basse (épaisse, effilée)
             hair(255, new int[]{3, 3, 3, 2, 2, 3, 3, 3}, new int[]{8, 8, 8, 8, 8, 7, 6, 5}, fill(8), new int[]{8, 9, 9, 10, 10, 9, 9, 8}),   // 14 longs lisses
             hair(255, fill(3), new int[]{7, 7, 7, 7, 6, 5, 4, 3}, fill(8), fill(0)),                                          // 15 carré
             hair(255, fill(3), new int[]{8, 8, 8, 7, 7, 6, 6, 5}, fill(8), fill(1)),                                          // 16 carré plongeant
             hair(255, new int[]{4, 3, 3, 2, 2, 3, 3, 4}, fill(8), fill(8), fill(11)),                                         // 17 longs raides
             hair(255, new int[]{3, 4, 3, 4, 3, 4, 3, 4}, fill(8), fill(8), new int[]{9, 11, 9, 11, 9, 11, 9, 11}),             // 18 longs ondulés
-            hair(255, fill(2), new int[]{4, 4, 3, 2, 2, 1, 1, 0}, fill(5), new int[]{0, 0, 0, 7, 7, 0, 0, 0}),                // 19 queue haute
+            hair(255, fill(2), new int[]{4, 4, 3, 2, 2, 1, 1, 0}, fill(5), new int[]{0, 0, 6, 8, 8, 6, 0, 0}),                // 19 queue haute (épaisse, effilée)
             hair(255, fill(2), new int[]{4, 4, 3, 2, 2, 1, 1, 0}, new int[]{5, 6, 7, 8, 8, 7, 6, 5}, fill(0)),                // 20 chignon
-            hair(255, fill(2), fill(5), fill(6), new int[]{7, 7, 0, 0, 0, 0, 7, 7}),                                          // 21 couettes
-            hair(255, new int[]{3, 3, 3, 2, 2, 3, 3, 3}, fill(6), fill(7), new int[]{0, 0, 0, 10, 10, 0, 0, 0}),              // 22 tresse
+            hair(255, fill(2), fill(5), fill(6), new int[]{8, 7, 0, 0, 0, 0, 7, 8}),                                          // 21 couettes
+            hair(255, new int[]{3, 3, 3, 2, 2, 3, 3, 3}, fill(6), fill(7), new int[]{0, 0, 5, 10, 10, 5, 0, 0}),              // 22 tresse (plus épaisse en haut)
             hair(255, fill(4), fill(8), fill(8), fill(9)),                                                                    // 23 frange droite
             hair(255, new int[]{3, 2, 2, 3, 3, 2, 2, 3}, new int[]{3, 3, 3, 2, 2, 2, 1, 1}, fill(3), fill(0)),                // 24 pixie
             hair(255, fill(3), new int[]{8, 8, 7, 7, 6, 5, 4, 3}, fill(8), new int[]{3, 4, 4, 5, 5, 4, 4, 3}),                // 25 mi-longs dégradés
@@ -513,6 +513,49 @@ public final class SkinComposer {
             // cheveux longs : des mèches retombent aussi devant les épaules
             for (int dx : new int[]{0, 1, 6, 7}) column(c, BODY_O.front(), null, dx, longest / 3, base, style);
         }
+        accessories(c, style, base);
+    }
+
+    /**
+     * Accessoires des coiffures attachées : élastiques de couleur (queues, couettes, tresse) et chignon rond en relief
+     * (centre plus clair, bord plus sombre, une volute) sur l'arrière de la tête.
+     */
+    private static void accessories(Canvas c, int style, int base) {
+        int tie = Palette.mix(base, 0xFFD04060, 0.78);
+        int[] back = BODY_O.back();
+        switch (style) {
+            case 13, 19 -> {
+                c.rel(back, 3, 0, tie);
+                c.rel(back, 4, 0, Palette.shade(tie, 1.15));
+                if (style == 19) {
+                    c.rel(HEAD_O.back(), 3, 1, tie);
+                    c.rel(HEAD_O.back(), 4, 1, Palette.shade(tie, 1.15));
+                }
+            }
+            case 21 -> { for (int dx : new int[]{0, 1, 6, 7}) c.rel(back, dx, 0, dx % 2 == 0 ? tie : Palette.shade(tie, 1.15)); }
+            case 22 -> {
+                c.rel(back, 3, 9, tie);
+                c.rel(back, 4, 9, Palette.shade(tie, 1.15));
+            }
+            case 20 -> bun(c, base);
+            default -> { }
+        }
+    }
+
+    /** Chignon : un rond de 4×4 sur l'arrière de la tête, coins arrondis, avec un reflet au centre et une volute. */
+    private static void bun(Canvas c, int base) {
+        int[] back = HEAD_O.back();
+        int[][] shape = {{3, 0}, {4, 0}, {2, 1}, {3, 1}, {4, 1}, {5, 1}, {2, 2}, {3, 2}, {4, 2}, {5, 2}, {3, 3}, {4, 3}};
+        for (int[] p : shape) {
+            boolean centre = (p[0] == 3 || p[0] == 4) && (p[1] == 1 || p[1] == 2);
+            c.rel(back, p[0], p[1], Palette.shade(base, centre ? 1.2 : 0.74));
+        }
+        c.rel(back, 4, 2, Palette.shade(base, 0.7));     // la volute du chignon
+        int[] top = HEAD_O.top();
+        c.rel(top, 3, 6, Palette.shade(base, 1.18));
+        c.rel(top, 4, 6, Palette.shade(base, 1.18));
+        c.rel(top, 3, 7, Palette.shade(base, 0.78));
+        c.rel(top, 4, 7, Palette.shade(base, 0.78));
     }
 
     /** Couche sombre sous la couche extérieure : la tête ne laisse pas voir la peau à travers les cheveux, et ça crée du relief. */
