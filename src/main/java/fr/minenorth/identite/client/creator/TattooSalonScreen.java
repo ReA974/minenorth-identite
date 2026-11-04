@@ -84,6 +84,32 @@ public final class TattooSalonScreen extends Screen {
         state.set(AppearanceSection.TATTOOS, t);
     }
 
+    /** Le dessin libre de la zone (le visage n'en a pas : seulement de petites marques). */
+    private fr.minenorth.identite.drawing.DrawingKind drawingKind() {
+        return switch (zone()) {
+            case FACE_NECK -> null;
+            case TORSO -> fr.minenorth.identite.drawing.DrawingKind.TATTOO_TORSO;
+            case BACK -> fr.minenorth.identite.drawing.DrawingKind.TATTOO_BACK;
+            case RIGHT_ARM -> fr.minenorth.identite.drawing.DrawingKind.TATTOO_RIGHT_ARM;
+            case LEFT_ARM -> fr.minenorth.identite.drawing.DrawingKind.TATTOO_LEFT_ARM;
+            case LEGS -> fr.minenorth.identite.drawing.DrawingKind.TATTOO_LEGS;
+        };
+    }
+
+    private static boolean isBlank(byte[] grid) {
+        for (byte b : grid) if (b != 0) return false;
+        return true;
+    }
+
+    /** Ouvre l'Ã©diteur de pixels sur le dessin de la zone ; la grille montre ce que le catalogue dessine dÃ©jÃ  Ã  cet endroit. */
+    private void openDraw(fr.minenorth.identite.drawing.DrawingKind kind) {
+        Appearance a = state.appearance();
+        Appearance without = a.withDrawings(a.drawings().with(kind, new byte[kind.width() * kind.height()]));
+        int[] underlay = fr.minenorth.identite.drawing.DrawingRegions.read(
+                SkinComposer.compose(state.gender(), without), kind, state.gender().slimArms());
+        minecraft.setScreen(new DrawScreen(this, kind, a.drawings().get(kind), underlay, grid -> state.setDrawing(kind, grid)));
+    }
+
     private TattooZone zone() { return ZONES[zone]; }
 
     /** Torse et dos : le tatouage se place oÃ¹ on veut. */
@@ -266,6 +292,14 @@ public final class TattooSalonScreen extends Screen {
         hits.add(new Hit(saveX, y, w, 20, () -> { onSave.accept(state); onClose(); }));
         MineNorthStyle.button(g, px + 8, y, 80, 20, "Défaire", MineNorthStyle.DARK, over(mx, my, px + 8, y, 80, 20), state.canUndo());
         if (state.canUndo()) hits.add(new Hit(px + 8, y, 80, 20, state::undo));
+        fr.minenorth.identite.drawing.DrawingKind kind = drawingKind();
+        if (kind != null) {
+            boolean has = !isBlank(state.appearance().drawings().get(kind));
+            String label = (has ? "Mon dessin : " : "Dessiner : ") + ZONE_NAMES[zone];
+            int dx = px + 92, dw = Math.min(170, font.width(label) + 16);
+            MineNorthStyle.button(g, dx, y, dw, 20, label, MineNorthStyle.PINK, over(mx, my, dx, y, dw, 20), true);
+            hits.add(new Hit(dx, y, dw, 20, () -> openDraw(kind)));
+        }
     }
 
     // ------------------------------------------------------------------ entrées
