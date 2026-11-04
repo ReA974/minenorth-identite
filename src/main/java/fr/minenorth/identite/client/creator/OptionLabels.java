@@ -23,7 +23,8 @@ public final class OptionLabels {
             Map.entry("TATTOOS/leftArm", "Bras gauche"), Map.entry("TATTOOS/legs", "Jambes"),
             Map.entry("TATTOOS/torsoSize", "Taille du torse"), Map.entry("TATTOOS/backSize", "Taille du dos"),
             Map.entry("TATTOOS/rightArmSize", "Taille du bras droit"), Map.entry("TATTOOS/leftArmSize", "Taille du bras gauche"),
-            Map.entry("TATTOOS/legsSize", "Taille des jambes"), Map.entry("TATTOOS/ink", "Encre"),
+            Map.entry("TATTOOS/legsSize", "Taille des jambes"), Map.entry("TATTOOS/ink", "Encre"), Map.entry("TATTOOS/rightArmFace", "Face du bras droit"), Map.entry("TATTOOS/rightArmHeight", "Hauteur sur le bras droit"),
+            Map.entry("TATTOOS/leftArmFace", "Face du bras gauche"), Map.entry("TATTOOS/leftArmHeight", "Hauteur sur le bras gauche"),
             Map.entry("PIERCINGS/ears", "Oreilles"), Map.entry("PIERCINGS/nose", "Nez"), Map.entry("PIERCINGS/brow", "Sourcil"),
             Map.entry("PIERCINGS/lip", "Lèvre"), Map.entry("PIERCINGS/metal", "Métal"),
             Map.entry("PIERCINGS/helix", "Haut de l'oreille"), Map.entry("PIERCINGS/navel", "Nombril"));
@@ -60,6 +61,8 @@ private static final String[] TATTOO_MOTIFS = {"Aucun", "Étoile", "Cœur", "Cro
             "Poisson", "Infini", "Pique", "Trident", "Œil", "Patte"};
     private static final String[] TATTOO_INKS = {"Couleurs", "Noir", "Gris ombré"};
 
+    private static final String[] ARM_FACES = {"Avant", "Extérieur", "Intérieur", "Arrière"};
+    private static final String[] ARM_HEIGHTS = {"Centré", "Épaule", "Bras", "Avant-bras", "Poignet"};
     private static final String[] TATTOO_SIZES = {"Petit", "Moyen", "Grand"};
     private static final String[] FACE_MARKS = {"Aucune", "Croix", "X", "Trait", "Barres", "Zigzag", "Triangle", "Cœur",
             "Larme", "Cercle", "Diagonale", "Points", "Éclair"};
@@ -68,6 +71,8 @@ private static final String[] TATTOO_MOTIFS = {"Aucun", "Étoile", "Cœur", "Cro
     private static String[] tattooNames(String key) {
         if (key.endsWith("Size")) return TATTOO_SIZES;
         if (key.equals("ink")) return TATTOO_INKS;
+        if (key.endsWith("ArmFace")) return ARM_FACES;
+        if (key.endsWith("ArmHeight")) return ARM_HEIGHTS;
         return key.equals("faceNeck") ? FACE_MARKS : TATTOO_MOTIFS;
     }
 

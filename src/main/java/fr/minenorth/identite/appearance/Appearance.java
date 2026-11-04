@@ -85,7 +85,7 @@ public final class Appearance {
             if (s == AppearanceSection.TATTOOS && v.length == 6) v = TattooZone.migrateLegacy(v);
             // fiche d'avant les piercings : aucun piercing
             // fiche d'avant le choix de l'encre : les couleurs du motif
-            if (s == AppearanceSection.TATTOOS && v.length == TattooZone.INK_SLOT) v = java.util.Arrays.copyOf(v, TattooZone.TOTAL_SLOTS);
+            if (s == AppearanceSection.TATTOOS && v.length >= TattooZone.INK_SLOT && v.length < TattooZone.TOTAL_SLOTS) v = java.util.Arrays.copyOf(v, TattooZone.TOTAL_SLOTS);
             if (s == AppearanceSection.PIERCINGS && v.length < Catalog.slots(s).size()) {
                 v = java.util.Arrays.copyOf(v, Catalog.slots(s).size());
             }

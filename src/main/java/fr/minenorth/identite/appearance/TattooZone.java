@@ -20,7 +20,10 @@ public enum TattooZone {
     public static final int INK_SLOT = 11;
 
     /** Nombre d'emplacements de la section TATTOOS : les zones puis l'encre. */
-    public static final int TOTAL_SLOTS = 12;
+    public static final int TOTAL_SLOTS = 16;
+
+    /** Face (avant, extérieur, intérieur, arrière) et hauteur (centré, épaule, bras, avant-bras, poignet) des tatouages de bras. */
+    public static final int RIGHT_ARM_FACE_SLOT = 12, RIGHT_ARM_HEIGHT_SLOT = 13, LEFT_ARM_FACE_SLOT = 14, LEFT_ARM_HEIGHT_SLOT = 15;
 
     /** Nombre de figures du catalogue. */
     public static final int MOTIFS = 30;

@@ -847,14 +847,29 @@ public final class SkinComposer {
         faceMark(c, t[TattooZone.FACE_NECK.motifSlot()]);
         sized(c, BODY.front(), t, TattooZone.TORSO, true);
         sized(c, BODY.back(), t, TattooZone.BACK, true);
-        sized(c, rArm.front(), t, TattooZone.RIGHT_ARM, false);
-        sized(c, lArm.front(), t, TattooZone.LEFT_ARM, false);
+        sized(c, armFace(rArm, true, t[TattooZone.RIGHT_ARM_FACE_SLOT]), t, TattooZone.RIGHT_ARM, false, t[TattooZone.RIGHT_ARM_HEIGHT_SLOT]);
+        sized(c, armFace(lArm, false, t[TattooZone.LEFT_ARM_FACE_SLOT]), t, TattooZone.LEFT_ARM, false, t[TattooZone.LEFT_ARM_HEIGHT_SLOT]);
         sized(c, R_LEG.front(), t, TattooZone.LEGS, false);
         sized(c, L_LEG.front(), t, TattooZone.LEGS, false);
     }
 
     /** Torse et dos : figure réduite à 4×4 ou 6×6 au centre de la poitrine ; bras et jambes : 4 de large, 4, 6 ou 8 de haut. */
-    private static void sized(Canvas c, int[] rect, int[] t, TattooZone zone, boolean wide) {
+    private static void sized(Canvas c, int[] rect, int[] t, TattooZone zone, boolean wide) { sized(c, rect, t, zone, wide, 0); }
+
+    /** Face du bras : 0 avant, 1 extérieur, 2 intérieur, 3 arrière. */
+    private static int[] armFace(Box arm, boolean rightArm, int face) {
+        return switch (face) {
+            case 1 -> rightArm ? arm.right() : arm.left();
+            case 2 -> rightArm ? arm.left() : arm.right();
+            case 3 -> arm.back();
+            default -> arm.front();
+        };
+    }
+
+    /** Hauteur de départ sur le bras : 0 centré (comme avant), puis épaule, bras, avant-bras, poignet. */
+    private static final int[] ARM_START = {-1, 0, 3, 6, 8};
+
+    private static void sized(Canvas c, int[] rect, int[] t, TattooZone zone, boolean wide, int height) {
         int motif = t[zone.motifSlot()];
         if (motif <= 0) return;
         int size = t[zone.sizeSlot()];
@@ -863,6 +878,7 @@ public final class SkinComposer {
         int[] rows = size == 0 ? REDUCED : size == 1 ? SIX : FULL;
         int ox = wide ? (8 - cols.length) / 2 : 0;
         int oy = size == 0 ? (wide ? 3 : 4) : size == 1 ? 3 : 2;
+        if (height > 0) oy = Math.min(ARM_START[height], 12 - rows.length);
         design(c, rect, ox, oy, motif, cols, rows, ink);
     }
 
