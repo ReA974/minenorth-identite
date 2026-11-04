@@ -221,6 +221,14 @@ public final class CharacterManager {
         return Optional.of(next.withDrawings(merged));
     }
 
+    /** Toutes les sections de l'apparence : ce que rouvre {@code /cidedit}. L'identité et le sexe n'en font jamais partie. */
+    public static Set<AppearanceSection> fullEditorSections() { return java.util.EnumSet.allOf(AppearanceSection.class); }
+
+    /** Rouvre l'éditeur d'apparence complet d'un joueur en ligne (staff) ; l'identité, le sexe et la tenue ne changent pas. */
+    public static boolean openFullEditor(MinecraftServer server, UUID target) {
+        return openEditor(server, target, fullEditorSections());
+    }
+
     /** Ouvre l'éditeur limité à ces sections chez un joueur en ligne qui a un personnage. */
     public static boolean openEditor(MinecraftServer server, UUID target, Set<AppearanceSection> sections) {
         ServerPlayer player = server.getPlayerList().getPlayer(target);

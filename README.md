@@ -4,6 +4,7 @@ Mod Forge 1.20.1 indépendant pour le système d'identité MineNorth RP.
 
 ## Commandes
 - `/cidmenu <joueur>` : OP uniquement, ouvre la consultation de l'identité d'un joueur qui a un personnage (carte perdue).
+- `/cidedit <joueur>` : OP uniquement, rouvre chez un joueur en ligne l'éditeur d'apparence complet (corps, visage, peau, cheveux, pilosité, maquillage, tatouages, dessins) s'il a oublié quelque chose sur son skin ; l'identité, le sexe et la tenue ne changent pas. La modification est valable 10 minutes et une seule fois.
 - `/cidreset <joueur>` : OP uniquement, supprime le personnage (identité et apparence) ; le joueur doit en recréer un (l'écran se rouvre tout de suite s'il est en ligne, sinon à sa prochaine connexion).
 
 ## Fonctionnalités
