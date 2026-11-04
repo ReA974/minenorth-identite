@@ -3,6 +3,7 @@ package fr.minenorth.identite.skin;
 import fr.minenorth.identite.appearance.Appearance;
 import fr.minenorth.identite.appearance.AppearanceSection;
 import fr.minenorth.identite.appearance.Catalog;
+import fr.minenorth.identite.appearance.TattooZone;
 import fr.minenorth.identite.document.Gender;
 import org.junit.jupiter.api.Test;
 
@@ -109,44 +110,61 @@ class SkinDetailTest {
 
     // ---------------------------------------------------------------- tatouages
 
+    private static int[] tattoo(Gender g, TattooZone zone, int motif, int size) {
+        int[] t = Catalog.defaults(g).get(AppearanceSection.TATTOOS);
+        t[zone.motifSlot()] = motif;
+        if (zone.hasSize()) t[zone.sizeSlot()] = size;
+        return px(g, bare(g).with(AppearanceSection.TATTOOS, t));
+    }
+
     @Test
-    void everyTattooMotifShowsInEveryZone() {
-        Catalog.Slot motifs = Catalog.slots(AppearanceSection.TATTOOS).get(0);
+    void everyTattooMotifShowsInEveryZoneAtEverySize() {
+        Catalog.Slot motifs = Catalog.slots(AppearanceSection.TATTOOS).get(TattooZone.TORSO.motifSlot());
         assertTrue(motifs.options() >= 13, "au moins 12 motifs");
         int[] none = px(Gender.MALE, bare(Gender.MALE));
-        for (int zone = 0; zone < 6; zone++) {
-            for (int m = 1; m < motifs.options(); m++) {
-                int[] t = new int[6];
-                t[zone] = m;
-                int n = diff(none, px(Gender.MALE, bare(Gender.MALE).with(AppearanceSection.TATTOOS, t)));
-                assertTrue(n >= 3, "zone " + zone + " motif " + m + " : " + n + " pixels");
+        for (TattooZone zone : TattooZone.values()) {
+            for (int size = 0; size < (zone.hasSize() ? 3 : 1); size++) {
+                for (int m = 1; m < Catalog.slots(AppearanceSection.TATTOOS).get(zone.motifSlot()).options(); m++) {
+                    int n = diff(none, tattoo(Gender.MALE, zone, m, size));
+                    assertTrue(n >= 3, zone + " taille " + size + " motif " + m + " : " + n + " pixels");
+                }
             }
         }
     }
 
     @Test
-    void tattooMotifsAreDistinctInEveryZone() {
-        Catalog.Slot motifs = Catalog.slots(AppearanceSection.TATTOOS).get(0);
-        for (int zone = 0; zone < 6; zone++) {
-            List<int[]> images = new ArrayList<>();
-            for (int m = 1; m < motifs.options(); m++) {
-                int[] t = new int[6];
-                t[zone] = m;
-                images.add(px(Gender.FEMALE, bare(Gender.FEMALE).with(AppearanceSection.TATTOOS, t)));
+    void tattooMotifsAreDistinctInEveryZoneAtEverySize() {
+        for (TattooZone zone : TattooZone.values()) {
+            for (int size = 0; size < (zone.hasSize() ? 3 : 1); size++) {
+                List<int[]> images = new ArrayList<>();
+                for (int m = 1; m < Catalog.slots(AppearanceSection.TATTOOS).get(zone.motifSlot()).options(); m++) {
+                    images.add(tattoo(Gender.FEMALE, zone, m, size));
+                }
+                assertAllDistinct(images, "tatouages " + zone + " taille " + size);
             }
-            assertAllDistinct(images, "tatouages zone " + zone);
         }
     }
 
     @Test
     void tattoosUseSeveralColors() {
         int[] none = px(Gender.MALE, bare(Gender.MALE));
-        int[] t = new int[6];
-        t[1] = 8;
-        int[] p = px(Gender.MALE, bare(Gender.MALE).with(AppearanceSection.TATTOOS, t));
+        int[] p = tattoo(Gender.MALE, TattooZone.TORSO, 8, 2);
         Set<Integer> colors = new HashSet<>();
         for (int i = 0; i < p.length; i++) if (p[i] != none[i]) colors.add(p[i]);
         assertTrue(colors.size() >= 3, "couleurs : " + colors.size());
+    }
+
+    @Test
+    void biggerSizesCoverMorePixels() {
+        int[] none = px(Gender.MALE, bare(Gender.MALE));
+        for (TattooZone zone : TattooZone.values()) {
+            if (!zone.hasSize()) continue;
+            for (int m = 1; m <= 12; m++) {
+                int small = diff(none, tattoo(Gender.MALE, zone, m, 0));
+                int large = diff(none, tattoo(Gender.MALE, zone, m, 2));
+                assertTrue(large > small, zone + " motif " + m + " : petit " + small + ", grand " + large);
+            }
+        }
     }
 
     // ---------------------------------------------------------------- visage, maquillage, corps

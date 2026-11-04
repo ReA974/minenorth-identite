@@ -173,7 +173,9 @@ class SkinComposerTest {
     @Test
     void tattooAppearsOnlyOnItsZone() {
         Appearance without = bare(Gender.MALE);
-        Appearance with = without.with(AppearanceSection.TATTOOS, new int[]{0, 0, 0, 1, 0, 0});
+        int[] tattoos = new int[11];
+        tattoos[5] = 1;   // bras droit
+        Appearance with = without.with(AppearanceSection.TATTOOS, tattoos);
         int[] a = SkinComposer.compose(Gender.MALE, without);
         int[] b = SkinComposer.compose(Gender.MALE, with);
         int changed = 0;

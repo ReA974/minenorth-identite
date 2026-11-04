@@ -20,7 +20,10 @@ public final class OptionLabels {
             Map.entry("MAKEUP/blush", "Blush"), Map.entry("MAKEUP/blushColor", "Couleur du blush"),
             Map.entry("TATTOOS/faceNeck", "Visage et cou"), Map.entry("TATTOOS/torso", "Torse"),
             Map.entry("TATTOOS/back", "Dos"), Map.entry("TATTOOS/rightArm", "Bras droit"),
-            Map.entry("TATTOOS/leftArm", "Bras gauche"), Map.entry("TATTOOS/legs", "Jambes"));
+            Map.entry("TATTOOS/leftArm", "Bras gauche"), Map.entry("TATTOOS/legs", "Jambes"),
+            Map.entry("TATTOOS/torsoSize", "Taille du torse"), Map.entry("TATTOOS/backSize", "Taille du dos"),
+            Map.entry("TATTOOS/rightArmSize", "Taille du bras droit"), Map.entry("TATTOOS/leftArmSize", "Taille du bras gauche"),
+            Map.entry("TATTOOS/legsSize", "Taille des jambes"));
 
     private static final Map<String, String[]> OPTIONS = Map.ofEntries(
             Map.entry("BODY/build", new String[]{"Normale", "Athlétique", "Ronde", "Mince", "Sablier", "Costaud"}),
@@ -44,6 +47,16 @@ public final class OptionLabels {
 
 private static final String[] TATTOO_MOTIFS = {"Aucun", "Étoile", "Cœur", "Croix", "Ancre", "Rose", "Crâne",            "Ailes", "Flamme", "Éclair", "Soleil", "Couronne", "Tribal"};
 
+    private static final String[] TATTOO_SIZES = {"Petit", "Moyen", "Grand"};
+    private static final String[] FACE_MARKS = {"Aucune", "Croix", "X", "Trait", "Barres", "Zigzag", "Triangle", "Cœur",
+            "Larme", "Cercle", "Diagonale", "Points", "Éclair"};
+
+    /** Libellés d'un emplacement de tatouage : tailles, petites marques du visage, ou figures des autres zones. */
+    private static String[] tattooNames(String key) {
+        if (key.endsWith("Size")) return TATTOO_SIZES;
+        return key.equals("faceNeck") ? FACE_MARKS : TATTOO_MOTIFS;
+    }
+
     public static boolean isColor(String key) {
         return key.equals("color") || key.equals("tone") || key.endsWith("Color");
     }
@@ -53,7 +66,7 @@ private static final String[] TATTOO_MOTIFS = {"Aucun", "Étoile", "Cœur", "Cro
     }
 
     public static String option(AppearanceSection section, String key, int value) {
-        String[] names = section == AppearanceSection.TATTOOS ? TATTOO_MOTIFS : OPTIONS.get(section.name() + "/" + key);
+        String[] names = section == AppearanceSection.TATTOOS ? tattooNames(key) : OPTIONS.get(section.name() + "/" + key);
         if (names != null && value >= 0 && value < names.length) return names[value];
         return "Option " + (value + 1);
     }

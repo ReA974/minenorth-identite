@@ -50,9 +50,14 @@ public final class Catalog {
         SLOTS.put(AppearanceSection.MAKEUP, List.of(
                 new Slot("lips", 6), new Slot("lipColor", 8), new Slot("eyes", 6), new Slot("eyeColor", 8),
                 new Slot("blush", 5), new Slot("blushColor", 6)));
+        // tatouages : un motif par zone (0 = aucun, 12 motifs) et, sauf au visage, une taille (petit, moyen, grand)
         SLOTS.put(AppearanceSection.TATTOOS, List.of(
-                new Slot("faceNeck", 13), new Slot("torso", 13), new Slot("back", 13),
-                new Slot("rightArm", 13), new Slot("leftArm", 13), new Slot("legs", 13)));
+                new Slot("faceNeck", 13),
+                new Slot("torso", 13), new Slot("torsoSize", 3),
+                new Slot("back", 13), new Slot("backSize", 3),
+                new Slot("rightArm", 13), new Slot("rightArmSize", 3),
+                new Slot("leftArm", 13), new Slot("leftArmSize", 3),
+                new Slot("legs", 13), new Slot("legsSize", 3)));
     }
 
     public static List<Slot> slots(AppearanceSection section) { return SLOTS.get(section); }

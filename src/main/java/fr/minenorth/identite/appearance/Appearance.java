@@ -81,6 +81,8 @@ public final class Appearance {
         Map<AppearanceSection, int[]> values = new EnumMap<>(AppearanceSection.class);
         for (AppearanceSection s : AppearanceSection.values()) {
             int[] v = tag.getIntArray(s.name());
+            // fiche d'avant les tailles de tatouage : on garde les motifs, en grand comme avant
+            if (s == AppearanceSection.TATTOOS && v.length == 6) v = TattooZone.migrateLegacy(v);
             checkRange(s, v);
             values.put(s, v);
         }

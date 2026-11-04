@@ -2,6 +2,7 @@ package fr.minenorth.identite.skin;
 
 import fr.minenorth.identite.appearance.Appearance;
 import fr.minenorth.identite.appearance.AppearanceSection;
+import fr.minenorth.identite.appearance.TattooZone;
 import fr.minenorth.identite.clothing.Clothing;
 import fr.minenorth.identite.clothing.ClothingSlot;
 import fr.minenorth.identite.clothing.Outfit;
@@ -681,14 +682,48 @@ public final class SkinComposer {
     private static final int[] REDUCED = {1, 3, 4, 6};
     private static final int[] FULL = {0, 1, 2, 3, 4, 5, 6, 7};
 
+    private static final int[] SIX = {0, 2, 3, 4, 5, 7};
+
+    /** Petites marques du visage, 3×3 (« o »), posées sur la joue gauche : très discrètes, jamais sur les yeux ni la bouche. */
+    private static final String[][] FACE_MARKS = {
+            {".o.", "ooo", ".o."}, {"o.o", ".o.", "o.o"}, {"ooo", "...", "..."}, {"o.o", "o.o", "o.o"},
+            {"oo.", ".oo", "..."}, {".o.", "ooo", "..."}, {"o.o", "ooo", ".o."}, {".o.", ".o.", "oo."},
+            {"ooo", "o.o", "ooo"}, {"o..", ".o.", "..o"}, {"o.o", "...", "o.o"}, {"..o", ".oo", "oo."}};
+
+    private static final int FACE_INK = 0xFF2A2A3A;
+
+    /** Chaque zone a un motif et une taille : petit (4 cases), moyen (6) ou grand (8). Petit par défaut : très discret. */
     private static void paintTattoos(Canvas c, int[] t, Box rArm, Box lArm) {
-        design(c, HEAD.front(), 0, 4, t[0], REDUCED, REDUCED);            // joue
-        design(c, BODY.front(), 0, 2, t[1], FULL, FULL);                  // torse
-        design(c, BODY.back(), 0, 2, t[2], FULL, FULL);                   // dos
-        design(c, rArm.front(), 0, 2, t[3], REDUCED, FULL);               // bras droit : une figure sur le devant
-        design(c, lArm.front(), 0, 2, t[4], REDUCED, FULL);               // bras gauche
-        design(c, R_LEG.front(), 0, 2, t[5], REDUCED, FULL);              // jambes
-        design(c, L_LEG.front(), 0, 2, t[5], REDUCED, FULL);
+        faceMark(c, t[TattooZone.FACE_NECK.motifSlot()]);
+        sized(c, BODY.front(), t, TattooZone.TORSO, true);
+        sized(c, BODY.back(), t, TattooZone.BACK, true);
+        sized(c, rArm.front(), t, TattooZone.RIGHT_ARM, false);
+        sized(c, lArm.front(), t, TattooZone.LEFT_ARM, false);
+        sized(c, R_LEG.front(), t, TattooZone.LEGS, false);
+        sized(c, L_LEG.front(), t, TattooZone.LEGS, false);
+    }
+
+    /** Torse et dos : figure réduite à 4×4 ou 6×6 au centre de la poitrine ; bras et jambes : 4 de large, 4, 6 ou 8 de haut. */
+    private static void sized(Canvas c, int[] rect, int[] t, TattooZone zone, boolean wide) {
+        int motif = t[zone.motifSlot()];
+        if (motif <= 0) return;
+        int size = t[zone.sizeSlot()];
+        int[] cols = wide ? (size == 0 ? REDUCED : size == 1 ? SIX : FULL) : REDUCED;
+        int[] rows = size == 0 ? REDUCED : size == 1 ? SIX : FULL;
+        int ox = wide ? (8 - cols.length) / 2 : 0;
+        int oy = size == 0 ? (wide ? 3 : 4) : size == 1 ? 3 : 2;
+        design(c, rect, ox, oy, motif, cols, rows);
+    }
+
+    private static void faceMark(Canvas c, int motif) {
+        if (motif <= 0) return;
+        int[] face = HEAD.front();
+        String[] art = FACE_MARKS[motif - 1];
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 3; x++) {
+                if (art[y].charAt(x) == 'o') c.mixRel(face, x, 5 + y, FACE_INK, 0.7);
+            }
+        }
     }
 
     /** Pose le motif dans la zone ; colonnes et lignes du dessin d'origine à garder (réduction). Mélangé à la peau comme de l'encre. */
