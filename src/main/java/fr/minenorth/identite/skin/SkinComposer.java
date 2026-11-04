@@ -882,6 +882,25 @@ public final class SkinComposer {
         design(c, rect, ox, oy, motif, cols, rows, ink);
     }
 
+    /**
+     * Le dessin d'un motif (1 à {@link TattooZone#MOTIFS}) en 8×8 pixels ARGB, ligne par ligne ; 0 là où il n'y a rien.
+     * Sert aux vignettes du salon de tatouage.
+     */
+    public static int[] designPixels(int motif, int ink) {
+        int[] out = new int[64];
+        if (motif < 1 || motif > TattooZone.MOTIFS) return out;
+        String[] art = DESIGNS[motif - 1];
+        int[] colors = DESIGN_COLORS[motif - 1];
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                char ch = art[y].charAt(x);
+                if (ch == '.') continue;
+                out[y * 8 + x] = inked(ch == '#' ? OUTLINE : ch == 'o' ? colors[0] : colors[1], ch, ink);
+            }
+        }
+        return out;
+    }
+
     /** Encre : 0 couleurs du motif, 1 noir, 2 gris ombré (le contour reste le plus sombre). */
     private static int inked(int color, char ch, int ink) {
         if (ink == 0 || ch == '#') return color;
