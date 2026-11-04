@@ -62,7 +62,7 @@ class TattooDesignTest {
     @Test
     void largeTorsoFiguresAreFiguresNotWallpaper() {
         int[] base = naked(Gender.MALE);
-        for (int m = 1; m <= 12; m++) {
+        for (int m = 1; m <= TattooZone.MOTIFS; m++) {
             int n = total(base, tattoo(Gender.MALE, TattooZone.TORSO, m, 2));
             assertTrue(n >= 18 && n <= 50, "motif " + m + " : " + n + " pixels");
         }
@@ -74,7 +74,7 @@ class TattooDesignTest {
             int[] base = naked(g);
             for (TattooZone zone : TattooZone.values()) {
                 for (int size = 0; size < (zone.hasSize() ? 3 : 1); size++) {
-                    for (int m = 1; m <= 12; m++) {
+                    for (int m = 1; m <= (zone == TattooZone.FACE_NECK ? 12 : TattooZone.MOTIFS); m++) {
                         int[] p = tattoo(g, zone, m, size);
                         int[] r = region(zone, size);
                         int in = inside(base, p, r);
@@ -90,7 +90,7 @@ class TattooDesignTest {
     void theDefaultSizeIsDiscreet() {
         int[] base = naked(Gender.MALE);
         for (TattooZone zone : new TattooZone[]{TattooZone.TORSO, TattooZone.BACK, TattooZone.RIGHT_ARM, TattooZone.LEFT_ARM}) {
-            for (int m = 1; m <= 12; m++) {
+            for (int m = 1; m <= TattooZone.MOTIFS; m++) {
                 int n = total(base, tattoo(Gender.MALE, zone, m, 0));
                 assertTrue(n <= 16, zone + " motif " + m + " : " + n + " pixels en petit");
             }
@@ -100,7 +100,7 @@ class TattooDesignTest {
     @Test
     void mediumFiguresAreInBetween() {
         int[] base = naked(Gender.MALE);
-        for (int m = 1; m <= 12; m++) {
+        for (int m = 1; m <= TattooZone.MOTIFS; m++) {
             int n = total(base, tattoo(Gender.MALE, TattooZone.TORSO, m, 1));
             assertTrue(n <= 36 && n >= 8, "motif " + m + " : " + n + " pixels en moyen");
         }
@@ -132,7 +132,7 @@ class TattooDesignTest {
     @Test
     void figuresUseAnOutlineAndFillColorsWhenLarge() {
         int[] base = naked(Gender.MALE);
-        for (int m = 1; m <= 12; m++) {
+        for (int m = 1; m <= TattooZone.MOTIFS; m++) {
             int[] p = tattoo(Gender.MALE, TattooZone.TORSO, m, 2);
             Set<Integer> colors = new HashSet<>();
             for (int i = 0; i < p.length; i++) if (p[i] != base[i]) colors.add(p[i]);
@@ -144,8 +144,8 @@ class TattooDesignTest {
     void eachMotifHasItsOwnLookAtEverySize() {
         for (int size = 0; size < 3; size++) {
             Set<Integer> signatures = new HashSet<>();
-            for (int m = 1; m <= 12; m++) signatures.add(java.util.Arrays.hashCode(tattoo(Gender.MALE, TattooZone.TORSO, m, size)));
-            assertEquals(12, signatures.size(), "taille " + size);
+            for (int m = 1; m <= TattooZone.MOTIFS; m++) signatures.add(java.util.Arrays.hashCode(tattoo(Gender.MALE, TattooZone.TORSO, m, size)));
+            assertEquals(TattooZone.MOTIFS, signatures.size(), "taille " + size);
         }
     }
 
@@ -153,7 +153,7 @@ class TattooDesignTest {
     void slimArmsStillGetTheirTattooInsideTheArm() {
         int[] base = naked(Gender.FEMALE);
         for (int size = 0; size < 3; size++) {
-            for (int m = 1; m <= 12; m++) {
+            for (int m = 1; m <= TattooZone.MOTIFS; m++) {
                 int[] p = tattoo(Gender.FEMALE, TattooZone.RIGHT_ARM, m, size);
                 int n = total(base, p);
                 assertTrue(n >= 3, "motif " + m + " taille " + size + " : " + n + " pixels");

@@ -8,10 +8,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TattooZoneTest {
     @Test
-    void everyZoneHasAMotifSlotWithTwelveMotifs() {
+    void everyZoneHasAMotifSlotWithAllTheMotifs() {
         for (TattooZone z : TattooZone.values()) {
             Catalog.Slot slot = Catalog.slots(AppearanceSection.TATTOOS).get(z.motifSlot());
-            assertEquals(13, slot.options(), z.toString());
+            assertEquals(z == TattooZone.FACE_NECK ? 13 : TattooZone.MOTIFS + 1, slot.options(), z.toString());
         }
     }
 
@@ -39,6 +39,7 @@ class TattooZoneTest {
                 used[z.sizeSlot()] = true;
             }
         }
+        used[TattooZone.INK_SLOT] = true;
         for (boolean u : used) assertTrue(u);
     }
 
@@ -55,7 +56,7 @@ class TattooZoneTest {
         CompoundTag tag = Catalog.defaults(Gender.MALE).toTag();
         tag.putIntArray(AppearanceSection.TATTOOS.name(), new int[]{3, 5, 7, 9, 11, 12});
         int[] t = Appearance.fromTag(tag).get(AppearanceSection.TATTOOS);
-        assertEquals(11, t.length);
+        assertEquals(12, t.length);
         assertEquals(3, t[TattooZone.FACE_NECK.motifSlot()]);
         assertEquals(5, t[TattooZone.TORSO.motifSlot()]);
         assertEquals(2, t[TattooZone.TORSO.sizeSlot()]);

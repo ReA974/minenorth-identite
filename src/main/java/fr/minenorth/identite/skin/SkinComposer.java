@@ -797,13 +797,36 @@ public final class SkinComposer {
             {"....##..", "...#oo#.", "..#oo#..", ".#oo#...", "#oooooo#", "...#oo#.", "..#oo#..", ".##o#..."},   // 9 éclair
             {"#..##..#", ".#.oo.#.", "..oooo..", "#oaaaao#", "#oaaaao#", "..oooo..", ".#.oo.#.", "#..##..#"},   // 10 soleil
             {"#..##..#", "##.##.##", "#oo##oo#", "#oooooo#", "#oaooao#", "#oooooo#", "########", "........"},   // 11 couronne
-            {"#......#", "##....##", "#oo..oo#", ".#oooo#.", "..#oo#..", ".#oooo#.", "#oo..oo#", "##....##"}};  // 12 tribal
+            {"#......#", "##....##", "#oo..oo#", ".#oooo#.", "..#oo#..", ".#oooo#.", "#oo..oo#", "##....##"},   // 12 tribal
+            {"..####..", ".#ooo#..", "#oo#....", "#oo#....", "#oo#....", "#oo#....", ".#ooo#..", "..####.."},   // 13 lune
+            {"##....##", "#o#..#o#", "#oa##ao#", ".#oooo#.", "..#oo#..", ".#oaao#.", "#o#..#o#", "##....##"},   // 14 papillon
+            {".####...", "#oooo#..", "#o##oo#.", ".#.#oo#.", "..#oo#..", ".#oo#...", "#oo#.##.", ".##..##."},   // 15 serpent
+            {"...##...", "..#oo#..", "..#oo#..", "..#oo#..", "..#oo#..", ".######.", "..#aa#..", "...##..."},   // 16 poignard
+            {"......##", ".....#oo", "....#oo#", "...#oo#.", "..#oo#..", ".#oo#...", "#o#.....", "##......"},   // 17 plume
+            {".##..##.", "#oo##oo#", "#o#..#o#", ".##..##.", ".#oooo#.", "#o#oo#o#", "#oo##oo#", ".##..##."},   // 18 trèfle
+            {".######.", "#o....o#", "#.#..#.#", "#..##..#", "#..##..#", "#.#..#.#", "#o....o#", ".######."},   // 19 dé
+            {"...##...", "...oo...", "..#oo#..", "##oooo##", "##oooo##", "..#oo#..", "...oo...", "...##..."},   // 20 boussole
+            {"..####..", ".#o..o#.", "#o.##.o#", "#.#aa#.#", "#.#aa#.#", "#o.##.o#", ".#o..o#.", "..####.."},   // 21 cible
+            {"...####.", "...#oo#.", "...#o.#.", "...#o.#.", "..##o.#.", ".#oo#.##", ".#oo#...", "..##...."},   // 22 note
+            {".####...", "#oooo#..", "#o##o#..", "#oooo#..", ".####...", "..#o#...", "..#oo#..", "..####.."},   // 23 clé
+            {"...##...", "..#oo#..", "#.#oo#.#", "#o#oo#o#", "#oo#oo#.", ".#oooo#.", "..####..", "........"},   // 24 lotus
+            {"........", "..###...", ".#oooo#.", "#oooaoo#", "#ooooo#.", ".#oooo.#", ".###..##", "........"},   // 25 poisson
+            {"........", ".##..##.", "#oo##oo#", "#o#oo#o#", "#oo##oo#", ".##..##.", "........", "........"},   // 26 infini
+            {"...##...", "..#oo#..", ".#oooo#.", "#oooooo#", "#oooooo#", ".##oo##.", "...oo...", "..####.."},   // 27 pique
+            {"#..#..#.", "#..#..#.", "#o.#.o#.", ".#ooo#..", "..#o#...", "..#o#...", "..#o#...", "..###..."},   // 28 trident
+            {"........", "..####..", ".#oooo#.", "#o#aa#o#", "#o#aa#o#", ".#oooo#.", "..####..", "........"},   // 29 œil
+            {".#.##.#.", "#o#oo#o#", ".#.##.#.", "..####..", ".#oooo#.", "#oooooo#", "#oo##oo#", ".##..##."}};  // 30 patte
 
     /** Couleur principale et couleur secondaire de chaque motif (le contour est toujours un noir bleuté). */
     private static final int[][] DESIGN_COLORS = {
             {0xFF4A8AD0, 0xFF1A2A5A}, {0xFFD03030, 0xFFE87070}, {0xFF5A5A66, 0xFFE8E8F0}, {0xFF2A5AA0, 0xFF4A8AD0},
             {0xFFD03030, 0xFF2A6A3A}, {0xFFE8E8F0, 0xFF5A5A66}, {0xFF5A5A66, 0xFFE8E8F0}, {0xFFE08030, 0xFFE0C040},
-            {0xFFE0C040, 0xFFE08030}, {0xFFE0C040, 0xFFE08030}, {0xFFE0C040, 0xFFD03030}, {0xFF1A2A5A, 0xFF14141E}};
+            {0xFFE0C040, 0xFFE08030}, {0xFFE0C040, 0xFFE08030}, {0xFFE0C040, 0xFFD03030}, {0xFF1A2A5A, 0xFF14141E},
+            {0xFFE0C040, 0xFFB08030}, {0xFF4A8AD0, 0xFFD03030}, {0xFF2A6A3A, 0xFFE0C040}, {0xFFB0B0C0, 0xFFD03030},
+            {0xFF4A8AD0, 0xFFE8E8F0}, {0xFF2A6A3A, 0xFF4A8AD0}, {0xFFE8E8F0, 0xFF14141E}, {0xFFE0C040, 0xFFE08030},
+            {0xFFD03030, 0xFFE8E8F0}, {0xFFE08030, 0xFFE0C040}, {0xFFB0B0C0, 0xFF5A5A66}, {0xFFD06090, 0xFFE0C040},
+            {0xFFE08030, 0xFFE8E8F0}, {0xFF2A5AA0, 0xFF4A8AD0}, {0xFF14141E, 0xFFD03030}, {0xFF2A5AA0, 0xFFB0B0C0},
+            {0xFF2A6A3A, 0xFFE8E8F0}, {0xFF8A5A30, 0xFFE0C040}};
 
     private static final int OUTLINE = 0xFF14141E;
     private static final int[] REDUCED = {1, 3, 4, 6};
@@ -835,11 +858,21 @@ public final class SkinComposer {
         int motif = t[zone.motifSlot()];
         if (motif <= 0) return;
         int size = t[zone.sizeSlot()];
+        int ink = t[TattooZone.INK_SLOT];
         int[] cols = wide ? (size == 0 ? REDUCED : size == 1 ? SIX : FULL) : REDUCED;
         int[] rows = size == 0 ? REDUCED : size == 1 ? SIX : FULL;
         int ox = wide ? (8 - cols.length) / 2 : 0;
         int oy = size == 0 ? (wide ? 3 : 4) : size == 1 ? 3 : 2;
-        design(c, rect, ox, oy, motif, cols, rows);
+        design(c, rect, ox, oy, motif, cols, rows, ink);
+    }
+
+    /** Encre : 0 couleurs du motif, 1 noir, 2 gris ombré (le contour reste le plus sombre). */
+    private static int inked(int color, char ch, int ink) {
+        if (ink == 0 || ch == '#') return color;
+        if (ink == 1) return ch == 'o' ? 0xFF262634 : 0xFF14141E;
+        int lum = (int) Math.round(((color >> 16) & 0xFF) * 0.3 + ((color >> 8) & 0xFF) * 0.59 + (color & 0xFF) * 0.11);
+        lum = Math.max(0x50, Math.min(0xC8, lum));
+        return 0xFF000000 | (lum << 16) | (lum << 8) | lum;
     }
 
     private static void faceMark(Canvas c, int motif) {
@@ -854,7 +887,7 @@ public final class SkinComposer {
     }
 
     /** Pose le motif dans la zone ; colonnes et lignes du dessin d'origine à garder (réduction). Mélangé à la peau comme de l'encre. */
-    private static void design(Canvas c, int[] rect, int ox, int oy, int motif, int[] cols, int[] rows) {
+    private static void design(Canvas c, int[] rect, int ox, int oy, int motif, int[] cols, int[] rows, int ink) {
         if (motif <= 0) return;
         String[] art = DESIGNS[motif - 1];
         int[] colors = DESIGN_COLORS[motif - 1];
@@ -862,7 +895,7 @@ public final class SkinComposer {
             for (int x = 0; x < cols.length; x++) {
                 char ch = art[rows[y]].charAt(cols[x]);
                 if (ch == '.' || !c.inside(rect, ox + x, oy + y)) continue;
-                int color = ch == '#' ? OUTLINE : ch == 'o' ? colors[0] : colors[1];
+                int color = inked(ch == '#' ? OUTLINE : ch == 'o' ? colors[0] : colors[1], ch, ink);
                 c.set(rect[0] + ox + x, rect[1] + oy + y, Palette.mix(c.relGet(rect, ox + x, oy + y), color, 0.9));
             }
         }

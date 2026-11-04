@@ -16,6 +16,15 @@ public enum TattooZone {
     /** Nombre total d'emplacements de la section TATTOOS. */
     public static final int SLOT_COUNT = 11;
 
+    /** Emplacement de l'encre (couleurs, noir ou gris ombré), commun à tous les tatouages du catalogue. */
+    public static final int INK_SLOT = 11;
+
+    /** Nombre d'emplacements de la section TATTOOS : les zones puis l'encre. */
+    public static final int TOTAL_SLOTS = 12;
+
+    /** Nombre de figures du catalogue. */
+    public static final int MOTIFS = 30;
+
     private final int motifSlot;
     private final int sizeSlot;
 
@@ -36,7 +45,7 @@ public enum TattooZone {
      * Les valeurs ne sont pas vérifiées ici.
      */
     public static int[] migrateLegacy(int[] old) {
-        int[] out = new int[SLOT_COUNT];
+        int[] out = new int[TOTAL_SLOTS];
         TattooZone[] zones = values();
         for (int i = 0; i < zones.length && i < old.length; i++) {
             out[zones[i].motifSlot] = old[i];
