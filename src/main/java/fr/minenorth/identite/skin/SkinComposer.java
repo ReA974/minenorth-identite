@@ -653,6 +653,11 @@ public final class SkinComposer {
             jewel(c, HEAD.right(), HEAD_O.right(), px[0], px[1], tones[px[2]][0]);
             jewel(c, HEAD.left(), HEAD_O.left(), 7 - px[0], px[1], tones[px[2]][0]);
         }
+        for (int[] px : helixPixels(p[5])) {
+            jewel(c, HEAD.right(), HEAD_O.right(), px[0], px[1], tones[px[2]][0]);
+            jewel(c, HEAD.left(), HEAD_O.left(), 7 - px[0], px[1], tones[px[2]][0]);
+        }
+        for (int[] px : navelPixels(p[6])) jewel(c, BODY.front(), BODY_O.front(), px[0], px[1], tones[px[2]][0]);
         for (int[] px : nosePixels(p[1])) jewel(c, HEAD.front(), HEAD_O.front(), px[0], px[1], tones[px[2]][0]);
         for (int[] px : browPixels(p[2])) jewel(c, HEAD.front(), HEAD_O.front(), px[0], px[1], tones[px[2]][0]);
         for (int[] px : lipPixels(p[3])) jewel(c, HEAD.front(), HEAD_O.front(), px[0], px[1], tones[px[2]][0]);
@@ -670,6 +675,24 @@ public final class SkinComposer {
             case 2 -> new int[][]{{3, 5, 0}, {2, 6, 0}, {4, 6, 0}, {3, 7, 0}};
             case 3 -> new int[][]{{3, 5, 1}, {3, 6, 2}, {3, 7, 1}};
             case 4 -> new int[][]{{3, 5, 0}, {2, 6, 0}, {4, 6, 0}, {2, 7, 0}, {4, 7, 0}, {3, 7, 0}};
+            default -> new int[0][];
+        };
+    }
+
+    private static int[][] helixPixels(int style) {
+        return switch (style) {
+            case 1 -> new int[][]{{2, 3, 1}};
+            case 2 -> new int[][]{{2, 3, 0}, {3, 3, 0}, {3, 4, 0}};
+            default -> new int[0][];
+        };
+    }
+
+    /** Nombril : colonne 3, ligne 7 de la face avant du torse. */
+    private static int[][] navelPixels(int style) {
+        return switch (style) {
+            case 1 -> new int[][]{{3, 7, 1}};
+            case 2 -> new int[][]{{3, 7, 0}, {4, 7, 0}};
+            case 3 -> new int[][]{{3, 7, 0}, {3, 8, 2}, {3, 9, 1}};
             default -> new int[0][];
         };
     }

@@ -50,9 +50,10 @@ public final class Catalog {
         SLOTS.put(AppearanceSection.MAKEUP, List.of(
                 new Slot("lips", 6), new Slot("lipColor", 8), new Slot("eyes", 6), new Slot("eyeColor", 8),
                 new Slot("blush", 5), new Slot("blushColor", 6)));
-        // piercings : oreilles, nez, sourcil, lèvre, et le métal (argent, or, noir, or rose, acier)
+        // piercings : oreilles, nez, sourcil, lèvre, le métal (argent, or, noir, or rose, acier), haut de l oreille, nombril
         SLOTS.put(AppearanceSection.PIERCINGS, List.of(
-                new Slot("ears", 5), new Slot("nose", 4), new Slot("brow", 3), new Slot("lip", 4), new Slot("metal", 5)));
+                new Slot("ears", 5), new Slot("nose", 4), new Slot("brow", 3), new Slot("lip", 4), new Slot("metal", 5),
+                new Slot("helix", 3), new Slot("navel", 4)));
         // tatouages : un motif par zone (0 = aucun, 12 motifs) et, sauf au visage, une taille (petit, moyen, grand)
         SLOTS.put(AppearanceSection.TATTOOS, List.of(
                 new Slot("faceNeck", 13),
@@ -82,6 +83,8 @@ public final class Catalog {
     }
 
     public static int[] randomSection(Gender gender, AppearanceSection section, Random random) {
+        // tatouages et piercings se choisissent a la main : le hasard n en pose jamais
+        if (section == AppearanceSection.TATTOOS || section == AppearanceSection.PIERCINGS) return new int[slots(section).size()];
         List<Slot> slots = slots(section);
         int[] out = new int[slots.size()];
         for (int i = 0; i < out.length; i++) {

@@ -25,7 +25,8 @@ public final class OptionLabels {
             Map.entry("TATTOOS/rightArmSize", "Taille du bras droit"), Map.entry("TATTOOS/leftArmSize", "Taille du bras gauche"),
             Map.entry("TATTOOS/legsSize", "Taille des jambes"),
             Map.entry("PIERCINGS/ears", "Oreilles"), Map.entry("PIERCINGS/nose", "Nez"), Map.entry("PIERCINGS/brow", "Sourcil"),
-            Map.entry("PIERCINGS/lip", "Lèvre"), Map.entry("PIERCINGS/metal", "Métal"));
+            Map.entry("PIERCINGS/lip", "Lèvre"), Map.entry("PIERCINGS/metal", "Métal"),
+            Map.entry("PIERCINGS/helix", "Haut de l'oreille"), Map.entry("PIERCINGS/navel", "Nombril"));
 
     private static final Map<String, String[]> OPTIONS = Map.ofEntries(
             Map.entry("BODY/build", new String[]{"Normale", "Athlétique", "Ronde", "Mince", "Sablier", "Costaud"}),
@@ -50,7 +51,9 @@ public final class OptionLabels {
             Map.entry("PIERCINGS/nose", new String[]{"Aucun", "Clou", "Anneau", "Septum"}),
             Map.entry("PIERCINGS/brow", new String[]{"Aucun", "Anneau", "Barre"}),
             Map.entry("PIERCINGS/lip", new String[]{"Aucun", "Labret", "Anneau", "Double"}),
-            Map.entry("PIERCINGS/metal", new String[]{"Argent", "Or", "Noir", "Or rose", "Acier"}));
+            Map.entry("PIERCINGS/metal", new String[]{"Argent", "Or", "Noir", "Or rose", "Acier"}),
+            Map.entry("PIERCINGS/helix", new String[]{"Aucun", "Clou", "Anneau"}),
+            Map.entry("PIERCINGS/navel", new String[]{"Aucun", "Clou", "Anneau", "Pendant"}));
 
 private static final String[] TATTOO_MOTIFS = {"Aucun", "Étoile", "Cœur", "Croix", "Ancre", "Rose", "Crâne",            "Ailes", "Flamme", "Éclair", "Soleil", "Couronne", "Tribal"};
 

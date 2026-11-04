@@ -15,14 +15,14 @@ import static org.junit.jupiter.api.Assertions.*;
 /** Piercings : oreilles, nez, sourcil, lèvre, en argent, or, noir, or rose ou acier. */
 class PiercingTest {
     private static final int W = SkinComposer.SIZE;
-    private static final int EARS = 0, NOSE = 1, BROW = 2, LIP = 3, METAL = 4;
+    private static final int EARS = 0, NOSE = 1, BROW = 2, LIP = 3, METAL = 4, HELIX = 5, NAVEL = 6;
 
     private static Appearance bare(Gender g) {
         return Catalog.defaults(g).with(AppearanceSection.HAIR, new int[]{0, 1});
     }
 
     private static int[] pierced(Gender g, int slot, int value, int metal) {
-        int[] v = new int[5];
+        int[] v = new int[7];
         v[slot] = value;
         v[METAL] = metal;
         return SkinComposer.compose(g, bare(g).with(AppearanceSection.PIERCINGS, v));
@@ -44,7 +44,7 @@ class PiercingTest {
     void theSectionExistsWithTheFiveSlots() {
         assertEquals("Piercings", AppearanceSection.PIERCINGS.label());
         assertSame(AppearanceSection.PIERCINGS, AppearanceSection.fromName("PIERCINGS"));
-        assertEquals(5, Catalog.slots(AppearanceSection.PIERCINGS).size());
+        assertEquals(7, Catalog.slots(AppearanceSection.PIERCINGS).size());
         assertEquals(5, optionCount(EARS));
         assertEquals(4, optionCount(NOSE));
         assertEquals(3, optionCount(BROW));
@@ -57,7 +57,7 @@ class PiercingTest {
     void everyPiercingShowsAndDiffersFromTheOthers() {
         for (Gender g : Gender.values()) {
             int[] base = none(g);
-            for (int slot : new int[]{EARS, NOSE, BROW, LIP}) {
+            for (int slot : new int[]{EARS, NOSE, BROW, LIP, HELIX, NAVEL}) {
                 List<int[]> images = new ArrayList<>();
                 for (int v = 1; v < optionCount(slot); v++) {
                     int[] p = pierced(g, slot, v, 0);
@@ -82,7 +82,7 @@ class PiercingTest {
 
     @Test
     void metalAloneWithoutAPiercingChangesNothing() {
-        int[] v = new int[5];
+        int[] v = new int[7];
         v[METAL] = 3;
         assertArrayEquals(none(Gender.MALE), SkinComposer.compose(Gender.MALE, bare(Gender.MALE).with(AppearanceSection.PIERCINGS, v)));
     }
@@ -128,13 +128,49 @@ class PiercingTest {
     @Test
     void piercingsStayOnTheHead() {
         int[] base = none(Gender.FEMALE);
-        for (int slot : new int[]{EARS, NOSE, BROW, LIP}) {
+        for (int slot : new int[]{EARS, NOSE, BROW, LIP, HELIX}) {
             for (int v = 1; v < optionCount(slot); v++) {
                 int[] p = pierced(Gender.FEMALE, slot, v, 2);
                 assertEquals(0, changed(base, p, 0, 16, W, W - 16), "slot " + slot + " option " + v + " touche le corps");
                 assertEquals(0, changed(base, p, 0, 0, W, 8), "slot " + slot + " option " + v + " touche le dessus de la tête");
             }
         }
+    }
+
+    @Test
+    void navelPiercingsStayOnTheTorsoFront() {
+        for (Gender g : Gender.values()) {
+            int[] base = none(g);
+            for (int v = 1; v < optionCount(NAVEL); v++) {
+                int[] p = pierced(g, NAVEL, v, 1);
+                assertTrue(changed(base, p, 20, 20, 8, 12) >= 1, "nombril " + v);
+                assertTrue(changed(base, p, 20, 36, 8, 12) >= 1, "nombril en relief " + v);
+                assertEquals(0, changed(base, p, 0, 0, W, 16), "la tête ne bouge pas");
+            }
+        }
+    }
+
+    @Test
+    void randomNeverAddsTattoosOrPiercings() {
+        java.util.Random r = new java.util.Random(3);
+        for (Gender g : Gender.values()) {
+            for (int i = 0; i < 50; i++) {
+                Appearance a = Catalog.random(g, r);
+                for (int v : a.get(AppearanceSection.TATTOOS)) assertEquals(0, v);
+                for (int v : a.get(AppearanceSection.PIERCINGS)) assertEquals(0, v);
+            }
+        }
+    }
+
+    @Test
+    void sheetsWithTheFirstFivePiercingSlotsGetTheNewOnesAtZero() {
+        CompoundTag tag = Catalog.defaults(Gender.MALE).toTag();
+        tag.putIntArray(AppearanceSection.PIERCINGS.name(), new int[]{2, 0, 0, 0, 1});
+        int[] v = Appearance.fromTag(tag).get(AppearanceSection.PIERCINGS);
+        assertEquals(7, v.length);
+        assertEquals(2, v[0]);
+        assertEquals(1, v[4]);
+        assertEquals(0, v[6]);
     }
 
     // ---- fiches enregistrées avant l'arrivée des piercings
