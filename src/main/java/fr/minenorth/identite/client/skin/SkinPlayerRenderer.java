@@ -19,6 +19,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class SkinPlayerRenderer extends PlayerRenderer {
     public SkinPlayerRenderer(EntityRendererProvider.Context ctx, boolean slim) {
         super(ctx, slim);
+        addLayer(new HairLayer(this));
     }
 
     @Override

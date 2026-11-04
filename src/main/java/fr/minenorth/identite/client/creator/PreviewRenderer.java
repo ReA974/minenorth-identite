@@ -46,7 +46,7 @@ public final class PreviewRenderer {
 
     /** Dessine le modèle dans le rectangle donné ; texture déjà à jour (ClientSkins.preview). */
     public static void render(GuiGraphics g, int x, int y, int w, int h, Gender gender, ResourceLocation texture,
-                              float yaw, float zoom, float focus) {
+                              float yaw, float zoom, float focus, int hairStyle, int hairColor) {
         float scale = h / 2.3f * zoom;
         float cx = x + w / 2f;
         float feetY = y + h / 2f + focus * scale;
@@ -67,6 +67,7 @@ public final class PreviewRenderer {
         MultiBufferSource.BufferSource buffers = g.bufferSource();
         VertexConsumer vc = buffers.getBuffer(RenderType.entityTranslucent(texture));
         m.renderToBuffer(ps, vc, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
+        fr.minenorth.identite.client.skin.HairRenderer.draw(ps, buffers, LightTexture.FULL_BRIGHT, m, hairStyle, hairColor, false);
         g.flush();
         ps.popPose();
         Lighting.setupFor3DItems();
@@ -76,6 +77,7 @@ public final class PreviewRenderer {
     /** Régénère la texture d'aperçu puis dessine. */
     public static void render(GuiGraphics g, int x, int y, int w, int h, Gender gender, Appearance appearance,
                               float yaw, float zoom, float focus) {
-        render(g, x, y, w, h, gender, ClientSkins.preview(gender, appearance), yaw, zoom, focus);
+        int[] hair = appearance.get(fr.minenorth.identite.appearance.AppearanceSection.HAIR);
+        render(g, x, y, w, h, gender, ClientSkins.preview(gender, appearance), yaw, zoom, focus, hair[0], hair[1]);
     }
 }

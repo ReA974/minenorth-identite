@@ -208,7 +208,9 @@ public final class CreatorScreen extends Screen {
         }
         PreviewRenderer.Cam cam = PreviewRenderer.CAMS[camera];
         PreviewRenderer.render(g, viewX, bodyTop, viewW, h, state.gender(), ClientSkins.previewLocation(),
-                cam.yaw() + yaw, cam.zoom() * zoom, cam.focus());
+                cam.yaw() + yaw, cam.zoom() * zoom, cam.focus(),
+                state.appearance().get(fr.minenorth.identite.appearance.AppearanceSection.HAIR)[0],
+                state.appearance().get(fr.minenorth.identite.appearance.AppearanceSection.HAIR)[1]);
         int bw = viewW / PreviewRenderer.CAMS.length;
         for (int i = 0; i < PreviewRenderer.CAMS.length; i++) {
             int x = viewX + i * bw;
