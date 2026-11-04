@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 
 public final class ModNetwork {
     private ModNetwork() {}
-    private static final String PROTOCOL = "5";   // 5 : dessins (visage, barbe, tatouages) dans la fiche d'apparence
+    private static final String PROTOCOL = "6";   // 6 : piercings et nouveaux réglages de tatouage dans la fiche ; 5 : dessins dans la fiche
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(MineNorthIdentite.MOD_ID, "network"),
             () -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);
