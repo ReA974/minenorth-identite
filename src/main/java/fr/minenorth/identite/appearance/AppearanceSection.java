@@ -8,7 +8,8 @@ public enum AppearanceSection {
     HAIR("Cheveux"),
     FACIAL_HAIR("Pilosité"),
     MAKEUP("Maquillage"),
-    TATTOOS("Tatouages");
+    TATTOOS("Tatouages"),
+    PIERCINGS("Piercings");
 
     private final String label;
 

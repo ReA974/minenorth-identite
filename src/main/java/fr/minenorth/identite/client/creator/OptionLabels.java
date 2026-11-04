@@ -23,7 +23,9 @@ public final class OptionLabels {
             Map.entry("TATTOOS/leftArm", "Bras gauche"), Map.entry("TATTOOS/legs", "Jambes"),
             Map.entry("TATTOOS/torsoSize", "Taille du torse"), Map.entry("TATTOOS/backSize", "Taille du dos"),
             Map.entry("TATTOOS/rightArmSize", "Taille du bras droit"), Map.entry("TATTOOS/leftArmSize", "Taille du bras gauche"),
-            Map.entry("TATTOOS/legsSize", "Taille des jambes"));
+            Map.entry("TATTOOS/legsSize", "Taille des jambes"),
+            Map.entry("PIERCINGS/ears", "Oreilles"), Map.entry("PIERCINGS/nose", "Nez"), Map.entry("PIERCINGS/brow", "Sourcil"),
+            Map.entry("PIERCINGS/lip", "Lèvre"), Map.entry("PIERCINGS/metal", "Métal"));
 
     private static final Map<String, String[]> OPTIONS = Map.ofEntries(
             Map.entry("BODY/build", new String[]{"Normale", "Athlétique", "Ronde", "Mince", "Sablier", "Costaud"}),
@@ -43,7 +45,12 @@ public final class OptionLabels {
                     "Moustache en croc", "Bouc", "Mouche", "Collier", "Barbe courte", "Barbe pleine", "Favoris", "Van Dyke"}),
             Map.entry("MAKEUP/lips", new String[]{"Aucun", "Fin", "Plein", "Brillant", "Dégradé", "Mat sombre"}),
             Map.entry("MAKEUP/eyes", new String[]{"Aucun", "Léger", "Smoky", "Eye-liner", "Eye-liner ailé", "Pailleté"}),
-            Map.entry("MAKEUP/blush", new String[]{"Aucun", "Léger", "Pommettes", "Soleil", "Intense"}));
+            Map.entry("MAKEUP/blush", new String[]{"Aucun", "Léger", "Pommettes", "Soleil", "Intense"}),
+            Map.entry("PIERCINGS/ears", new String[]{"Aucun", "Clou", "Anneau", "Pendant", "Grand anneau"}),
+            Map.entry("PIERCINGS/nose", new String[]{"Aucun", "Clou", "Anneau", "Septum"}),
+            Map.entry("PIERCINGS/brow", new String[]{"Aucun", "Anneau", "Barre"}),
+            Map.entry("PIERCINGS/lip", new String[]{"Aucun", "Labret", "Anneau", "Double"}),
+            Map.entry("PIERCINGS/metal", new String[]{"Argent", "Or", "Noir", "Or rose", "Acier"}));
 
 private static final String[] TATTOO_MOTIFS = {"Aucun", "Étoile", "Cœur", "Croix", "Ancre", "Rose", "Crâne",            "Ailes", "Flamme", "Éclair", "Soleil", "Couronne", "Tribal"};
 
@@ -58,7 +65,7 @@ private static final String[] TATTOO_MOTIFS = {"Aucun", "Étoile", "Cœur", "Cro
     }
 
     public static boolean isColor(String key) {
-        return key.equals("color") || key.equals("tone") || key.endsWith("Color");
+        return key.equals("color") || key.equals("tone") || key.equals("metal") || key.endsWith("Color");
     }
 
     public static String slot(AppearanceSection section, String key) {

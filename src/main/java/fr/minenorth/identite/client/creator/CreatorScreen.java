@@ -439,6 +439,7 @@ public final class CreatorScreen extends Screen {
 
     private static int swatchColor(String key, int v) {
         if (key.equals("blushColor")) return fr.minenorth.identite.skin.Palette.lipColor(v);
+        if (key.equals("metal")) return fr.minenorth.identite.skin.Palette.metal(v);
         if (key.equals("tone")) return fr.minenorth.identite.skin.Palette.skinTone(v);
         if (key.equals("lipColor")) return fr.minenorth.identite.skin.Palette.lipColor(v);
         if (key.equals("eyeColor")) return fr.minenorth.identite.skin.Palette.eyeColor(v);

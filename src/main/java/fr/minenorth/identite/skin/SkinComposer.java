@@ -107,6 +107,7 @@ public final class SkinComposer {
         paintFacialHair(c, beard, tone);
         paintTattoos(c, tattoos, rArm, lArm);
         paintDrawings(c, a.drawings(), rArm, lArm);
+        paintPiercings(c, a.get(AppearanceSection.PIERCINGS));
         paintOutfit(c, a.outfit());
         paintHair(c, hair);
         return c.px;
@@ -637,6 +638,66 @@ public final class SkinComposer {
                 c.rel(rect, x, y, blend ? Palette.mix(c.relGet(rect, x, y), color, 0.88) : color);
             }
         }
+    }
+
+    // ------------------------------------------------------------------ piercings
+
+    /**
+     * Piercings : oreilles (des deux côtés de la tête), nez, sourcil et lèvre. Chaque bijou est posé sur la tête (plus
+     * sombre) et sur la couche extérieure (métal clair), pour le relief. Ne touche jamais les yeux.
+     */
+    private static void paintPiercings(Canvas c, int[] p) {
+        int metal = Palette.metal(p[4]);
+        int[][] tones = {{metal}, {Palette.shade(metal, 1.25)}, {Palette.shade(metal, 0.6)}};
+        for (int[] px : earPixels(p[0])) {
+            jewel(c, HEAD.right(), HEAD_O.right(), px[0], px[1], tones[px[2]][0]);
+            jewel(c, HEAD.left(), HEAD_O.left(), 7 - px[0], px[1], tones[px[2]][0]);
+        }
+        for (int[] px : nosePixels(p[1])) jewel(c, HEAD.front(), HEAD_O.front(), px[0], px[1], tones[px[2]][0]);
+        for (int[] px : browPixels(p[2])) jewel(c, HEAD.front(), HEAD_O.front(), px[0], px[1], tones[px[2]][0]);
+        for (int[] px : lipPixels(p[3])) jewel(c, HEAD.front(), HEAD_O.front(), px[0], px[1], tones[px[2]][0]);
+    }
+
+    private static void jewel(Canvas c, int[] baseRect, int[] outerRect, int dx, int dy, int color) {
+        c.rel(baseRect, dx, dy, Palette.shade(color, 0.8));
+        c.rel(outerRect, dx, dy, color);
+    }
+
+    /** Pixels {colonne, ligne, ton} : ton 0 = métal, 1 = reflet, 2 = ombre. Oreilles : coordonnées de la face droite. */
+    private static int[][] earPixels(int style) {
+        return switch (style) {
+            case 1 -> new int[][]{{3, 5, 1}};
+            case 2 -> new int[][]{{3, 5, 0}, {2, 6, 0}, {4, 6, 0}, {3, 7, 0}};
+            case 3 -> new int[][]{{3, 5, 1}, {3, 6, 2}, {3, 7, 1}};
+            case 4 -> new int[][]{{3, 5, 0}, {2, 6, 0}, {4, 6, 0}, {2, 7, 0}, {4, 7, 0}, {3, 7, 0}};
+            default -> new int[0][];
+        };
+    }
+
+    private static int[][] nosePixels(int style) {
+        return switch (style) {
+            case 1 -> new int[][]{{3, 5, 1}};
+            case 2 -> new int[][]{{3, 5, 0}, {3, 6, 0}};
+            case 3 -> new int[][]{{3, 5, 0}, {4, 5, 0}};
+            default -> new int[0][];
+        };
+    }
+
+    private static int[][] browPixels(int style) {
+        return switch (style) {
+            case 1 -> new int[][]{{2, 2, 0}, {2, 3, 2}};
+            case 2 -> new int[][]{{1, 2, 1}, {2, 2, 1}};
+            default -> new int[0][];
+        };
+    }
+
+    private static int[][] lipPixels(int style) {
+        return switch (style) {
+            case 1 -> new int[][]{{3, 7, 1}};
+            case 2 -> new int[][]{{3, 7, 0}, {4, 7, 2}};
+            case 3 -> new int[][]{{2, 7, 1}, {5, 7, 1}};
+            default -> new int[0][];
+        };
     }
 
     // ------------------------------------------------------------------ vêtements (couche extérieure)

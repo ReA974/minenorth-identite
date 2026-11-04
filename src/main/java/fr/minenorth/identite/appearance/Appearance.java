@@ -83,6 +83,8 @@ public final class Appearance {
             int[] v = tag.getIntArray(s.name());
             // fiche d'avant les tailles de tatouage : on garde les motifs, en grand comme avant
             if (s == AppearanceSection.TATTOOS && v.length == 6) v = TattooZone.migrateLegacy(v);
+            // fiche d'avant les piercings : aucun piercing
+            if (s == AppearanceSection.PIERCINGS && v.length == 0) v = new int[Catalog.slots(s).size()];
             checkRange(s, v);
             values.put(s, v);
         }

@@ -28,6 +28,11 @@ public final class Palette {
     /** Encre d'un motif de tatouage (1 à 6). */
     public static int ink(int motif) { return INK[motif]; }
 
+    private static final int[] METAL = {0xFFC8C8D2, 0xFFE0B040, 0xFF22222C, 0xFFD8957E, 0xFF7C9CB8};
+
+    /** Métal d'un piercing : argent, or, noir, or rose, acier bleu. */
+    public static int metal(int i) { return METAL[i]; }
+
     /** ARGB vers ABGR (ordre des octets de NativeImage.setPixelRGBA). */
     public static int argbToAbgr(int argb) {
         return (argb & 0xFF00FF00) | ((argb >> 16) & 0xFF) | ((argb & 0xFF) << 16);
