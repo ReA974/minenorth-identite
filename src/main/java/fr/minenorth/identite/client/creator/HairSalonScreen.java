@@ -32,6 +32,7 @@ public final class HairSalonScreen extends Screen {
 
     private final CreatorState state;
     private final Consumer<CreatorState> onSave;
+    private final Appearance original;
     private final List<Hit> hits = new ArrayList<>();
     private int tab;
     private int camera = 2;
@@ -45,6 +46,7 @@ public final class HairSalonScreen extends Screen {
         super(Component.literal("Salon de coiffure"));
         this.state = state;
         this.onSave = onSave;
+        this.original = state.appearance();
     }
 
     public static HairSalonScreen open(Gender gender, Appearance current, Consumer<CreatorState> onSave) {
@@ -79,7 +81,7 @@ public final class HairSalonScreen extends Screen {
     @Override public void render(GuiGraphics g, int mx, int my, float partial) {
         renderBackground(g);
         hits.clear();
-        MineNorthStyle.panel(g, px, py, pw, ph, "MINENORTHRP - SALON DE COIFFURE", "Choisissez une coupe, une couleur et une barbe.");
+        MineNorthStyle.panel(g, px, py, pw, ph, "MINENORTHRP - SALON DE COIFFURE", "Choisissez une coupe, une couleur et une barbe. Paiement par carte.");
         drawMirror(g, mx, my);
         drawOptions(g, mx, my);
         drawFooter(g, mx, my);
@@ -149,11 +151,12 @@ public final class HairSalonScreen extends Screen {
     }
 
     private void drawFooter(GuiGraphics g, int mx, int my) {
-        int y = py + ph - 24, w = 110;
-        int cancelX = px + pw - 8 - w - 6 - 90, saveX = px + pw - 8 - w;
+        int y = py + ph - 24, w = 170;
+        long price = fr.minenorth.identite.salon.SalonPrices.quote(fr.minenorth.identite.salon.SalonKind.HAIR, original, state.appearance());
+        int saveX = px + pw - 8 - w, cancelX = saveX - 6 - 90;
         MineNorthStyle.button(g, cancelX, y, 90, 20, "Annuler", MineNorthStyle.DARK, over(mx, my, cancelX, y, 90, 20), true);
         hits.add(new Hit(cancelX, y, 90, 20, this::onClose));
-        MineNorthStyle.button(g, saveX, y, w, 20, "Valider la coupe", MineNorthStyle.GREEN, over(mx, my, saveX, y, w, 20), true);
+        MineNorthStyle.button(g, saveX, y, w, 20, price > 0 ? "Valider · " + MineNorthStyle.euros(price) : "Valider la coupe", MineNorthStyle.GREEN, over(mx, my, saveX, y, w, 20), true);
         hits.add(new Hit(saveX, y, w, 20, () -> { onSave.accept(state); onClose(); }));
         MineNorthStyle.button(g, px + 8, y, 70, 20, "Défaire", MineNorthStyle.DARK, over(mx, my, px + 8, y, 70, 20), state.canUndo());
         if (state.canUndo()) hits.add(new Hit(px + 8, y, 70, 20, state::undo));

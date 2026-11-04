@@ -247,9 +247,29 @@ public final class CharacterManager {
             player.displayClientMessage(Component.literal("§c" + error.get()), true);
             return;
         }
+        Appearance next = applyEdit(current, edits, drawings).orElse(current);
+        // salon de tatouage ou de coiffeur : le prix est calculé ici, jamais par le client, et payé par carte avant d'appliquer
+        fr.minenorth.identite.salon.SalonKind salon = fr.minenorth.identite.salon.SalonKind.forSections(allowed);
+        long price = fr.minenorth.identite.salon.SalonPrices.quote(salon, current, next);
+        long paid = 0;
+        if (price > 0 && fr.minenorth.api.MineNorth.bank() != fr.minenorth.api.BankService.NONE) {
+            paid = fr.minenorth.api.MineNorth.discounted(player.server, player.getUUID(), price);
+            fr.minenorth.api.PayResult result = fr.minenorth.api.MineNorth.bank().charge(player, paid, salon.source());
+            if (!result.ok()) {
+                player.displayClientMessage(Component.literal("§c" + result.message() + " (" + euros(paid) + ")"), true);
+                return;
+            }
+        }
         EDITS.close(player.getUUID());
-        updateAppearance(player.server, player.getUUID(), profile.gender(), applyEdit(current, edits, drawings).orElse(current));
-        player.displayClientMessage(Component.literal("§aApparence mise à jour."), true);
+        updateAppearance(player.server, player.getUUID(), profile.gender(), next);
+        player.displayClientMessage(Component.literal(paid > 0
+                ? "§aApparence mise à jour. Payé par carte : " + euros(paid) + "."
+                : "§aApparence mise à jour."), true);
+    }
+
+    /** Montant en centimes, pour les messages : 25 € ou 12,50 €. */
+    public static String euros(long cents) {
+        return (cents / 100) + (cents % 100 == 0 ? "" : "," + String.format("%02d", cents % 100)) + " €";
     }
 
     /** Fiche d'un joueur (en ligne ou non) ; vide s'il n'a pas de personnage. */

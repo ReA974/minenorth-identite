@@ -40,6 +40,7 @@ public final class TattooSalonScreen extends Screen {
 
     private final CreatorState state;
     private final Consumer<CreatorState> onSave;
+    private final Appearance original;
     private final List<Hit> hits = new ArrayList<>();
     private int zone = 1;
     private int camera = 1;
@@ -54,6 +55,7 @@ public final class TattooSalonScreen extends Screen {
         super(Component.literal("Salon de tatouage"));
         this.state = state;
         this.onSave = onSave;
+        this.original = state.appearance();
     }
 
     public static TattooSalonScreen open(Gender gender, Appearance current, Consumer<CreatorState> onSave) {
@@ -175,7 +177,7 @@ public final class TattooSalonScreen extends Screen {
     @Override public void render(GuiGraphics g, int mx, int my, float partial) {
         renderBackground(g);
         hits.clear();
-        MineNorthStyle.panel(g, px, py, pw, ph, "MINENORTHRP - SALON DE TATOUAGE", "Choisissez un motif, une zone, puis tatouez.");
+        MineNorthStyle.panel(g, px, py, pw, ph, "MINENORTHRP - SALON DE TATOUAGE", "Choisissez un motif, une zone, puis tatouez. Paiement par carte.");
         drawGrid(g, mx, my);
         drawPreview(g, mx, my);
         drawOptions(g, mx, my);
@@ -284,12 +286,13 @@ public final class TattooSalonScreen extends Screen {
     }
 
     private void drawFooter(GuiGraphics g, int mx, int my) {
-        int y = py + ph - 24, w = 90;
-        int cancelX = px + pw - 8 - 2 * w - 6, saveX = px + pw - 8 - w;
+        int y = py + ph - 24, w = 90, sw = 150;
+        long price = fr.minenorth.identite.salon.SalonPrices.quote(fr.minenorth.identite.salon.SalonKind.TATTOO, original, state.appearance());
+        int saveX = px + pw - 8 - sw, cancelX = saveX - 6 - w;
         MineNorthStyle.button(g, cancelX, y, w, 20, "Annuler", MineNorthStyle.DARK, over(mx, my, cancelX, y, w, 20), true);
         hits.add(new Hit(cancelX, y, w, 20, this::onClose));
-        MineNorthStyle.button(g, saveX, y, w, 20, "Tatouer", MineNorthStyle.GREEN, over(mx, my, saveX, y, w, 20), true);
-        hits.add(new Hit(saveX, y, w, 20, () -> { onSave.accept(state); onClose(); }));
+        MineNorthStyle.button(g, saveX, y, sw, 20, price > 0 ? "Tatouer · " + MineNorthStyle.euros(price) : "Tatouer", MineNorthStyle.GREEN, over(mx, my, saveX, y, sw, 20), true);
+        hits.add(new Hit(saveX, y, sw, 20, () -> { onSave.accept(state); onClose(); }));
         MineNorthStyle.button(g, px + 8, y, 80, 20, "Défaire", MineNorthStyle.DARK, over(mx, my, px + 8, y, 80, 20), state.canUndo());
         if (state.canUndo()) hits.add(new Hit(px + 8, y, 80, 20, state::undo));
         fr.minenorth.identite.drawing.DrawingKind kind = drawingKind();
