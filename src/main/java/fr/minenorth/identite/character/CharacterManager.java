@@ -63,12 +63,6 @@ public final class CharacterManager {
         return Catalog.validate(r.gender(), r.appearance());
     }
 
-    /** « Garder mon skin Minecraft » est réservé au staff : les joueurs prennent le skin qu'ils ont créé. */
-    public static Optional<String> skinPolicyError(boolean customSkin, boolean staff) {
-        if (!customSkin && !staff) return Optional.of("Seul le staff peut garder son skin Minecraft.");
-        return Optional.empty();
-    }
-
     /** Un personnage = identité avec sexe ET apparence. Une ancienne identité sans sexe n'en est pas un. */
     public static boolean hasCharacter(ServerLevel level, UUID player) {
         IdentityData.Profile profile = IdentityData.get(level).get(player);
@@ -106,9 +100,6 @@ public final class CharacterManager {
             return;
         }
         Optional<String> error = check(r, LocalDate.now());
-        if (error.isEmpty() && r.appearance() != null) {
-            error = skinPolicyError(r.appearance().customSkin(), player.hasPermissions(2));
-        }
         if (error.isPresent()) {
             player.displayClientMessage(Component.literal("§c" + error.get()), true);
             return;
@@ -129,7 +120,8 @@ public final class CharacterManager {
                 r.gender());
         data.set(profile);
         // le personnage arrive en sous-vêtements : la tenue de départ est posée par le serveur, jamais par le client
-        Appearance sheet = r.appearance().withOutfit(fr.minenorth.identite.clothing.Outfit.starter(r.gender()));
+        Appearance sheet = r.appearance().withCustomSkin(true)
+                .withOutfit(fr.minenorth.identite.clothing.Outfit.starter(r.gender()));
         AppearanceData.get(level).set(player.getUUID(), sheet);
 
         CREATING.finish(player.getUUID());

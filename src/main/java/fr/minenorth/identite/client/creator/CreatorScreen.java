@@ -504,12 +504,6 @@ public final class CreatorScreen extends Screen {
         MineNorthStyle.button(g, x, y, w, 20, "Choisir mon skin", MineNorthStyle.GREEN, false, ready);
         if (ready) hits.add(new Hit(x, y, w, 20, () -> submit(true)));
         y += 24;
-        // « Garder mon skin Minecraft » est réservé au staff (le serveur le refuse aux autres)
-        if (net.minecraft.client.Minecraft.getInstance().player != null && net.minecraft.client.Minecraft.getInstance().player.hasPermissions(2)) {
-            MineNorthStyle.button(g, x, y, w, 20, "Garder mon skin Minecraft (staff)", MineNorthStyle.DARK, false, ready);
-            if (ready) hits.add(new Hit(x, y, w, 20, () -> submit(false)));
-            y += 24;
-        }
         return y;
     }
 
