@@ -179,18 +179,18 @@ public final class HairPieces {
 
     /** Calotte au-dessus de la tête. */
     private static void cap(List<Piece> out, float t) {
-        head(out, -H - t, TOP - t, -H - t, 2 * (H + t), t, 2 * (H + t), HAIR);
+        head(out, -H, TOP - t, -H, 2 * H, t, 2 * H, HAIR);
     }
 
     /** Mèches de chaque côté de la tête, de la hauteur de la calotte jusqu'à {@code bottom}. */
     private static void sides(List<Piece> out, float t, float bottom, float front) {
-        head(out, H, TOP, front, t, bottom - TOP, H + t - front, HAIR);
-        head(out, -H - t, TOP, front, t, bottom - TOP, H + t - front, HAIR);
+        head(out, H, TOP - t, front, t, bottom - TOP + t, H + t - front, HAIR);
+        head(out, -H - t, TOP - t, front, t, bottom - TOP + t, H + t - front, HAIR);
     }
 
     /** Derrière de la tête, jusqu'à {@code bottom}. */
     private static void back(List<Piece> out, float t, float bottom) {
-        head(out, -H, TOP, H, 2 * H, bottom - TOP, t, HAIR);
+        head(out, -H, TOP - t, H, 2 * H, bottom - TOP + t, t, HAIR);
     }
 
     /** Frange droite au-dessus des sourcils. */
