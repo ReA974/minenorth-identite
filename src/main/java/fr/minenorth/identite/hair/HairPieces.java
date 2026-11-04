@@ -35,8 +35,8 @@ public final class HairPieces {
     /** Zone du visage qui doit rester dégagée (face avant de la tête, sous le front). */
     public static final float FACE_TOP = -6.4f, FACE_X = 4.0f, FRONT = -4.0f;
 
-    /** Les cheveux commencent juste au-dessus de la couche extérieure de la tête. */
-    private static final float H = 4.6f, TOP = -8.6f;
+    /** Les cheveux collent à la tête (4,0) et la couche extérieure peinte (4,5) reste dessous. */
+    private static final float H = 4.25f, TOP = -8.25f;
 
     /** Les coiffures qui ont du volume (les autres restent peintes sur le skin). */
     public static List<Piece> forStyle(int style) {
@@ -71,7 +71,7 @@ public final class HairPieces {
             case 13 -> {
                 cap(out, 0.8f);
                 back(out, 0.8f, -3.0f);
-                tail(out, 0f, -4.4f, 4.6f, -10f, 3.6f, 10f, 3.0f);
+                tail(out, 0f, -4.4f, 4.25f, -10f, 3.6f, 10f, 3.0f);
             }
             case 14 -> longHair(out, 1.2f, 9f, 1.0f);
             case 15 -> {
@@ -100,9 +100,9 @@ public final class HairPieces {
             }
             case 19 -> {
                 cap(out, 0.8f);
-                head(out, -1.4f, -9.6f, 3.5f, 2.8f, 1.0f, 2.8f, TIE);
-                out.add(new Piece(Part.HEAD, 0f, -9.0f, 4.1f, 35f, -1.9f, 0f, -1.5f, 3.8f, 4.5f, 3.2f, HAIR));
-                out.add(new Piece(Part.HEAD, 0f, -5.4f, 6.7f, -14f, -1.8f, -0.4f, -1.5f, 3.6f, 11.0f, 3.0f, HAIR));
+                head(out, -1.4f, -9.3f, 3.2f, 2.8f, 1.0f, 2.8f, TIE);
+                out.add(new Piece(Part.HEAD, 0f, -9.0f, 3.8f, 35f, -1.9f, 0f, -1.5f, 3.8f, 4.5f, 3.2f, HAIR));
+                out.add(new Piece(Part.HEAD, 0f, -5.4f, 6.4f, -14f, -1.8f, -0.4f, -1.5f, 3.6f, 11.0f, 3.0f, HAIR));
             }
             case 20 -> {
                 cap(out, 0.8f);
@@ -123,10 +123,10 @@ public final class HairPieces {
                 cap(out, 0.8f);
                 back(out, 0.8f, -3.0f);
                 for (int i = 0; i < 5; i++) {
-                    out.add(new Piece(Part.HEAD, 0f, -3.5f, 4.6f, -9f, -1.7f + (i % 2 == 0 ? 0f : 0.3f), 2.6f * i,
+                    out.add(new Piece(Part.HEAD, 0f, -3.5f, 4.25f, -9f, -1.7f + (i % 2 == 0 ? 0f : 0.3f), 2.6f * i,
                             -0.2f, 3.4f, 2.8f, 2.6f, i % 2 == 0 ? HAIR : SHADOW));
                 }
-                out.add(new Piece(Part.HEAD, 0f, -3.5f, 4.6f, -9f, -1.5f, 13.0f, -0.2f, 3.0f, 1.0f, 2.6f, TIE));
+                out.add(new Piece(Part.HEAD, 0f, -3.5f, 4.25f, -9f, -1.5f, 13.0f, -0.2f, 3.0f, 1.0f, 2.6f, TIE));
             }
             case 23 -> {
                 cap(out, 1.0f);
@@ -195,7 +195,7 @@ public final class HairPieces {
 
     /** Frange droite au-dessus des sourcils. */
     private static void bangs(List<Piece> out) {
-        head(out, -4.7f, -9.4f, -5.5f, 9.4f, 2.8f, 1.0f, HAIR);
+        head(out, -4.7f, -9.4f, -5.0f, 9.4f, 2.8f, 1.0f, HAIR);
     }
 
     /** Cheveux longs : tête, puis rideau dans le dos jusqu'à {@code length} sous le cou. */
