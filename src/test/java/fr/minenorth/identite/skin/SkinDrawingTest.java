@@ -55,7 +55,8 @@ class SkinDrawingTest {
         int[] naked = SkinComposer.compose(Gender.MALE, bare(Gender.MALE));
         int[] p = SkinComposer.compose(Gender.MALE, drawn(Gender.MALE, DrawingKind.BEARD, 4, 7, 3));
         assertEquals(DrawingKind.BEARD.color(3), px(p, 8 + 4, 8 + 7));
-        assertEquals(1, diffCount(naked, p));
+        assertEquals(2, diffCount(naked, p));   // le poil sur la tête et son volume sur la couche extérieure
+        assertEquals(255, px(p, 40 + 4, 8 + 7) >>> 24);
     }
 
     @Test

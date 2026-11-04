@@ -73,7 +73,7 @@ class BeardDetailTest {
             int[] beard = withBeard(style);
             for (int y = 0; y < W; y++) {
                 for (int x = 0; x < W; x++) {
-                    boolean head = y < 16 && x < 32;
+                    boolean head = (y < 16 && x < 32) || (y >= 8 && y < 16 && x >= 32 && x < 56);   // tête + volume sur le devant et les côtés
                     if (!head) assertEquals(none[y * W + x], beard[y * W + x], "style " + style + " touche " + x + "," + y);
                 }
             }

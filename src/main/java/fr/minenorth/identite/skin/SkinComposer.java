@@ -388,7 +388,10 @@ public final class SkinComposer {
         if (style == 0) return;
         int[] f = HEAD.front();
         int hair = Palette.hairColor(beard[1]);
-        for (int[] p : BEARDS[style]) beardPixel(c, f, p[0], p[1], p[0], style, hair, 31 + style);
+        for (int[] p : BEARDS[style]) {
+            beardPixel(c, f, p[0], p[1], p[0], style, hair, 31 + style);
+            beardOuter(c, HEAD_O.front(), p[0], p[1], p[0], style, hair, 31 + style);
+        }
         int[][] sides = beardSides(style);
         int minX = 8;
         for (int[] p : sides) minX = Math.min(minX, p[0]);
@@ -397,10 +400,15 @@ public final class SkinComposer {
             if (p[0] == minX && noise(p[0], p[1], 53) > 0.55) continue;
             beardPixel(c, HEAD.right(), p[0], p[1], p[0], style, hair, 61 + style);
             beardPixel(c, HEAD.left(), 7 - p[0], p[1], p[0], style, hair, 61 + style);
+            beardOuter(c, HEAD_O.right(), p[0], p[1], p[0], style, hair, 61 + style);
+            beardOuter(c, HEAD_O.left(), 7 - p[0], p[1], p[0], style, hair, 61 + style);
         }
     }
 
-    /** Un poil : barbe de quelques jours = peau teintée par endroits ; sinon poil plein, plus clair en haut, plus sombre en bas. */
+    /**
+     * Un poil sur la tête : barbe de quelques jours = peau teintée par endroits ; sinon poil plein, plus clair en haut,
+     * plus sombre en bas, et assombri pour servir de couche de fond sous le volume de la couche extérieure.
+     */
     private static void beardPixel(Canvas c, int[] rect, int dx, int dy, int noiseX, int style, int hair, int salt) {
         double n = noise(noiseX, dy, salt);   // même bruit des deux côtés : la barbe est symétrique
         if (style == 1) {
@@ -409,8 +417,21 @@ public final class SkinComposer {
             c.mixRel(rect, dx, dy, hair, 0.25 + 0.15 * n);
         } else {
             double light = dy <= 5 ? 1.06 : 0.94;
-            c.rel(rect, dx, dy, Palette.shade(hair, (0.85 + 0.25 * n) * light));
+            c.rel(rect, dx, dy, Palette.shade(hair, (0.85 + 0.25 * n) * light * 0.78));
         }
+    }
+
+    /**
+     * Le volume : le même poil sur la couche extérieure de la tête, qui flotte un peu au-dessus. Plein pour une vraie barbe,
+     * transparent pour une barbe de quelques jours (duvet). Même placement que la couche de fond.
+     */
+    private static void beardOuter(Canvas c, int[] rect, int dx, int dy, int noiseX, int style, int hair, int salt) {
+        double n = noise(noiseX, dy, salt);
+        if (style == 1 && n <= 0.3) return;
+        int alpha = style == 1 ? 0xA0 : style == 2 ? 0x70 : 0xFF;
+        double light = dy <= 5 ? 1.08 : 0.96;
+        int color = Palette.shade(hair, (0.97 + 0.2 * noise(noiseX, dy, salt + 100)) * light);
+        c.rel(rect, dx, dy, (color & 0x00FFFFFF) | (alpha << 24));
     }
 
     // ------------------------------------------------------------------ cheveux (couche extérieure)
@@ -455,40 +476,80 @@ public final class SkinComposer {
             hair(255, new int[]{3, 4, 3, 4, 3, 4, 3, 4}, fill(8), fill(8), new int[]{10, 11, 10, 12, 12, 10, 11, 10}),         // 26 boucles longues
             hair(255, fill(4), new int[]{7, 7, 7, 7, 6, 5, 4, 3}, fill(7), fill(0))};                                         // 27 bob à frange
 
+    /** Texture des mèches par coupe : 0 droites, 1 ondulées, 2 bouclées (par paquets), 3 lisses et brillantes. */
+    private static final int[] HAIR_TEXTURE = {0,
+            3, 0, 0, 3, 0, 3, 1, 3,                          // 1 à 8 : rasée, brosse, court, dégradé, crête, gominé, frange, banane
+            1, 1, 2, 2, 0, 0,                                // 9 à 14 : désordonnée, mi-longue, bouclée, afro, queue basse, longs lisses
+            0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 2, 3};          // 15 à 27 : carré … bob à frange
+
     private static void paintHair(Canvas c, int[] hair) {
         if (hair[0] == 0) return;
-        Hair h = HAIRS[hair[0]];
+        int style = hair[0];
+        Hair h = HAIRS[style];
         int base = Palette.hairColor(hair[1]);
         int[] top = HEAD_O.top();
-        for (int dy = 0; dy < 8; dy++) for (int dx = 0; dx < 8; dx++) {
-            if (((h.topMask >> dx) & 1) != 0) strand(c, top, dx, dy, base, hair[0], true);
+        for (int dy = 0; dy < 8; dy++) {
+            for (int dx = 0; dx < 8; dx++) {
+                if (((h.topMask >> dx) & 1) == 0) continue;
+                strand(c, top, dx, dy, base, style, true, 8);
+                underlay(c, HEAD.top(), dx, dy, base);
+            }
         }
         int[] front = HEAD_O.front();
         int[] right = HEAD_O.right();
         int[] left = HEAD_O.left();
         int[] back = HEAD_O.back();
+        int longest = 0;
         for (int dx = 0; dx < 8; dx++) {
-            column(c, front, dx, h.front[dx], base, hair[0]);
-            column(c, right, dx, h.side[dx], base, hair[0]);
-            column(c, left, dx, h.side[7 - dx], base, hair[0]);
-            column(c, back, dx, h.back[dx], base, hair[0]);
-            column(c, BODY_O.back(), dx, h.extra[dx], base, hair[0]);
+            column(c, front, null, dx, h.front[dx], base, style);                 // devant : jamais de couche dessous (le visage)
+            column(c, right, HEAD.right(), dx, h.side[dx], base, style);
+            column(c, left, HEAD.left(), dx, h.side[7 - dx], base, style);
+            column(c, back, HEAD.back(), dx, h.back[dx], base, style);
+            column(c, BODY_O.back(), null, dx, h.extra[dx], base, style);
+            longest = Math.max(longest, h.extra[dx]);
+        }
+        if (longest >= 9) {
+            // cheveux longs : des mèches retombent aussi devant les épaules
+            for (int dx : new int[]{0, 1, 6, 7}) column(c, BODY_O.front(), null, dx, longest / 3, base, style);
         }
     }
 
-    private static void column(Canvas c, int[] rect, int dx, int rows, int base, int style) {
+    /** Couche sombre sous la couche extérieure : la tête ne laisse pas voir la peau à travers les cheveux, et ça crée du relief. */
+    private static void underlay(Canvas c, int[] baseRect, int dx, int dy, int base) {
+        c.rel(baseRect, dx, dy, Palette.shade(base, 0.5 + 0.12 * noise(baseRect[0] + dx, baseRect[1] + dy, 5)));
+    }
+
+    private static void column(Canvas c, int[] rect, int[] under, int dx, int rows, int base, int style) {
         for (int dy = 0; dy < Math.min(rows, rect[3]); dy++) {
             // pointe irrégulière : certaines mèches s'arrêtent un cran plus haut
             if (dy == rows - 1 && rows > 1 && noise(rect[0] + dx, rect[1] + dy, 77) > 0.7) continue;
-            strand(c, rect, dx, dy, base, style, false);
+            strand(c, rect, dx, dy, base, style, false, rows);
+            if (under != null) underlay(c, under, dx, dy, base);
         }
     }
 
-    /** Un pixel de cheveu : mèches verticales, reflets en haut et variations discrètes. */
-    private static void strand(Canvas c, int[] rect, int dx, int dy, int base, int style, boolean topFace) {
-        double f = 0.84 + 0.26 * noise(rect[0] + dx, rect[1] + dy, 13 + style);
-        if (((dx + (dy >> 1)) % 3) == 0) f *= 0.93;
-        if (topFace && dy >= 2 && dy <= 3) f *= 1.1;
+    /**
+     * Un pixel de cheveu : grain, mèches selon la texture de la coupe, dôme et reflet sur le dessus, dessous des mèches
+     * plus sombre.
+     */
+    private static void strand(Canvas c, int[] rect, int dx, int dy, int base, int style, boolean topFace, int rows) {
+        int texture = HAIR_TEXTURE[style];
+        double f = 0.86 + 0.24 * noise(rect[0] + dx, rect[1] + dy, 13 + style);
+        switch (texture) {
+            case 0 -> { if (dx % 3 == 0) f *= 0.92; }
+            case 1 -> f *= ((dx + dy / 2) % 4) < 2 ? 0.9 : 1.07;
+            case 2 -> f = 0.76 + 0.4 * noise(rect[0] + dx / 2, rect[1] + dy / 2, 91 + style);
+            default -> {
+                f = 0.93 + 0.12 * noise(rect[0] + dx, rect[1] + dy, 13 + style);
+                if (dy == 1 || dy == 2) f *= 1.1;
+            }
+        }
+        if (topFace) {
+            f *= 1.1 - 0.035 * Math.hypot(dx - 3.5, dy - 3.5);
+            if (texture != 3 && dy >= 2 && dy <= 3) f *= 1.06;
+        } else if (dy == rows - 1) {
+            f *= 0.8;
+        }
         if (style == 22 && rect == BODY_O.back()) f *= (dy % 2 == 0) ? 1.0 : 0.82;
         c.rel(rect, dx, dy, Palette.shade(base, f));
     }
@@ -502,12 +563,24 @@ public final class SkinComposer {
     private static void paintDrawings(Canvas c, Drawings drawings, Box rArm, Box lArm) {
         drawGrid(c, drawings, DrawingKind.FACE, HEAD.front(), false);
         drawGrid(c, drawings, DrawingKind.BEARD, HEAD.front(), false);
+        drawBeardOuter(c, drawings);
         drawGrid(c, drawings, DrawingKind.TATTOO_TORSO, BODY.front(), true);
         drawGrid(c, drawings, DrawingKind.TATTOO_BACK, BODY.back(), true);
         drawGrid(c, drawings, DrawingKind.TATTOO_RIGHT_ARM, rArm.front(), true);
         drawGrid(c, drawings, DrawingKind.TATTOO_LEFT_ARM, lArm.front(), true);
         drawGrid(c, drawings, DrawingKind.TATTOO_LEGS, R_LEG.front(), true);
         drawGrid(c, drawings, DrawingKind.TATTOO_LEGS, L_LEG.front(), true);
+    }
+
+    /** Le volume d'une barbe dessinée : même case sur la couche extérieure de la tête, un peu éclaircie. */
+    private static void drawBeardOuter(Canvas c, Drawings drawings) {
+        byte[] grid = drawings.get(DrawingKind.BEARD);
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                int index = grid[y * 8 + x];
+                if (index != 0) c.rel(HEAD_O.front(), x, y, Palette.shade(DrawingKind.BEARD.color(index), 1.04));
+            }
+        }
     }
 
     private static void drawGrid(Canvas c, Drawings drawings, DrawingKind kind, int[] rect, boolean blend) {
