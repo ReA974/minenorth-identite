@@ -34,6 +34,9 @@ public final class PlayerInfoSkin {
     private static boolean ready, failed;
     private static final Set<UUID> overridden = new HashSet<>();
 
+    /** Vrai si le skin créé est bien posé dans le PlayerInfo : tout le jeu (dont la main en vue subjective) le lit alors tout seul. */
+    static boolean works() { return init(); }
+
     private static boolean init() {
         if (ready) return true;
         if (failed) return false;

@@ -1,6 +1,7 @@
 package fr.minenorth.identite.client.skin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -27,24 +28,33 @@ public class SkinPlayerRenderer extends PlayerRenderer {
         return ClientSkins.active(player.getUUID()).map(ClientSkins.Entry::texture).orElseGet(() -> super.getTextureLocation(player));
     }
 
-    // En vue subjective, vanilla dessine la main avec player.getSkinTextureLocation() et non getTextureLocation() :
-    // on la redessine avec notre texture.
+    // En vue subjective, vanilla dessine la main avec player.getSkinTextureLocation(). PlayerInfoSkin y met déjà le skin créé :
+    // on laisse donc vanilla dessiner le bras (pose calculée d'après l'objet tenu, et les mods d'armes comme TACZ qui
+    // repositionnent le bras s'y attendent). Redessiner nous-mêmes reprenait la pose du dernier rendu à la 3e personne
+    // (bras tendu pour viser) : un bras énorme et étiré traversait l'écran avec une arme en main.
+    // Repli seulement si PlayerInfoSkin n'a pas pu poser la texture.
 
     @Override
     public void renderRightHand(PoseStack ps, MultiBufferSource buf, int light, AbstractClientPlayer player) {
-        hand(ps, buf, light, player, getModel().rightArm, getModel().rightSleeve);
+        if (PlayerInfoSkin.works() || ClientSkins.active(player.getUUID()).isEmpty()) super.renderRightHand(ps, buf, light, player);
+        else hand(ps, buf, light, player, getModel().rightArm, getModel().rightSleeve);
     }
 
     @Override
     public void renderLeftHand(PoseStack ps, MultiBufferSource buf, int light, AbstractClientPlayer player) {
-        hand(ps, buf, light, player, getModel().leftArm, getModel().leftSleeve);
+        if (PlayerInfoSkin.works() || ClientSkins.active(player.getUUID()).isEmpty()) super.renderLeftHand(ps, buf, light, player);
+        else hand(ps, buf, light, player, getModel().leftArm, getModel().leftSleeve);
     }
 
     private void hand(PoseStack ps, MultiBufferSource buf, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve) {
         PlayerModel<AbstractClientPlayer> model = getModel();
-        model.setAllVisible(true);
-        model.leftSleeve.visible = player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
-        model.rightSleeve.visible = player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
+        model.setAllVisible(false);
+        arm.visible = true;
+        sleeve.visible = arm == model.leftArm ? player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE) : player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
+        // pas de pose héritée du rendu à la 3e personne (arme épaulée, arc…) ni d'échelle laissée par un calque
+        model.rightArmPose = HumanoidModel.ArmPose.EMPTY;
+        model.leftArmPose = HumanoidModel.ArmPose.EMPTY;
+        for (ModelPart p : new ModelPart[]{arm, sleeve}) { p.resetPose(); p.xScale = 1f; p.yScale = 1f; p.zScale = 1f; }
         model.attackTime = 0.0F;
         model.crouching = false;
         model.swimAmount = 0.0F;
@@ -54,5 +64,6 @@ public class SkinPlayerRenderer extends PlayerRenderer {
         arm.render(ps, buf.getBuffer(RenderType.entitySolid(texture)), light, OverlayTexture.NO_OVERLAY);
         sleeve.xRot = 0.0F;
         sleeve.render(ps, buf.getBuffer(RenderType.entityTranslucent(texture)), light, OverlayTexture.NO_OVERLAY);
+        model.setAllVisible(true);
     }
 }
