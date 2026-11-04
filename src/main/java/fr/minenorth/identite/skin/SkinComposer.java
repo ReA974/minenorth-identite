@@ -652,34 +652,56 @@ public final class SkinComposer {
 
     // ------------------------------------------------------------------ tatouages
 
-    /** Tuiles 4x4 : « # » encre, « b » seconde couleur. Les trois premières colonnes diffèrent d'un motif à l'autre. */
-    private static final String[] TILES = {
-            "#.#..#.##.#..#.#", "#....#....#....#", "#..#.##..##.#..#", "####.##..##.####",
-            "..#..###..#.....", "#.#.....#.#.....", "##...##...###..#", "#.b..#.bb.#..b.#",
-            ".##.#bb##bb#.##.", "#bb#.##..##.#bb#", "b#bb#b#bbb#bb#b#", "#.####.##.##.#.#"};
+    /**
+     * Les 12 motifs, dessinés en 8×8 : « # » contour, « o » couleur principale, « a » couleur secondaire, « . » rien.
+     * Sur le torse et le dos le dessin est posé tel quel ; sur un bras, une jambe ou la joue il est réduit en gardant
+     * les colonnes et lignes 1, 3, 4 et 6 (la réduction reste symétrique).
+     */
+    private static final String[][] DESIGNS = {
+            {"...##...", "..#oo#..", "###oo###", "#oooooo#", ".#oooo#.", "..#oo#..", ".#o##o#.", ".##..##."},   // 1 étoile
+            {".##..##.", "#oo##oo#", "#aooooo#", "#oooooo#", ".#oooo#.", "..#oo#..", "...##...", "........"},   // 2 cœur
+            {"...##...", "..#oo#..", "###oo###", "#oooooo#", "###oo###", "..#oo#..", "..#oo#..", "..####.."},   // 3 croix
+            {"..####..", "..#oo#..", "...oo...", ".oooooo.", "...oo...", "o..oo..o", "oo.oo.oo", ".oooooo."},   // 4 ancre
+            {"..####..", ".#oooo#.", "#oo##oo#", "#o#oo#o#", ".#oooo#.", "..#aa#..", ".#a##a#.", "..#..#.."},   // 5 rose
+            {"..####..", ".#oooo#.", "#oooooo#", "#o#oo#o#", "#oooooo#", ".##oo##.", "..#aa#..", "...##..."},   // 6 crâne
+            {"#......#", "##....##", "#o#..#o#", "#oo##oo#", "#oooooo#", ".#oooo#.", "..#oo#..", "...##..."},   // 7 ailes
+            {"...##...", "..#oo#..", ".#ooo#..", ".#oaoo#.", "#oaaaoo#", "#oaaaoo#", ".#oaoo#.", "..####.."},   // 8 flamme
+            {"....##..", "...#oo#.", "..#oo#..", ".#oo#...", "#oooooo#", "...#oo#.", "..#oo#..", ".##o#..."},   // 9 éclair
+            {"#..##..#", ".#.oo.#.", "..oooo..", "#oaaaao#", "#oaaaao#", "..oooo..", ".#.oo.#.", "#..##..#"},   // 10 soleil
+            {"#..##..#", "##.##.##", "#oo##oo#", "#oooooo#", "#oaooao#", "#oooooo#", "########", "........"},   // 11 couronne
+            {"#......#", "##....##", "#oo..oo#", ".#oooo#.", "..#oo#..", ".#oooo#.", "#oo..oo#", "##....##"}};  // 12 tribal
+
+    /** Couleur principale et couleur secondaire de chaque motif (le contour est toujours un noir bleuté). */
+    private static final int[][] DESIGN_COLORS = {
+            {0xFF4A8AD0, 0xFF1A2A5A}, {0xFFD03030, 0xFFE87070}, {0xFF5A5A66, 0xFFE8E8F0}, {0xFF2A5AA0, 0xFF4A8AD0},
+            {0xFFD03030, 0xFF2A6A3A}, {0xFFE8E8F0, 0xFF5A5A66}, {0xFF5A5A66, 0xFFE8E8F0}, {0xFFE08030, 0xFFE0C040},
+            {0xFFE0C040, 0xFFE08030}, {0xFFE0C040, 0xFFE08030}, {0xFFE0C040, 0xFFD03030}, {0xFF1A2A5A, 0xFF14141E}};
+
+    private static final int OUTLINE = 0xFF14141E;
+    private static final int[] REDUCED = {1, 3, 4, 6};
+    private static final int[] FULL = {0, 1, 2, 3, 4, 5, 6, 7};
 
     private static void paintTattoos(Canvas c, int[] t, Box rArm, Box lArm) {
-        tattoo(c, HEAD.front(), 0, 4, 4, 4, t[0]);
-        tattoo(c, BODY.front(), 1, 1, 6, 8, t[1]);
-        tattoo(c, BODY.back(), 1, 1, 6, 8, t[2]);
-        for (int[] side : rArm.sides()) tattoo(c, side, 0, 1, side[2], 10, t[3]);
-        for (int[] side : lArm.sides()) tattoo(c, side, 0, 1, side[2], 10, t[4]);
-        for (Box leg : new Box[]{R_LEG, L_LEG}) for (int[] side : leg.sides()) tattoo(c, side, 0, 2, side[2], 9, t[5]);
+        design(c, HEAD.front(), 0, 4, t[0], REDUCED, REDUCED);            // joue
+        design(c, BODY.front(), 0, 2, t[1], FULL, FULL);                  // torse
+        design(c, BODY.back(), 0, 2, t[2], FULL, FULL);                   // dos
+        design(c, rArm.front(), 0, 2, t[3], REDUCED, FULL);               // bras droit : une figure sur le devant
+        design(c, lArm.front(), 0, 2, t[4], REDUCED, FULL);               // bras gauche
+        design(c, R_LEG.front(), 0, 2, t[5], REDUCED, FULL);              // jambes
+        design(c, L_LEG.front(), 0, 2, t[5], REDUCED, FULL);
     }
 
-    private static void tattoo(Canvas c, int[] rect, int ox, int oy, int w, int h, int motif) {
+    /** Pose le motif dans la zone ; colonnes et lignes du dessin d'origine à garder (réduction). Mélangé à la peau comme de l'encre. */
+    private static void design(Canvas c, int[] rect, int ox, int oy, int motif, int[] cols, int[] rows) {
         if (motif <= 0) return;
-        String tile = TILES[motif - 1];
-        int ink = Palette.ink(1 + motif % 6);
-        int accent = Palette.shade(Palette.ink(1 + (motif + 3) % 6), 1.7);
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                char ch = tile.charAt((y % 4) * 4 + (x % 4));
+        String[] art = DESIGNS[motif - 1];
+        int[] colors = DESIGN_COLORS[motif - 1];
+        for (int y = 0; y < rows.length; y++) {
+            for (int x = 0; x < cols.length; x++) {
+                char ch = art[rows[y]].charAt(cols[x]);
                 if (ch == '.' || !c.inside(rect, ox + x, oy + y)) continue;
-                boolean edge = x == 0 || y == 0 || x == w - 1 || y == h - 1;
-                int color = ch == '#' ? ink : accent;
-                c.set(rect[0] + ox + x, rect[1] + oy + y,
-                        Palette.mix(c.relGet(rect, ox + x, oy + y), edge ? Palette.shade(color, 0.8) : color, 0.88));
+                int color = ch == '#' ? OUTLINE : ch == 'o' ? colors[0] : colors[1];
+                c.set(rect[0] + ox + x, rect[1] + oy + y, Palette.mix(c.relGet(rect, ox + x, oy + y), color, 0.9));
             }
         }
     }

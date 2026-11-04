@@ -42,8 +42,7 @@ public final class OptionLabels {
             Map.entry("MAKEUP/eyes", new String[]{"Aucun", "Léger", "Smoky", "Eye-liner", "Eye-liner ailé", "Pailleté"}),
             Map.entry("MAKEUP/blush", new String[]{"Aucun", "Léger", "Pommettes", "Soleil", "Intense"}));
 
-    private static final String[] TATTOO_MOTIFS = {"Aucun", "Damier", "Diagonales", "Losanges", "Carrés", "Croix",
-            "Points", "Tribal", "Bicolore", "Anneaux", "Sablier", "Mosaïque", "Irrégulier"};
+private static final String[] TATTOO_MOTIFS = {"Aucun", "Étoile", "Cœur", "Croix", "Ancre", "Rose", "Crâne",            "Ailes", "Flamme", "Éclair", "Soleil", "Couronne", "Tribal"};
 
     public static boolean isColor(String key) {
         return key.equals("color") || key.equals("tone") || key.endsWith("Color");
