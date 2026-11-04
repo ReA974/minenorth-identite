@@ -18,12 +18,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 /**
- * Fauteuil de salon. Clic droit : si un professionnel est dans le salon, l'éditeur d'apparence s'ouvre chez le client,
+ * Fauteuil de salon. Clic droit : l'éditeur d'apparence s'ouvre chez le joueur,
  * limité à ce que le salon permet (tatouages et piercings, ou cheveux et pilosité).
  */
 public class ChairBlock extends HorizontalDirectionalBlock {
@@ -54,17 +50,6 @@ public class ChairBlock extends HorizontalDirectionalBlock {
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (level.isClientSide) return InteractionResult.SUCCESS;
         if (!(player instanceof ServerPlayer client)) return InteractionResult.PASS;
-        List<Set<String>> nearby = new ArrayList<>();
-        double max = SalonKind.RADIUS * SalonKind.RADIUS;
-        for (ServerPlayer other : client.server.getPlayerList().getPlayers()) {
-            if (other != client && other.level() == level && other.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= max) {
-                nearby.add(other.getTags());
-            }
-        }
-        if (!kind.allowed(client.hasPermissions(2), client.getTags(), nearby)) {
-            client.displayClientMessage(Component.literal("§c" + kind.missingMessage()), true);
-            return InteractionResult.CONSUME;
-        }
         if (!CharacterManager.openEditor(client.server, client.getUUID(), kind.sections())) {
             client.displayClientMessage(Component.literal("§cCréez d'abord votre personnage."), true);
         }
