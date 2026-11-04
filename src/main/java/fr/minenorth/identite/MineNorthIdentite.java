@@ -9,6 +9,7 @@ public class MineNorthIdentite {
     public static final String MOD_ID="minenorthidentite";
     public MineNorthIdentite(){
         IEventBus bus=FMLJavaModLoadingContext.get().getModEventBus();
+        fr.minenorth.identite.salon.ModBlocks.BLOCKS.register(bus);
         ModItems.ITEMS.register(bus);
         ModNetwork.register();
         net.minecraftforge.fml.ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON,

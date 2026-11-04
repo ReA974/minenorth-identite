@@ -16,5 +16,10 @@ public final class SharedTab {
         if (!e.getTabKey().location().equals(new ResourceLocation("minenorthapi", "minenorth"))) return;
         e.accept(ModItems.UNDERWEAR_MALE.get());
         e.accept(ModItems.UNDERWEAR_FEMALE.get());
+        e.accept(ModItems.TATTOO_CHAIR.get());
+        e.accept(ModItems.TATTOO_TABLE.get());
+        e.accept(ModItems.BARBER_CHAIR.get());
+        e.accept(ModItems.BARBER_TABLE.get());
+        e.accept(ModItems.BARBER_MIRROR.get());
     }
 }

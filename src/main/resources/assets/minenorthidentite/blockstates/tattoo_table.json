@@ -1,0 +1,1 @@
+{"variants":{"facing=north":{"model":"minenorthidentite:block/tattoo_table"},"facing=east":{"model":"minenorthidentite:block/tattoo_table","y":90},"facing=south":{"model":"minenorthidentite:block/tattoo_table","y":180},"facing=west":{"model":"minenorthidentite:block/tattoo_table","y":270}}}

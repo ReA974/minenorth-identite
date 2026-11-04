@@ -1,5 +1,10 @@
 {
   "item.minenorthidentite.identity_card": "Carte d'identité",
   "item.minenorthidentite.underwear_male": "Caleçon",
-  "item.minenorthidentite.underwear_female": "Sous-vêtements (femme)"
+  "item.minenorthidentite.underwear_female": "Sous-vêtements (femme)",
+  "block.minenorthidentite.tattoo_chair": "Fauteuil de tatouage",
+  "block.minenorthidentite.tattoo_table": "Desserte de tatoueur",
+  "block.minenorthidentite.barber_chair": "Fauteuil de coiffeur",
+  "block.minenorthidentite.barber_table": "Desserte de coiffeur",
+  "block.minenorthidentite.barber_mirror": "Miroir de coiffeur"
 }

@@ -1,0 +1,1 @@
+{"variants":{"facing=north":{"model":"minenorthidentite:block/barber_mirror"},"facing=east":{"model":"minenorthidentite:block/barber_mirror","y":90},"facing=south":{"model":"minenorthidentite:block/barber_mirror","y":180},"facing=west":{"model":"minenorthidentite:block/barber_mirror","y":270}}}
