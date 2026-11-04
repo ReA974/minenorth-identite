@@ -17,7 +17,7 @@ import java.util.function.Supplier;
  * serveur refuse : pas de déconnexion. Les numéros de couleur des dessins sont vérifiés par le serveur (palette).
  */
 public record EditorSavePacket(Map<AppearanceSection, int[]> edits, Map<DrawingKind, byte[]> drawings) {
-    private static final int MAX_VALUES = 16;
+    private static final int MAX_VALUES = 32;
 
     /** Modification du catalogue seulement. */
     public EditorSavePacket(Map<AppearanceSection, int[]> edits) { this(edits, Map.of()); }

@@ -61,4 +61,16 @@ class EditorPacketCodecTest {
         b.writeVarInt(1_000_000);
         assertTrue(EditorSavePacket.decode(b).edits().isEmpty());
     }
+
+    @Test
+    void everySectionWithAllItsValuesSurvivesTheTrip() {
+        for (AppearanceSection s : AppearanceSection.values()) {
+            int[] values = Catalog.defaults(Gender.MALE).get(s);
+            io.netty.buffer.ByteBuf raw = io.netty.buffer.Unpooled.buffer();
+            net.minecraft.network.FriendlyByteBuf b = new net.minecraft.network.FriendlyByteBuf(raw);
+            EditorSavePacket.encode(new EditorSavePacket(Map.of(s, values)), b);
+            EditorSavePacket p = EditorSavePacket.decode(b);
+            assertArrayEquals(values, p.edits().get(s), "section " + s);
+        }
+    }
 }
