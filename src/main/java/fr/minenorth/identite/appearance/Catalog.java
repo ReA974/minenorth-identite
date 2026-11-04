@@ -63,7 +63,8 @@ public final class Catalog {
                 new Slot("leftArm", 31), new Slot("leftArmSize", 3),
                 new Slot("legs", 31), new Slot("legsSize", 3),
                 new Slot("ink", 3),
-                new Slot("rightArmFace", 4), new Slot("rightArmHeight", 5), new Slot("leftArmFace", 4), new Slot("leftArmHeight", 5)));
+                new Slot("rightArmFace", 4), new Slot("rightArmHeight", 5), new Slot("leftArmFace", 4), new Slot("leftArmHeight", 5),
+                new Slot("torsoX", 9), new Slot("torsoY", 13), new Slot("backX", 9), new Slot("backY", 13), new Slot("legSide", 3)));
     }
 
     public static List<Slot> slots(AppearanceSection section) { return SLOTS.get(section); }

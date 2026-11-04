@@ -34,6 +34,7 @@ public final class TattooSalonScreen extends Screen {
     private static final int[] VIEW_CAMS = {0, 3, 5, 4};
     private static final String[] SIZES = {"Petit", "Moyen", "Grand"};
     private static final String[] INKS = {"Couleurs", "Noir", "Gris"};
+    private static final String[] LEGS = {"Les deux", "Droite", "Gauche"};
     private static final String[] FACES = {"Avant", "Ext.", "Int.", "Arrière"};
     private static final String[] HEIGHTS = {"Centré", "Épaule", "Bras", "Avant-bras", "Poignet"};
 
@@ -46,6 +47,7 @@ public final class TattooSalonScreen extends Screen {
     private Appearance previewAppearance;
     private Gender previewGender;
 
+    private int padX, padY;
     private int px, py, pw, ph, bodyTop, bodyBottom, gridX, viewX, viewW, optX, optW;
 
     private TattooSalonScreen(CreatorState state, Consumer<CreatorState> onSave) {
@@ -83,6 +85,52 @@ public final class TattooSalonScreen extends Screen {
     }
 
     private TattooZone zone() { return ZONES[zone]; }
+
+    /** Torse et dos : le tatouage se place oÃ¹ on veut. */
+    private boolean isPlaceable() { return zone() == TattooZone.TORSO || zone() == TattooZone.BACK; }
+
+    private int xSlot() { return zone() == TattooZone.TORSO ? TattooZone.TORSO_X_SLOT : TattooZone.BACK_X_SLOT; }
+
+    private int ySlot() { return zone() == TattooZone.TORSO ? TattooZone.TORSO_Y_SLOT : TattooZone.BACK_Y_SLOT; }
+
+    /** Cases occupÃ©es par le tatouage (taille petit, moyen, grand) : 4, 6 ou 8. */
+    private int span() { return 4 + 2 * tattoos()[zone().sizeSlot()]; }
+
+    private int ox() { int v = tattoos()[xSlot()]; return v > 0 ? Math.min(v - 1, 8 - span()) : (8 - span()) / 2; }
+
+    private int oy() {
+        int v = tattoos()[ySlot()];
+        int size = tattoos()[zone().sizeSlot()];
+        return v > 0 ? Math.min(v - 1, 12 - span()) : (size == 2 ? 2 : 3);
+    }
+
+    private boolean overPad(double mx, double my) { return isPlaceable() && over((int) mx, (int) my, padX, padY, 48, 72); }
+
+    /** Place le centre du tatouage sur la case cliquÃ©e du schÃ©ma. */
+    private void placeAt(double mx, double my) {
+        int cx = (int) ((mx - padX) / 6), cy = (int) ((my - padY) / 6);
+        int x = Math.max(0, Math.min(8 - span(), cx - span() / 2));
+        int y = Math.max(0, Math.min(12 - span(), cy - span() / 2));
+        int[] t = tattoos();
+        if (t[xSlot()] == x + 1 && t[ySlot()] == y + 1) return;
+        t[xSlot()] = x + 1;
+        t[ySlot()] = y + 1;
+        state.set(AppearanceSection.TATTOOS, t);
+    }
+
+    /** SchÃ©ma du torse (8 Ã— 12 cases) : le carrÃ© clair montre oÃ¹ sera le tatouage ; on clique pour le dÃ©placer. */
+    private void drawPad(GuiGraphics g, int mx, int my, int x, int y) {
+        g.drawString(font, "Position (cliquez)", x, y, MineNorthStyle.MUTED, false);
+        padX = x;
+        padY = y + 10;
+        g.fill(padX - 1, padY - 1, padX + 49, padY + 73, MineNorthStyle.CYAN);
+        g.fill(padX, padY, padX + 48, padY + 72, 0xFF6B4A38);
+        int s = span(), ox = ox(), oy = oy();
+        g.fill(padX + ox * 6, padY + oy * 6, padX + (ox + s) * 6, padY + (oy + s) * 6, 0xCCFFE066);
+        g.drawString(font, "Cliquez ou glissez", padX + 56, padY + 4, MineNorthStyle.MUTED, false);
+        g.drawString(font, "pour placer le", padX + 56, padY + 14, MineNorthStyle.MUTED, false);
+        g.drawString(font, "tatouage.", padX + 56, padY + 24, MineNorthStyle.MUTED, false);
+    }
 
     private boolean isArm() { return zone() == TattooZone.RIGHT_ARM || zone() == TattooZone.LEFT_ARM; }
 
@@ -179,6 +227,10 @@ public final class TattooSalonScreen extends Screen {
             y = row(g, mx, my, x, y, "Taille", SIZES, t[zone().sizeSlot()], zone().sizeSlot(), 3);
         }
         y = row(g, mx, my, x, y, "Encre", INKS, t[TattooZone.INK_SLOT], TattooZone.INK_SLOT, 3);
+        if (zone() == TattooZone.LEGS) {
+            row(g, mx, my, x, y, "Jambe", LEGS, t[TattooZone.LEG_SIDE_SLOT], TattooZone.LEG_SIDE_SLOT, 3);
+        }
+        if (isPlaceable()) drawPad(g, mx, my, x, y);
         if (isArm()) {
             y = row(g, mx, my, x, y, "Face du bras", FACES, t[faceSlot()], faceSlot(), 4);
             row(g, mx, my, x, y, "Hauteur", HEIGHTS, t[heightSlot()], heightSlot(), 3);
@@ -220,6 +272,10 @@ public final class TattooSalonScreen extends Screen {
 
     @Override public boolean mouseClicked(double mx, double my, int button) {
         if (button == 0) {
+            if (overPad(mx, my)) {
+                placeAt(mx, my);
+                return true;
+            }
             for (Hit h : hits) {
                 if (over((int) mx, (int) my, h.x, h.y, h.w, h.h)) {
                     h.action.run();
@@ -231,6 +287,10 @@ public final class TattooSalonScreen extends Screen {
     }
 
     @Override public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+        if (button == 0 && overPad(mx, my)) {
+            placeAt(mx, my);
+            return true;
+        }
         if (button == 0 && over((int) mx, (int) my, viewX, bodyTop, viewW, bodyBottom - bodyTop - 22)) {
             yaw += (float) dx * 1.5f;
             return true;

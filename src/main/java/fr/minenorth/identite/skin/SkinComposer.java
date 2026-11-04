@@ -849,8 +849,8 @@ public final class SkinComposer {
         sized(c, BODY.back(), t, TattooZone.BACK, true);
         sized(c, armFace(rArm, true, t[TattooZone.RIGHT_ARM_FACE_SLOT]), t, TattooZone.RIGHT_ARM, false, t[TattooZone.RIGHT_ARM_HEIGHT_SLOT]);
         sized(c, armFace(lArm, false, t[TattooZone.LEFT_ARM_FACE_SLOT]), t, TattooZone.LEFT_ARM, false, t[TattooZone.LEFT_ARM_HEIGHT_SLOT]);
-        sized(c, R_LEG.front(), t, TattooZone.LEGS, false);
-        sized(c, L_LEG.front(), t, TattooZone.LEGS, false);
+        if (t[TattooZone.LEG_SIDE_SLOT] != 2) sized(c, R_LEG.front(), t, TattooZone.LEGS, false);
+        if (t[TattooZone.LEG_SIDE_SLOT] != 1) sized(c, L_LEG.front(), t, TattooZone.LEGS, false);
     }
 
     /** Torse et dos : figure réduite à 4×4 ou 6×6 au centre de la poitrine ; bras et jambes : 4 de large, 4, 6 ou 8 de haut. */
@@ -879,6 +879,12 @@ public final class SkinComposer {
         int ox = wide ? (8 - cols.length) / 2 : 0;
         int oy = size == 0 ? (wide ? 3 : 4) : size == 1 ? 3 : 2;
         if (height > 0) oy = Math.min(ARM_START[height], 12 - rows.length);
+        if (wide) {
+            int xs = t[zone == TattooZone.TORSO ? TattooZone.TORSO_X_SLOT : TattooZone.BACK_X_SLOT];
+            int ys = t[zone == TattooZone.TORSO ? TattooZone.TORSO_Y_SLOT : TattooZone.BACK_Y_SLOT];
+            if (xs > 0) ox = Math.min(xs - 1, 8 - cols.length);
+            if (ys > 0) oy = Math.min(ys - 1, 12 - rows.length);
+        }
         design(c, rect, ox, oy, motif, cols, rows, ink);
     }
 

@@ -56,7 +56,7 @@ class TattooZoneTest {
         CompoundTag tag = Catalog.defaults(Gender.MALE).toTag();
         tag.putIntArray(AppearanceSection.TATTOOS.name(), new int[]{3, 5, 7, 9, 11, 12});
         int[] t = Appearance.fromTag(tag).get(AppearanceSection.TATTOOS);
-        assertEquals(16, t.length);
+        assertEquals(21, t.length);
         assertEquals(3, t[TattooZone.FACE_NECK.motifSlot()]);
         assertEquals(5, t[TattooZone.TORSO.motifSlot()]);
         assertEquals(2, t[TattooZone.TORSO.sizeSlot()]);
