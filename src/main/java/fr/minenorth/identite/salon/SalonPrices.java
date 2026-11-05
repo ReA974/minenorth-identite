@@ -31,7 +31,30 @@ public final class SalonPrices {
 
     public static long quote(SalonKind kind, Appearance before, Appearance after) {
         if (kind == null) return 0;
-        return kind == SalonKind.TATTOO ? tattoos(before, after) + piercings(before, after) : hair(before, after);
+        return switch (kind) {
+            case TATTOO -> tattoos(before, after) + piercings(before, after);
+            case HAIR -> hair(before, after);
+            case MAKEUP -> makeup(before, after);
+        };
+    }
+
+    /** Maquillage : lèvres, yeux, joues (la couleur seule se paie moins cher), particularité de la peau, teint. */
+    public static final long LIPS = 1_500, EYES = 2_000, BLUSH = 1_000, MAKEUP_COLOR = 500, SKIN_MARK = 2_500, SKIN_TONE = 4_000;
+
+    private static long makeup(Appearance before, Appearance after) {
+        int[] b = before.get(AppearanceSection.MAKEUP), a = after.get(AppearanceSection.MAKEUP);
+        long total = part(b[0], a[0], b[1], a[1], LIPS) + part(b[2], a[2], b[3], a[3], EYES) + part(b[4], a[4], b[5], a[5], BLUSH);
+        int[] sb = before.get(AppearanceSection.SKIN), sa = after.get(AppearanceSection.SKIN);
+        if (sb[1] != sa[1] && sa[1] != 0) total += SKIN_MARK;
+        if (sb[0] != sa[0]) total += SKIN_TONE;
+        return total;
+    }
+
+    /** Un maquillage : rien si on l'enlève ; le prix plein si le style change ; un petit prix si seule la couleur change. */
+    private static long part(int styleBefore, int styleAfter, int colorBefore, int colorAfter, long price) {
+        if (styleAfter == 0) return 0;
+        if (styleAfter != styleBefore) return price;
+        return colorAfter != colorBefore ? MAKEUP_COLOR : 0;
     }
 
     /** Piercings : ce qui est posé ou changé se paie (et le métal s'il est précieux) ; en retirer un coûte un petit forfait. */

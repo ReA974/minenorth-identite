@@ -146,4 +146,36 @@ class SalonPricesTest {
         Appearance both = pierced(tattoo(BASE, TattooZone.TORSO, 3, 0, 1), 6, 1, 0);
         assertEquals(SalonPrices.TATTOO_SMALL + SalonPrices.PIERCING_NAVEL[1], tattooPrice(BASE, both));
     }
+
+    private static Appearance makeup(Appearance a, int lips, int lipColor, int eyes, int blush) {
+        int[] m = a.get(AppearanceSection.MAKEUP);
+        m[0] = lips;
+        m[1] = lipColor;
+        m[2] = eyes;
+        m[4] = blush;
+        return a.with(AppearanceSection.MAKEUP, m);
+    }
+
+    @Test
+    void makeupIsPaidAtTheMakeupSalon() {
+        assertEquals(0, SalonPrices.quote(SalonKind.MAKEUP, BASE, BASE));
+        assertEquals(SalonPrices.LIPS, SalonPrices.quote(SalonKind.MAKEUP, BASE, makeup(BASE, 2, 0, 0, 0)));
+        assertEquals(SalonPrices.LIPS + SalonPrices.EYES + SalonPrices.BLUSH, SalonPrices.quote(SalonKind.MAKEUP, BASE, makeup(BASE, 2, 0, 3, 1)));
+    }
+
+    @Test
+    void onlyChangingTheColorCostsLess() {
+        Appearance has = makeup(BASE, 2, 0, 0, 0);
+        assertEquals(SalonPrices.MAKEUP_COLOR, SalonPrices.quote(SalonKind.MAKEUP, has, makeup(has, 2, 3, 0, 0)));
+        assertTrue(SalonPrices.MAKEUP_COLOR < SalonPrices.LIPS);
+        assertEquals(0, SalonPrices.quote(SalonKind.MAKEUP, has, makeup(has, 0, 0, 0, 0)), "retirer un maquillage est gratuit");
+    }
+
+    @Test
+    void marksAndSkinToneArePaid() {
+        Appearance mark = BASE.with(AppearanceSection.SKIN, new int[]{BASE.get(AppearanceSection.SKIN)[0], 2});
+        assertEquals(SalonPrices.SKIN_MARK, SalonPrices.quote(SalonKind.MAKEUP, BASE, mark));
+        Appearance tan = BASE.with(AppearanceSection.SKIN, new int[]{6, 0});
+        assertEquals(SalonPrices.SKIN_TONE, SalonPrices.quote(SalonKind.MAKEUP, BASE, tan));
+    }
 }

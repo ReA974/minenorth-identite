@@ -31,6 +31,20 @@ public final class OptionPreview {
         int[] values = current.get(section);
         values[slot] = value;
         Appearance a = current.with(section, values);
+        // une vignette montre seulement l'option : ni maquillage, ni particularités, ni marque du visage, ni piercing d'une autre section
+        if (section != AppearanceSection.MAKEUP) {
+            int[] makeup = a.get(AppearanceSection.MAKEUP);
+            a = a.with(AppearanceSection.MAKEUP, new int[makeup.length]);
+        }
+        if (section != AppearanceSection.SKIN) {
+            int[] skin = a.get(AppearanceSection.SKIN);
+            a = a.with(AppearanceSection.SKIN, new int[]{skin[0], 0});
+        }
+        if (section != AppearanceSection.TATTOOS) {
+            int[] tattoos = a.get(AppearanceSection.TATTOOS);
+            tattoos[0] = 0;
+            a = a.with(AppearanceSection.TATTOOS, tattoos);
+        }
         // on retire ce qui cacherait l'option : cheveux, barbe, tête importée
         int[] hair = a.get(AppearanceSection.HAIR);
         a = a.with(AppearanceSection.HAIR, new int[]{0, hair[1]});

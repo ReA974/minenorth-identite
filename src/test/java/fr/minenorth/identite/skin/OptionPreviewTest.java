@@ -77,4 +77,12 @@ class OptionPreviewTest {
         List<int[]> images = tiles(Gender.FEMALE, AppearanceSection.BODY, 0, "build");
         assertEquals(images.size(), images.stream().map(java.util.Arrays::hashCode).distinct().count());
     }
+
+    @Test
+    void aFaceTileNeverShowsMakeupOrMarks() {
+        Appearance made = base(Gender.FEMALE).with(AppearanceSection.MAKEUP, new int[]{3, 1, 2, 1, 4, 1}).with(AppearanceSection.SKIN, new int[]{3, 2});
+        int[] withMakeup = OptionPreview.of(Gender.FEMALE, made, AppearanceSection.FACE, 0, "eyes", 2).argb();
+        int[] plain = OptionPreview.of(Gender.FEMALE, base(Gender.FEMALE).with(AppearanceSection.SKIN, new int[]{3, 0}), AppearanceSection.FACE, 0, "eyes", 2).argb();
+        assertArrayEquals(plain, withMakeup);
+    }
 }
