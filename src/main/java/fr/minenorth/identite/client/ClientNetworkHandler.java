@@ -10,7 +10,9 @@ public final class ClientNetworkHandler {
         // Le serveur redemande l'écran périodiquement : ne rien faire si la création (ou un dessin qui en dépend) est à l'écran.
         net.minecraft.client.gui.screens.Screen current = Minecraft.getInstance().screen;
         boolean creator = current instanceof fr.minenorth.identite.client.creator.CreatorScreen c && c.isCreation();
-        boolean drawing = current instanceof fr.minenorth.identite.client.creator.DrawScreen d && d.belongsToCreation();
+        boolean drawing = current instanceof fr.minenorth.identite.client.creator.DrawScreen d && d.belongsToCreation()
+                || current instanceof fr.minenorth.identite.client.creator.TattooSalonScreen t && t.belongsToCreation()
+                || current instanceof fr.minenorth.identite.client.creator.HairSalonScreen h && h.belongsToCreation();
         if (!fr.minenorth.identite.client.creator.CreationScreens.shouldOpen(creator, drawing)) return;
         Minecraft.getInstance().setScreen(fr.minenorth.identite.client.creator.CreatorScreen.creation());
     }

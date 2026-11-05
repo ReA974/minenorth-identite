@@ -47,6 +47,8 @@ public final class TattooSalonScreen extends Screen {
     private final CreatorState state;
     private final Consumer<CreatorState> onSave;
     private final Appearance original;
+    private final Screen parent;
+    private final boolean free;
     private final List<Hit> hits = new ArrayList<>();
     private int zone = 1;
     private int camera = 1;
@@ -59,15 +61,30 @@ public final class TattooSalonScreen extends Screen {
     private int padX, padY;
     private int px, py, pw, ph, bodyTop, bodyBottom, gridX, viewX, viewW, optX, optW;
 
-    private TattooSalonScreen(CreatorState state, Consumer<CreatorState> onSave) {
+    private TattooSalonScreen(CreatorState state, Consumer<CreatorState> onSave, Screen parent, boolean free) {
         super(Component.literal("Salon de tatouage"));
+        this.parent = parent;
+        this.free = free;
         this.state = state;
         this.onSave = onSave;
         this.original = state.appearance();
     }
 
     public static TattooSalonScreen open(Gender gender, Appearance current, Consumer<CreatorState> onSave) {
-        return new TattooSalonScreen(CreatorState.forEditor(gender, current), onSave);
+        return new TattooSalonScreen(CreatorState.forEditor(gender, current), onSave, null, false);
+    }
+
+    /** Le même carnet, ouvert depuis la création du personnage ou /cidedit : gratuit, et on revient à l'écran d'origine. */
+    public static TattooSalonScreen forCreator(Gender gender, Appearance current, Screen parent, Consumer<CreatorState> onSave) {
+        return new TattooSalonScreen(CreatorState.forEditor(gender, current), onSave, parent, true);
+    }
+
+    /** Vrai si ce carnet a été ouvert depuis la création du personnage (le serveur ne doit pas la rouvrir par-dessus). */
+    public boolean belongsToCreation() { return parent instanceof CreatorScreen c && c.isCreation(); }
+
+    @Override public void onClose() {
+        if (parent != null) minecraft.setScreen(parent);
+        else super.onClose();
     }
 
     @Override protected void init() {
@@ -188,7 +205,7 @@ public final class TattooSalonScreen extends Screen {
     @Override public void render(GuiGraphics g, int mx, int my, float partial) {
         renderBackground(g);
         hits.clear();
-        T.panel(g, px, py, pw, ph, "MINENORTHRP - SALON DE TATOUAGE", "Choisissez un motif, une zone, puis tatouez. Paiement par carte.");
+        T.panel(g, px, py, pw, ph, "MINENORTHRP - SALON DE TATOUAGE", free ? "Choisissez un motif, une zone, puis validez." : "Choisissez un motif, une zone, puis tatouez. Paiement par carte.");
         drawGrid(g, mx, my);
         drawPreview(g, mx, my);
         drawOptions(g, mx, my);
@@ -384,11 +401,11 @@ public final class TattooSalonScreen extends Screen {
 
     private void drawFooter(GuiGraphics g, int mx, int my) {
         int y = py + ph - 24, w = 90, sw = 150;
-        long price = fr.minenorth.identite.salon.SalonPrices.quote(fr.minenorth.identite.salon.SalonKind.TATTOO, original, state.appearance());
+        long price = free ? 0 : fr.minenorth.identite.salon.SalonPrices.quote(fr.minenorth.identite.salon.SalonKind.TATTOO, original, state.appearance());
         int saveX = px + pw - 8 - sw, cancelX = saveX - 6 - w;
         MineNorthStyle.button(g, cancelX, y, w, 20, "Annuler", T.chip, over(mx, my, cancelX, y, w, 20), true);
         hits.add(new Hit(cancelX, y, w, 20, this::onClose));
-        MineNorthStyle.button(g, saveX, y, sw, 20, price > 0 ? "Tatouer · " + MineNorthStyle.euros(price) : "Tatouer", T.confirm, over(mx, my, saveX, y, sw, 20), true);
+        MineNorthStyle.button(g, saveX, y, sw, 20, price > 0 ? "Tatouer · " + MineNorthStyle.euros(price) : free ? "Valider" : "Tatouer", T.confirm, over(mx, my, saveX, y, sw, 20), true);
         hits.add(new Hit(saveX, y, sw, 20, () -> { onSave.accept(state); onClose(); }));
         MineNorthStyle.button(g, px + 8, y, 70, 20, "Défaire", T.chip, over(mx, my, px + 8, y, 70, 20), state.canUndo());
         if (state.canUndo()) hits.add(new Hit(px + 8, y, 70, 20, state::undo));

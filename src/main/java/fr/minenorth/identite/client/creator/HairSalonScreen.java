@@ -36,6 +36,8 @@ public final class HairSalonScreen extends Screen {
     private final CreatorState state;
     private final Consumer<CreatorState> onSave;
     private final Appearance original;
+    private final Screen parent;
+    private final boolean free;
     private final List<Hit> hits = new ArrayList<>();
     private int tab;
     private int view;
@@ -46,15 +48,30 @@ public final class HairSalonScreen extends Screen {
 
     private int px, py, pw, ph, bodyTop, bodyBottom, viewX, viewW, optX, optW, listTop;
 
-    private HairSalonScreen(CreatorState state, Consumer<CreatorState> onSave) {
+    private HairSalonScreen(CreatorState state, Consumer<CreatorState> onSave, Screen parent, boolean free, int tab) {
         super(Component.literal("Salon de coiffure"));
+        this.parent = parent;
+        this.free = free;
+        this.tab = tab;
         this.state = state;
         this.onSave = onSave;
         this.original = state.appearance();
     }
 
     public static HairSalonScreen open(Gender gender, Appearance current, Consumer<CreatorState> onSave) {
-        return new HairSalonScreen(CreatorState.forEditor(gender, current), onSave);
+        return new HairSalonScreen(CreatorState.forEditor(gender, current), onSave, null, false, 0);
+    }
+
+    /** Le même miroir, ouvert depuis la création du personnage ou /cidedit : gratuit, et on revient à l'écran d'origine. */
+    public static HairSalonScreen forCreator(Gender gender, Appearance current, Screen parent, int tab, Consumer<CreatorState> onSave) {
+        return new HairSalonScreen(CreatorState.forEditor(gender, current), onSave, parent, true, tab);
+    }
+
+    public boolean belongsToCreation() { return parent instanceof CreatorScreen c && c.isCreation(); }
+
+    @Override public void onClose() {
+        if (parent != null) minecraft.setScreen(parent);
+        else super.onClose();
     }
 
     @Override protected void init() {
@@ -85,7 +102,7 @@ public final class HairSalonScreen extends Screen {
     @Override public void render(GuiGraphics g, int mx, int my, float partial) {
         renderBackground(g);
         hits.clear();
-        T.panel(g, px, py, pw, ph, "MINENORTHRP - SALON DE COIFFURE", "Choisissez une coupe, une couleur et une barbe. Paiement par carte.");
+        T.panel(g, px, py, pw, ph, "MINENORTHRP - SALON DE COIFFURE", free ? "Choisissez une coupe, une couleur et une barbe." : "Choisissez une coupe, une couleur et une barbe. Paiement par carte.");
         drawMirror(g, mx, my);
         drawOptions(g, mx, my);
         drawFooter(g, mx, my);
@@ -177,11 +194,11 @@ public final class HairSalonScreen extends Screen {
 
     private void drawFooter(GuiGraphics g, int mx, int my) {
         int y = py + ph - 24, w = 170;
-        long price = fr.minenorth.identite.salon.SalonPrices.quote(fr.minenorth.identite.salon.SalonKind.HAIR, original, state.appearance());
+        long price = free ? 0 : fr.minenorth.identite.salon.SalonPrices.quote(fr.minenorth.identite.salon.SalonKind.HAIR, original, state.appearance());
         int saveX = px + pw - 8 - w, cancelX = saveX - 6 - 90;
         MineNorthStyle.button(g, cancelX, y, 90, 20, "Annuler", T.chip, over(mx, my, cancelX, y, 90, 20), true);
         hits.add(new Hit(cancelX, y, 90, 20, this::onClose));
-        MineNorthStyle.button(g, saveX, y, w, 20, price > 0 ? "Valider · " + MineNorthStyle.euros(price) : "Valider la coupe", T.confirm, over(mx, my, saveX, y, w, 20), true);
+        MineNorthStyle.button(g, saveX, y, w, 20, price > 0 ? "Valider · " + MineNorthStyle.euros(price) : free ? "Valider" : "Valider la coupe", T.confirm, over(mx, my, saveX, y, w, 20), true);
         hits.add(new Hit(saveX, y, w, 20, () -> { onSave.accept(state); onClose(); }));
         MineNorthStyle.button(g, px + 8, y, 70, 20, "Défaire", T.chip, over(mx, my, px + 8, y, 70, 20), state.canUndo());
         if (state.canUndo()) hits.add(new Hit(px + 8, y, 70, 20, state::undo));

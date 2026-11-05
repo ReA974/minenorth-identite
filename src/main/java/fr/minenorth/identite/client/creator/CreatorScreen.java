@@ -340,6 +340,9 @@ public final class CreatorScreen extends Screen {
         hits.add(new Hit(right - rw, y - 1, rw, 10, () -> state.resetSection(section)));
         y += 14;
         if (section == AppearanceSection.BODY) y = drawGender(g, hits, y);
+        if (section == AppearanceSection.TATTOOS || section == AppearanceSection.HAIR || section == AppearanceSection.FACIAL_HAIR) {
+            return drawSalonCard(g, hits, y, section, x, right);
+        }
         int[] values = state.appearance().get(section);
         List<Catalog.Slot> slots = Catalog.slots(section);
         for (int i = 0; i < slots.size(); i++) {
@@ -352,6 +355,66 @@ public final class CreatorScreen extends Screen {
             y += 6;
         }
         return drawingButtons(g, hits, section, y, x, right - x);
+    }
+
+    /** Tatouages et coiffure : un résumé et un bouton qui ouvre le même carnet que les salons (plus clair qu'une longue liste). */
+    private int drawSalonCard(GuiGraphics g, List<Hit> hits, int y, AppearanceSection section, int x, int right) {
+        boolean tattoos = section == AppearanceSection.TATTOOS;
+        String intro = tattoos
+                ? "Un carnet de 50 motifs, une carte du corps pour voir et choisir les zones, la taille, l'encre, la position, et même vos propres dessins."
+                : "Un miroir pour voir toute la coupe de face, de profil et de dos, avec les couleurs et les barbes.";
+        for (var part : font.split(Component.literal(intro), right - x)) {
+            g.drawString(font, part, x, y, MineNorthStyle.MUTED, false);
+            y += 10;
+        }
+        y += 6;
+        int[] values = state.appearance().get(section);
+        if (tattoos) {
+            boolean any = false;
+            for (fr.minenorth.identite.appearance.TattooZone zone : fr.minenorth.identite.appearance.TattooZone.values()) {
+                int motif = values[zone.motifSlot()];
+                if (motif <= 0) continue;
+                String key = Catalog.slots(section).get(zone.motifSlot()).key();
+                g.drawString(font, OptionLabels.slot(section, key) + " : " + OptionLabels.option(section, key, motif), x, y, MineNorthStyle.TEXT, false);
+                y += 11;
+                any = true;
+            }
+            if (!any) {
+                g.drawString(font, "Aucun tatouage pour l'instant.", x, y, MineNorthStyle.TEXT, false);
+                y += 11;
+            }
+        } else {
+            int[] hair = state.appearance().get(AppearanceSection.HAIR), beard = state.appearance().get(AppearanceSection.FACIAL_HAIR);
+            g.drawString(font, "Coupe : " + OptionLabels.option(AppearanceSection.HAIR, "style", hair[0]), x, y, MineNorthStyle.TEXT, false);
+            g.fill(right - 14, y - 1, right, y + 9, fr.minenorth.identite.skin.Palette.hairColor(hair[1]) | 0xFF000000);
+            y += 12;
+            g.drawString(font, "Barbe : " + OptionLabels.option(AppearanceSection.FACIAL_HAIR, "style", beard[0]), x, y, MineNorthStyle.TEXT, false);
+            g.fill(right - 14, y - 1, right, y + 9, fr.minenorth.identite.skin.Palette.hairColor(beard[1]) | 0xFF000000);
+            y += 12;
+        }
+        y += 8;
+        String label = tattoos ? "Ouvrir le carnet de tatouages" : "Ouvrir le miroir de coiffure";
+        int tab = section == AppearanceSection.FACIAL_HAIR ? 1 : 0;
+        hits.add(button(g, x, y, right - x, 24, label, tattoos ? 0xFFE0465E : 0xFFE8B84A, () -> openSalon(section, tab)));
+        return y + 32;
+    }
+
+    /** Ouvre le carnet (tatouages) ou le miroir (cheveux, barbe) sur l'apparence en cours ; « Valider » la reporte ici. */
+    private void openSalon(AppearanceSection section, int tab) {
+        Appearance now = state.appearance();
+        if (section == AppearanceSection.TATTOOS) {
+            minecraft.setScreen(TattooSalonScreen.forCreator(state.gender(), now, this, edited -> {
+                state.set(AppearanceSection.TATTOOS, edited.appearance().get(AppearanceSection.TATTOOS));
+                for (fr.minenorth.identite.drawing.DrawingKind kind : fr.minenorth.identite.drawing.DrawingKind.values()) {
+                    if (kind.section() == AppearanceSection.TATTOOS) state.setDrawing(kind, edited.appearance().drawings().get(kind));
+                }
+            }));
+        } else {
+            minecraft.setScreen(HairSalonScreen.forCreator(state.gender(), now, this, tab, edited -> {
+                state.set(AppearanceSection.HAIR, edited.appearance().get(AppearanceSection.HAIR));
+                state.set(AppearanceSection.FACIAL_HAIR, edited.appearance().get(AppearanceSection.FACIAL_HAIR));
+            }));
+        }
     }
 
     /** Boutons « Dessiner » des dessins de cette section (visage, barbe, tatouages), avec une pastille si déjà dessiné. */
