@@ -41,6 +41,7 @@ public final class TattooSalonScreen extends Screen {
     private static final String[] INKS = {"Couleurs", "Noir", "Gris"};
     private static final String[] FACES = {"Avant", "Ext.", "Int.", "Arrière"};
     private static final String[] HEIGHTS = {"Centré", "Épaule", "Bras", "Avant-bras", "Poignet"};
+    private static final String[] LEG_HEIGHTS = {"Centré", "Haut", "Cuisse", "Mollet", "Cheville"};
     private static final int[] ARM_START = {-1, 0, 3, 6, 8};
     private static final int SKIN = 0xFF9A6C50, SKIN_DARK = 0xFF6E4A36;
 
@@ -55,6 +56,7 @@ public final class TattooSalonScreen extends Screen {
     private float yaw;
     private int scroll;
     private boolean mapBack;
+    private boolean underwear = true;
     private Appearance previewAppearance;
     private Gender previewGender;
 
@@ -115,11 +117,32 @@ public final class TattooSalonScreen extends Screen {
 
     private boolean isArm() { return zone() == TattooZone.RIGHT_ARM || zone() == TattooZone.LEFT_ARM; }
 
+    /** Bras et jambes : face et hauteur au choix. */
+    private boolean isLimb() { return isArm() || zone() == TattooZone.RIGHT_LEG || zone() == TattooZone.LEFT_LEG; }
+
     private boolean isPlaceable() { return zone() == TattooZone.TORSO || zone() == TattooZone.BACK; }
 
-    private int faceSlot() { return zone() == TattooZone.RIGHT_ARM ? TattooZone.RIGHT_ARM_FACE_SLOT : TattooZone.LEFT_ARM_FACE_SLOT; }
+    private int faceSlot() { return faceSlotOf(zone()); }
 
-    private int heightSlot() { return zone() == TattooZone.RIGHT_ARM ? TattooZone.RIGHT_ARM_HEIGHT_SLOT : TattooZone.LEFT_ARM_HEIGHT_SLOT; }
+    private static int faceSlotOf(TattooZone z) {
+        return switch (z) {
+            case RIGHT_ARM -> TattooZone.RIGHT_ARM_FACE_SLOT;
+            case LEFT_ARM -> TattooZone.LEFT_ARM_FACE_SLOT;
+            case RIGHT_LEG -> TattooZone.RIGHT_LEG_FACE_SLOT;
+            default -> TattooZone.LEFT_LEG_FACE_SLOT;
+        };
+    }
+
+    private static int heightSlotOf(TattooZone z) {
+        return switch (z) {
+            case RIGHT_ARM -> TattooZone.RIGHT_ARM_HEIGHT_SLOT;
+            case LEFT_ARM -> TattooZone.LEFT_ARM_HEIGHT_SLOT;
+            case RIGHT_LEG -> TattooZone.RIGHT_LEG_HEIGHT_SLOT;
+            default -> TattooZone.LEFT_LEG_HEIGHT_SLOT;
+        };
+    }
+
+    private int heightSlot() { return heightSlotOf(zone()); }
 
     private int xSlot() { return zone() == TattooZone.TORSO ? TattooZone.TORSO_X_SLOT : TattooZone.BACK_X_SLOT; }
 
@@ -146,8 +169,8 @@ public final class TattooSalonScreen extends Screen {
             int ys = t[z == TattooZone.TORSO ? TattooZone.TORSO_Y_SLOT : TattooZone.BACK_Y_SLOT];
             if (xs > 0) ox = Math.min(xs - 1, 8 - w);
             if (ys > 0) oy = Math.min(ys - 1, 12 - h);
-        } else if (z == TattooZone.RIGHT_ARM || z == TattooZone.LEFT_ARM) {
-            int hs = t[z == TattooZone.RIGHT_ARM ? TattooZone.RIGHT_ARM_HEIGHT_SLOT : TattooZone.LEFT_ARM_HEIGHT_SLOT];
+        } else if (z != TattooZone.FACE_NECK) {
+            int hs = t[heightSlotOf(z)];
             if (hs > 0) oy = Math.min(ARM_START[hs], 12 - h);
         }
         return new int[]{ox, oy, w, h};
@@ -274,8 +297,10 @@ public final class TattooSalonScreen extends Screen {
     private void drawPreview(GuiGraphics g, int mx, int my) {
         int h = bodyBottom - bodyTop - 22;
         g.fillGradient(viewX, bodyTop, viewX + viewW, bodyTop + h, 0xFFFF9F6B, 0xFFFFD9A0);
-        if (previewAppearance == null || !state.appearance().equals(previewAppearance) || state.gender() != previewGender) {
-            previewAppearance = state.appearance();
+        // l'aperçu peut se faire sans sous-vêtements pour bien voir les tatouages (la fiche n'est pas modifiée)
+        Appearance shown = underwear ? state.appearance() : state.appearance().withOutfit(fr.minenorth.identite.clothing.Outfit.EMPTY);
+        if (previewAppearance == null || !shown.equals(previewAppearance) || state.gender() != previewGender) {
+            previewAppearance = shown;
             previewGender = state.gender();
             ClientSkins.preview(previewGender, previewAppearance);
         }
@@ -283,6 +308,7 @@ public final class TattooSalonScreen extends Screen {
         int[] hair = state.appearance().get(AppearanceSection.HAIR);
         PreviewRenderer.render(g, viewX, bodyTop, viewW, h, state.gender(), ClientSkins.previewLocation(),
                 cam.yaw() + yaw, cam.zoom(), cam.focus(), hair[0], hair[1]);
+        chip(g, mx, my, viewX + 2, bodyTop + 2, Math.min(96, viewW - 4), underwear ? "Sans sous-vêt." : "Avec sous-vêt.", !underwear, () -> underwear = !underwear);
         int bw = viewW / VIEW_NAMES.length;
         for (int i = 0; i < VIEW_NAMES.length; i++) {
             final int cam2 = VIEW_CAMS[i];
@@ -353,9 +379,9 @@ public final class TattooSalonScreen extends Screen {
             g.drawString(font, "Petites marques discrètes,", colX, y, T.muted, false);
             g.drawString(font, "choisies dans le carnet.", colX, y + 10, T.muted, false);
         }
-        if (isArm()) {
-            y = row(g, mx, my, colX, y, colW, "Face du bras", FACES, t[faceSlot()], faceSlot(), 4);
-            row(g, mx, my, colX, y, colW, "Hauteur", HEIGHTS, t[heightSlot()], heightSlot(), 3);
+        if (isLimb()) {
+            y = row(g, mx, my, colX, y, colW, isArm() ? "Face du bras" : "Face de la jambe", FACES, t[faceSlot()], faceSlot(), 4);
+            row(g, mx, my, colX, y, colW, "Hauteur", isArm() ? HEIGHTS : LEG_HEIGHTS, t[heightSlot()], heightSlot(), 3);
         }
         int below = bodyTop + 102;
         chip(g, mx, my, optX, below, 52, mapBack ? "Devant" : "Dos", false, () -> {

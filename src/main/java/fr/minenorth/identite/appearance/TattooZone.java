@@ -21,7 +21,7 @@ public enum TattooZone {
     public static final int INK_SLOT = 11;
 
     /** Nombre d'emplacements de la section TATTOOS : les zones puis l'encre. */
-    public static final int TOTAL_SLOTS = 22;
+    public static final int TOTAL_SLOTS = 26;
 
     /** Position libre du tatouage sur le torse et le dos : colonne et ligne (0 = centré comme avant, puis 1 à 8 et 1 à 12). */
     public static final int TORSO_X_SLOT = 16, TORSO_Y_SLOT = 17, BACK_X_SLOT = 18, BACK_Y_SLOT = 19;
@@ -36,6 +36,7 @@ public enum TattooZone {
      */
     public static int[] upgrade(int[] old) {
         if (old.length == TOTAL_SLOTS) return old;
+        if (old.length >= 22) return java.util.Arrays.copyOf(old, TOTAL_SLOTS);   // sans face ni hauteur de jambe
         if (old.length == 6) old = migrateLegacy(old);
         int side = old.length == 21 ? old[20] : 0;   // 0 les deux, 1 droite, 2 gauche
         int[] out = java.util.Arrays.copyOf(old, TOTAL_SLOTS);
@@ -51,6 +52,9 @@ public enum TattooZone {
         }
         return out;
     }
+
+    /** Face (avant, extérieur, intérieur, arrière) et hauteur (centré, haut, cuisse, mollet, cheville) des tatouages de jambe. */
+    public static final int RIGHT_LEG_FACE_SLOT = 22, RIGHT_LEG_HEIGHT_SLOT = 23, LEFT_LEG_FACE_SLOT = 24, LEFT_LEG_HEIGHT_SLOT = 25;
 
     /** Nombre de figures du catalogue. */
     public static final int MOTIFS = 50;

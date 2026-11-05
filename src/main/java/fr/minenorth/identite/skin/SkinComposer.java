@@ -101,11 +101,28 @@ public final class SkinComposer {
         paintBuild(c, body[0], rArm, lArm);
         if (gender == Gender.FEMALE) paintChest(c, body[0]);
         paintLowerBody(c, gender);
-        paintMarks(c, skin[1], tone);
-        paintFace(c, face, Palette.hairColor(hair[1]), tone);
-        paintMakeup(c, makeup, tone);
-        paintFacialHair(c, beard, tone);
-        paintTattoos(c, tattoos, rArm, lArm);
+        // Une tête importée (dessin du visage) remplace les pixels du visage : sourcils, taches, maquillage, barbe et marques
+        // du catalogue sont alors posés par-dessus, une seule fois, pour qu'on puisse encore les choisir.
+        boolean faceDrawn = hasFaceDrawing(a.drawings());
+        int hairColor = Palette.hairColor(hair[1]);
+        if (!faceDrawn) {
+            paintMarks(c, skin[1], tone);
+            paintBrows(c, face[2], hairColor, tone);
+        }
+        paintFace(c, face, hairColor, tone);
+        if (!faceDrawn) {
+            paintMakeup(c, makeup, tone);
+            paintFacialHair(c, beard, tone);
+        }
+        paintTattoos(c, tattoos, rArm, lArm, faceDrawn);
+        drawGrid(c, a.drawings(), DrawingKind.FACE, HEAD.front(), false);
+        if (faceDrawn) {
+            paintMarks(c, skin[1], tone);
+            paintBrows(c, face[2], hairColor, tone);
+            paintMakeup(c, makeup, tone);
+            paintFacialHair(c, beard, tone);
+            faceMark(c, tattoos[TattooZone.FACE_NECK.motifSlot()]);
+        }
         paintDrawings(c, a.drawings(), rArm, lArm);
         paintPiercings(c, a.get(AppearanceSection.PIERCINGS));
         paintOutfit(c, a.outfit());
@@ -225,6 +242,11 @@ public final class SkinComposer {
         }
     }
 
+    private static boolean hasFaceDrawing(Drawings drawings) {
+        for (byte b : drawings.get(DrawingKind.FACE)) if (b != 0) return true;
+        return false;
+    }
+
     private static void paintMarks(Canvas c, int marks, int tone) {
         int[] f = HEAD.front();
         int dark = Palette.shade(tone, 0.7);
@@ -257,10 +279,10 @@ public final class SkinComposer {
             {"WI"}, {"II"}, {"WI", "WI"}, {"LL", "WI"}, {"IW"}, {" I", "WI"},
             {"L ", "WI"}, {"LL", "IW"}, {"L ", "II"}, {" L", "WI"}};
 
-    private static void paintFace(Canvas c, int[] face, int hairColor, int tone) {
+    private static void paintBrows(Canvas c, int style, int hairColor, int tone) {
         int[] f = HEAD.front();
         int brow = Palette.mix(Palette.shade(hairColor, 0.85), tone, 0.15);
-        switch (face[2]) {
+        switch (style) {
             case 0 -> { for (int dx : new int[]{1, 2, 5, 6}) c.rel(f, dx, 3, brow); }
             case 1 -> {
                 for (int dx : new int[]{1, 2, 5, 6}) { c.rel(f, dx, 3, brow); c.rel(f, dx, 2, Palette.mix(tone, brow, 0.7)); }
@@ -270,6 +292,10 @@ public final class SkinComposer {
             case 4 -> { c.rel(f, 1, 2, brow); c.rel(f, 2, 3, brow); c.rel(f, 5, 3, brow); c.rel(f, 6, 2, brow); }
             default -> { }
         }
+    }
+
+    private static void paintFace(Canvas c, int[] face, int hairColor, int tone) {
+        int[] f = HEAD.front();
         int iris = Palette.eyeColor(face[1]);
         String[] rows = EYES[face[0]];
         for (int r = 0; r < rows.length; r++) {
@@ -619,7 +645,6 @@ public final class SkinComposer {
      * se mélangent à la peau. Une case transparente ne change rien ; ce qui dépasse la zone (bras fins) est coupé.
      */
     private static void paintDrawings(Canvas c, Drawings drawings, Box rArm, Box lArm) {
-        drawGrid(c, drawings, DrawingKind.FACE, HEAD.front(), false);
         drawGrid(c, drawings, DrawingKind.BEARD, HEAD.front(), false);
         drawBeardOuter(c, drawings);
         drawGrid(c, drawings, DrawingKind.TATTOO_TORSO, BODY.front(), true);
@@ -661,19 +686,11 @@ public final class SkinComposer {
      */
     private static void paintPiercings(Canvas c, int[] p) {
         int metal = Palette.metal(p[4]);
-        int[][] tones = {{metal}, {Palette.shade(metal, 1.25)}, {Palette.shade(metal, 0.6)}};
-        for (int[] px : earPixels(p[0])) {
-            jewel(c, HEAD.right(), HEAD_O.right(), px[0], px[1], tones[px[2]][0]);
-            jewel(c, HEAD.left(), HEAD_O.left(), 7 - px[0], px[1], tones[px[2]][0]);
-        }
-        for (int[] px : helixPixels(p[5])) {
-            jewel(c, HEAD.right(), HEAD_O.right(), px[0], px[1], tones[px[2]][0]);
-            jewel(c, HEAD.left(), HEAD_O.left(), 7 - px[0], px[1], tones[px[2]][0]);
-        }
-        for (int[] px : navelPixels(p[6])) jewel(c, BODY.front(), BODY_O.front(), px[0], px[1], tones[px[2]][0]);
-        for (int[] px : nosePixels(p[1])) jewel(c, HEAD.front(), HEAD_O.front(), px[0], px[1], tones[px[2]][0]);
-        for (int[] px : browPixels(p[2])) jewel(c, HEAD.front(), HEAD_O.front(), px[0], px[1], tones[px[2]][0]);
-        for (int[] px : lipPixels(p[3])) jewel(c, HEAD.front(), HEAD_O.front(), px[0], px[1], tones[px[2]][0]);
+        int[] tones = {metal, Palette.shade(metal, 1.3), Palette.shade(metal, 0.6)};
+        for (int[] px : nosePixels(p[1])) jewel(c, HEAD.front(), HEAD_O.front(), px[0], px[1], tones[px[2]]);
+        for (int[] px : browPixels(p[2])) jewel(c, HEAD.front(), HEAD_O.front(), px[0], px[1], tones[px[2]]);
+        for (int[] px : lipPixels(p[3])) jewel(c, HEAD.front(), HEAD_O.front(), px[0], px[1], tones[px[2]]);
+        for (int[] px : navelPixels(p[6])) jewel(c, BODY.front(), BODY_O.front(), px[0], px[1], tones[px[2]]);
     }
 
     private static void jewel(Canvas c, int[] baseRect, int[] outerRect, int dx, int dy, int color) {
@@ -681,21 +698,35 @@ public final class SkinComposer {
         c.rel(outerRect, dx, dy, color);
     }
 
-    /** Pixels {colonne, ligne, ton} : ton 0 = métal, 1 = reflet, 2 = ombre. Oreilles : coordonnées de la face droite. */
-    private static int[][] earPixels(int style) {
+    /** Pixels {colonne, ligne, ton} : ton 0 = métal, 1 = reflet, 2 = ombre. */
+    private static int[][] nosePixels(int style) {
         return switch (style) {
-            case 1 -> new int[][]{{3, 5, 1}};
-            case 2 -> new int[][]{{3, 5, 0}, {2, 6, 0}, {4, 6, 0}, {3, 7, 0}};
-            case 3 -> new int[][]{{3, 5, 1}, {3, 6, 2}, {3, 7, 1}};
-            case 4 -> new int[][]{{3, 5, 0}, {2, 6, 0}, {4, 6, 0}, {2, 7, 0}, {4, 7, 0}, {3, 7, 0}};
+            case 1 -> new int[][]{{2, 5, 1}};
+            case 2 -> new int[][]{{5, 5, 1}};
+            case 3 -> new int[][]{{2, 5, 1}, {5, 5, 1}};
+            case 4 -> new int[][]{{2, 5, 0}, {2, 6, 2}};
+            case 5 -> new int[][]{{3, 5, 0}, {4, 5, 0}};
             default -> new int[0][];
         };
     }
 
-    private static int[][] helixPixels(int style) {
+    private static int[][] browPixels(int style) {
         return switch (style) {
-            case 1 -> new int[][]{{2, 3, 1}};
-            case 2 -> new int[][]{{2, 3, 0}, {3, 3, 0}, {3, 4, 0}};
+            case 1 -> new int[][]{{1, 2, 0}, {1, 3, 2}};
+            case 2 -> new int[][]{{1, 2, 1}, {2, 2, 1}};
+            case 3 -> new int[][]{{1, 2, 0}, {1, 3, 2}, {6, 2, 0}, {6, 3, 2}};
+            case 4 -> new int[][]{{1, 2, 1}, {2, 2, 1}, {5, 2, 1}, {6, 2, 1}};
+            default -> new int[0][];
+        };
+    }
+
+    private static int[][] lipPixels(int style) {
+        return switch (style) {
+            case 1 -> new int[][]{{3, 7, 1}};
+            case 2 -> new int[][]{{3, 7, 0}, {4, 7, 2}};
+            case 3 -> new int[][]{{2, 7, 1}, {5, 7, 1}};
+            case 4 -> new int[][]{{5, 6, 1}};
+            case 5 -> new int[][]{{3, 6, 1}};
             default -> new int[0][];
         };
     }
@@ -706,32 +737,7 @@ public final class SkinComposer {
             case 1 -> new int[][]{{3, 7, 1}};
             case 2 -> new int[][]{{3, 7, 0}, {4, 7, 0}};
             case 3 -> new int[][]{{3, 7, 0}, {3, 8, 2}, {3, 9, 1}};
-            default -> new int[0][];
-        };
-    }
-
-    private static int[][] nosePixels(int style) {
-        return switch (style) {
-            case 1 -> new int[][]{{3, 5, 1}};
-            case 2 -> new int[][]{{3, 5, 0}, {3, 6, 0}};
-            case 3 -> new int[][]{{3, 5, 0}, {4, 5, 0}};
-            default -> new int[0][];
-        };
-    }
-
-    private static int[][] browPixels(int style) {
-        return switch (style) {
-            case 1 -> new int[][]{{2, 2, 0}, {2, 3, 2}};
-            case 2 -> new int[][]{{1, 2, 1}, {2, 2, 1}};
-            default -> new int[0][];
-        };
-    }
-
-    private static int[][] lipPixels(int style) {
-        return switch (style) {
-            case 1 -> new int[][]{{3, 7, 1}};
-            case 2 -> new int[][]{{3, 7, 0}, {4, 7, 2}};
-            case 3 -> new int[][]{{2, 7, 1}, {5, 7, 1}};
+            case 4 -> new int[][]{{3, 7, 1}, {3, 8, 1}};
             default -> new int[0][];
         };
     }
@@ -881,14 +887,14 @@ public final class SkinComposer {
     private static final int FACE_INK = 0xFF2A2A3A;
 
     /** Chaque zone a un motif et une taille : petit (4 cases), moyen (6) ou grand (8). Petit par défaut : très discret. */
-    private static void paintTattoos(Canvas c, int[] t, Box rArm, Box lArm) {
-        faceMark(c, t[TattooZone.FACE_NECK.motifSlot()]);
+    private static void paintTattoos(Canvas c, int[] t, Box rArm, Box lArm, boolean faceDrawn) {
+        if (!faceDrawn) faceMark(c, t[TattooZone.FACE_NECK.motifSlot()]);
         sized(c, BODY.front(), t, TattooZone.TORSO, true);
         sized(c, BODY.back(), t, TattooZone.BACK, true);
         sized(c, armFace(rArm, true, t[TattooZone.RIGHT_ARM_FACE_SLOT]), t, TattooZone.RIGHT_ARM, false, t[TattooZone.RIGHT_ARM_HEIGHT_SLOT]);
         sized(c, armFace(lArm, false, t[TattooZone.LEFT_ARM_FACE_SLOT]), t, TattooZone.LEFT_ARM, false, t[TattooZone.LEFT_ARM_HEIGHT_SLOT]);
-        sized(c, R_LEG.front(), t, TattooZone.RIGHT_LEG, false);
-        sized(c, L_LEG.front(), t, TattooZone.LEFT_LEG, false);
+        sized(c, armFace(R_LEG, true, t[TattooZone.RIGHT_LEG_FACE_SLOT]), t, TattooZone.RIGHT_LEG, false, t[TattooZone.RIGHT_LEG_HEIGHT_SLOT]);
+        sized(c, armFace(L_LEG, false, t[TattooZone.LEFT_LEG_FACE_SLOT]), t, TattooZone.LEFT_LEG, false, t[TattooZone.LEFT_LEG_HEIGHT_SLOT]);
     }
 
     /** Torse et dos : figure réduite à 4×4 ou 6×6 au centre de la poitrine ; bras et jambes : 4 de large, 4, 6 ou 8 de haut. */

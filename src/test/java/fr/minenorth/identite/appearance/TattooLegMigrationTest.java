@@ -26,7 +26,7 @@ class TattooLegMigrationTest {
     @Test
     void bothLegsBecomeTwoTattoos() {
         int[] t = load(withSide(0));
-        assertEquals(22, t.length);
+        assertEquals(26, t.length);
         assertEquals(7, t[TattooZone.RIGHT_LEG.motifSlot()]);
         assertEquals(7, t[TattooZone.LEFT_LEG.motifSlot()]);
         assertEquals(1, t[TattooZone.LEFT_LEG.sizeSlot()]);
@@ -53,7 +53,7 @@ class TattooLegMigrationTest {
         old[9] = 4;
         old[10] = 2;
         int[] t = load(old);
-        assertEquals(22, t.length);
+        assertEquals(26, t.length);
         assertEquals(4, t[TattooZone.RIGHT_LEG.motifSlot()]);
         assertEquals(4, t[TattooZone.LEFT_LEG.motifSlot()]);
         assertEquals(2, t[TattooZone.LEFT_LEG.sizeSlot()]);
@@ -61,7 +61,7 @@ class TattooLegMigrationTest {
 
     @Test
     void currentSheetsAreLeftAlone() {
-        int[] t = new int[22];
+        int[] t = new int[26];
         t[TattooZone.RIGHT_LEG.motifSlot()] = 3;
         t[TattooZone.LEFT_LEG.motifSlot()] = 9;
         int[] back = load(t);

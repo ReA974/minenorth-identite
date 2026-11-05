@@ -84,7 +84,13 @@ public final class Appearance {
             // fiche d'avant les tailles de tatouage : on garde les motifs, en grand comme avant
             // fiche d'avant les piercings : aucun piercing
             // fiche d'avant le choix de l'encre : les couleurs du motif
-            if (s == AppearanceSection.TATTOOS && (v.length == 6 || (v.length >= TattooZone.INK_SLOT && v.length < TattooZone.TOTAL_SLOTS + 1))) v = TattooZone.upgrade(v);
+            if (s == AppearanceSection.TATTOOS && (v.length == 6 || (v.length >= TattooZone.INK_SLOT && v.length < TattooZone.TOTAL_SLOTS))) v = TattooZone.upgrade(v);
+            // les piercings d'oreille (lobe et haut de l'oreille) n'existent plus : ils sont retirés des anciennes fiches
+            if (s == AppearanceSection.PIERCINGS && v.length > 0) {
+                v = v.clone();
+                v[0] = 0;
+                if (v.length > 5) v[5] = 0;
+            }
             if (s == AppearanceSection.PIERCINGS && v.length < Catalog.slots(s).size()) {
                 v = java.util.Arrays.copyOf(v, Catalog.slots(s).size());
             }

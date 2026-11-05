@@ -52,8 +52,8 @@ public final class Catalog {
                 new Slot("blush", 5), new Slot("blushColor", 6)));
         // piercings : oreilles, nez, sourcil, lèvre, le métal (argent, or, noir, or rose, acier), haut de l oreille, nombril
         SLOTS.put(AppearanceSection.PIERCINGS, List.of(
-                new Slot("ears", 5), new Slot("nose", 4), new Slot("brow", 3), new Slot("lip", 4), new Slot("metal", 5),
-                new Slot("helix", 3), new Slot("navel", 4)));
+                new Slot("ears", 1), new Slot("nose", 6), new Slot("brow", 5), new Slot("lip", 6), new Slot("metal", 5),
+                new Slot("helix", 1), new Slot("navel", 5)));
         // tatouages : un motif par zone (0 = aucun, 12 motifs) et, sauf au visage, une taille (petit, moyen, grand)
         SLOTS.put(AppearanceSection.TATTOOS, List.of(
                 new Slot("faceNeck", 13),
@@ -65,7 +65,8 @@ public final class Catalog {
                 new Slot("ink", 3),
                 new Slot("rightArmFace", 4), new Slot("rightArmHeight", 5), new Slot("leftArmFace", 4), new Slot("leftArmHeight", 5),
                 new Slot("torsoX", 9), new Slot("torsoY", 13), new Slot("backX", 9), new Slot("backY", 13),
-                new Slot("leftLeg", 51), new Slot("leftLegSize", 3)));
+                new Slot("leftLeg", 51), new Slot("leftLegSize", 3),
+                new Slot("rightLegFace", 4), new Slot("rightLegHeight", 5), new Slot("leftLegFace", 4), new Slot("leftLegHeight", 5)));
     }
 
     public static List<Slot> slots(AppearanceSection section) { return SLOTS.get(section); }

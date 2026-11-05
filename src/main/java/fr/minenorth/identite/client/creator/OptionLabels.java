@@ -23,7 +23,9 @@ public final class OptionLabels {
             Map.entry("TATTOOS/leftArm", "Bras gauche"), Map.entry("TATTOOS/rightLeg", "Jambe droite"), Map.entry("TATTOOS/leftLeg", "Jambe gauche"),
             Map.entry("TATTOOS/torsoSize", "Taille du torse"), Map.entry("TATTOOS/backSize", "Taille du dos"),
             Map.entry("TATTOOS/rightArmSize", "Taille du bras droit"), Map.entry("TATTOOS/leftArmSize", "Taille du bras gauche"),
-            Map.entry("TATTOOS/rightLegSize", "Taille de la jambe droite"), Map.entry("TATTOOS/leftLegSize", "Taille de la jambe gauche"), Map.entry("TATTOOS/ink", "Encre"), Map.entry("TATTOOS/torsoX", "Position du torse (colonne)"), Map.entry("TATTOOS/torsoY", "Position du torse (ligne)"),
+            Map.entry("TATTOOS/rightLegSize", "Taille de la jambe droite"), Map.entry("TATTOOS/leftLegSize", "Taille de la jambe gauche"), Map.entry("TATTOOS/ink", "Encre"),
+            Map.entry("TATTOOS/rightLegFace", "Face de la jambe droite"), Map.entry("TATTOOS/rightLegHeight", "Hauteur sur la jambe droite"),
+            Map.entry("TATTOOS/leftLegFace", "Face de la jambe gauche"), Map.entry("TATTOOS/leftLegHeight", "Hauteur sur la jambe gauche"), Map.entry("TATTOOS/torsoX", "Position du torse (colonne)"), Map.entry("TATTOOS/torsoY", "Position du torse (ligne)"),
             Map.entry("TATTOOS/backX", "Position du dos (colonne)"), Map.entry("TATTOOS/backY", "Position du dos (ligne)"), Map.entry("TATTOOS/rightArmFace", "Face du bras droit"), Map.entry("TATTOOS/rightArmHeight", "Hauteur sur le bras droit"),
             Map.entry("TATTOOS/leftArmFace", "Face du bras gauche"), Map.entry("TATTOOS/leftArmHeight", "Hauteur sur le bras gauche"),
             Map.entry("PIERCINGS/ears", "Oreilles"), Map.entry("PIERCINGS/nose", "Nez"), Map.entry("PIERCINGS/brow", "Sourcil"),
@@ -51,13 +53,11 @@ public final class OptionLabels {
             Map.entry("MAKEUP/lips", new String[]{"Aucun", "Fin", "Plein", "Brillant", "Dégradé", "Mat sombre"}),
             Map.entry("MAKEUP/eyes", new String[]{"Aucun", "Léger", "Smoky", "Eye-liner", "Eye-liner ailé", "Pailleté"}),
             Map.entry("MAKEUP/blush", new String[]{"Aucun", "Léger", "Pommettes", "Soleil", "Intense"}),
-            Map.entry("PIERCINGS/ears", new String[]{"Aucun", "Clou", "Anneau", "Pendant", "Grand anneau"}),
-            Map.entry("PIERCINGS/nose", new String[]{"Aucun", "Clou", "Anneau", "Septum"}),
-            Map.entry("PIERCINGS/brow", new String[]{"Aucun", "Anneau", "Barre"}),
-            Map.entry("PIERCINGS/lip", new String[]{"Aucun", "Labret", "Anneau", "Double"}),
+            Map.entry("PIERCINGS/nose", new String[]{"Aucun", "Clou droit", "Clou gauche", "Deux clous", "Anneau", "Septum"}),
+            Map.entry("PIERCINGS/brow", new String[]{"Aucun", "Anneau", "Barre", "Deux anneaux", "Deux barres"}),
+            Map.entry("PIERCINGS/lip", new String[]{"Aucun", "Labret", "Anneau", "Snake bites", "Monroe", "Medusa"}),
             Map.entry("PIERCINGS/metal", new String[]{"Argent", "Or", "Noir", "Or rose", "Acier"}),
-            Map.entry("PIERCINGS/helix", new String[]{"Aucun", "Clou", "Anneau"}),
-            Map.entry("PIERCINGS/navel", new String[]{"Aucun", "Clou", "Anneau", "Pendant"}));
+            Map.entry("PIERCINGS/navel", new String[]{"Aucun", "Clou", "Anneau", "Pendant", "Barre"}));
 
 private static final String[] TATTOO_MOTIFS = {"Aucun", "Étoile", "Cœur", "Croix", "Ancre", "Rose", "Crâne",            "Ailes", "Flamme", "Éclair", "Soleil", "Couronne", "Tribal",
             "Lune", "Papillon", "Serpent", "Poignard", "Plume", "Trèfle", "Dé", "Boussole", "Cible", "Note", "Clé", "Lotus",
@@ -77,7 +77,8 @@ private static final String[] TATTOO_MOTIFS = {"Aucun", "Étoile", "Cœur", "Cro
     private static String[] tattooNames(String key) {
         if (key.endsWith("Size")) return TATTOO_SIZES;
         if (key.equals("ink")) return TATTOO_INKS;
-        if (key.endsWith("ArmFace")) return ARM_FACES;
+        if (key.endsWith("ArmFace") || key.endsWith("LegFace")) return ARM_FACES;
+        if (key.endsWith("LegHeight")) return new String[]{"Centré", "Haut", "Cuisse", "Mollet", "Cheville"};
         if (key.endsWith("X") || key.endsWith("Y")) return POSITIONS;
         if (key.endsWith("ArmHeight")) return ARM_HEIGHTS;
         return key.equals("faceNeck") ? FACE_MARKS : TATTOO_MOTIFS;
