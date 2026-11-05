@@ -17,6 +17,8 @@ public final class ModItems {
     public static final RegistryObject<Item> BARBER_CHAIR = block("barber_chair", fr.minenorth.identite.salon.ModBlocks.BARBER_CHAIR);
     public static final RegistryObject<Item> BARBER_TABLE = block("barber_table", fr.minenorth.identite.salon.ModBlocks.BARBER_TABLE);
     public static final RegistryObject<Item> BARBER_MIRROR = block("barber_mirror", fr.minenorth.identite.salon.ModBlocks.BARBER_MIRROR);
+    public static final RegistryObject<Item> MAKEUP_CHAIR = block("makeup_chair", fr.minenorth.identite.salon.ModBlocks.MAKEUP_CHAIR);
+    public static final RegistryObject<Item> MAKEUP_TABLE = block("makeup_table", fr.minenorth.identite.salon.ModBlocks.MAKEUP_TABLE);
 
     private static RegistryObject<Item> block(String id, RegistryObject<net.minecraft.world.level.block.Block> block) {
         return ITEMS.register(id, () -> new net.minecraft.world.item.BlockItem(block.get(), new Item.Properties()));

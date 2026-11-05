@@ -21,5 +21,7 @@ public final class SharedTab {
         e.accept(ModItems.BARBER_CHAIR.get());
         e.accept(ModItems.BARBER_TABLE.get());
         e.accept(ModItems.BARBER_MIRROR.get());
+        e.accept(ModItems.MAKEUP_CHAIR.get());
+        e.accept(ModItems.MAKEUP_TABLE.get());
     }
 }

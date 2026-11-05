@@ -28,6 +28,10 @@ public final class ClientNetworkHandler {
             Minecraft.getInstance().setScreen(fr.minenorth.identite.client.creator.TattooSalonScreen.open(p.gender(), p.appearance(), save));
             return;
         }
+        if (p.sections().equals(fr.minenorth.identite.salon.SalonKind.MAKEUP.sections())) {
+            Minecraft.getInstance().setScreen(fr.minenorth.identite.client.creator.MakeupSalonScreen.open(p.gender(), p.appearance(), save));
+            return;
+        }
         if (p.sections().equals(fr.minenorth.identite.salon.SalonKind.HAIR.sections())) {
             Minecraft.getInstance().setScreen(fr.minenorth.identite.client.creator.HairSalonScreen.open(p.gender(), p.appearance(), save));
             return;

@@ -65,6 +65,21 @@ public final class SalonTheme {
             "b..b....b..b",
             ".bb......bb."};
 
+    /** Rouge à lèvres : a = rouge, b = or, c = noir. */
+    private static final String[] LIPSTICK = {
+            "....aaaa....",
+            "...aaaaaa...",
+            "...aaaaaa...",
+            "...aaaaaa...",
+            "...bbbbbb...",
+            "...bbbbbb...",
+            "..cccccccc..",
+            "..cccccccc..",
+            "..cccccccc..",
+            "..cccccccc..",
+            "..cccccccc..",
+            "............"};
+
     public static final SalonTheme TATTOO = new SalonTheme(
             0xFF0A0506, 0xFF241619, 0xFF150D0F, 0xFF4E2029, 0xFFE0465E, 0xFFFFFFFF, 0xFF43262C, 0xFFF4E6E6, 0xFFC9A2A8,
             0xFFB02A44, 0xFF7A3A8A, 0xFF8A2E3C, DROP, new int[]{0xFFE0465E, 0xFFFFC0C8, 0xFF14090B});
@@ -72,6 +87,10 @@ public final class SalonTheme {
     public static final SalonTheme HAIR = new SalonTheme(
             0xFF050F10, 0xFF11292F, 0xFF0A1A1F, 0xFF1F5A66, 0xFFE8B84A, 0xFF21180A, 0xFF265560, 0xFFEAF6F2, 0xFF9CC9C2,
             0xFF1E9E7A, 0xFFB07A2A, 0xFF3C8A8A, SCISSORS, new int[]{0xFFE6EAF2, 0xFFE8B84A, 0xFF14090B});
+
+    public static final SalonTheme MAKEUP = new SalonTheme(
+            0xFF140A12, 0xFF2A1426, 0xFF1A0C18, 0xFF5A2A52, 0xFFF08CC0, 0xFF2A0A1E, 0xFF4A2444, 0xFFFBE8F4, 0xFFD0A0C4,
+            0xFFC03A86, 0xFF8A4AA8, 0xFF9A3E7C, LIPSTICK, new int[]{0xFFE8407A, 0xFFE8B84A, 0xFF3A2A38});
 
     /** Fond, cadre, icône à la place du logo, titre et filet, comme les autres écrans MineNorth. */
     public void panel(GuiGraphics g, int left, int top, int w, int h, String title, String subtitle) {

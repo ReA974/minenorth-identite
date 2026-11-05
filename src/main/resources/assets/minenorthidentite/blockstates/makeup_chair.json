@@ -1,0 +1,1 @@
+{"variants":{"facing=north":{"model":"minenorthidentite:block/makeup_chair"},"facing=east":{"model":"minenorthidentite:block/makeup_chair","y":90},"facing=south":{"model":"minenorthidentite:block/makeup_chair","y":180},"facing=west":{"model":"minenorthidentite:block/makeup_chair","y":270}}}

@@ -6,5 +6,7 @@
   "block.minenorthidentite.tattoo_table": "Desserte de tatoueur",
   "block.minenorthidentite.barber_chair": "Fauteuil de coiffeur",
   "block.minenorthidentite.barber_table": "Desserte de coiffeur",
-  "block.minenorthidentite.barber_mirror": "Miroir de coiffeur"
+  "block.minenorthidentite.barber_mirror": "Miroir de coiffeur",
+  "block.minenorthidentite.makeup_chair": "Fauteuil de maquillage",
+  "block.minenorthidentite.makeup_table": "Coiffeuse de maquilleur"
 }

@@ -26,6 +26,10 @@ public final class ModBlocks {
             () -> new ChairBlock(SalonKind.HAIR, props(SoundType.WOOL)));
     public static final RegistryObject<Block> BARBER_TABLE = BLOCKS.register("barber_table",
             () -> new DecorBlock(false, props(SoundType.METAL)));
+    public static final RegistryObject<Block> MAKEUP_CHAIR = BLOCKS.register("makeup_chair",
+            () -> new ChairBlock(SalonKind.MAKEUP, props(SoundType.WOOL)));
+    public static final RegistryObject<Block> MAKEUP_TABLE = BLOCKS.register("makeup_table",
+            () -> new DecorBlock(false, props(SoundType.METAL)));
     public static final RegistryObject<Block> BARBER_MIRROR = BLOCKS.register("barber_mirror",
             () -> new DecorBlock(true, props(SoundType.GLASS)));
 }
