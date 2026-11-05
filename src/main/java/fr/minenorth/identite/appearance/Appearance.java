@@ -82,10 +82,9 @@ public final class Appearance {
         for (AppearanceSection s : AppearanceSection.values()) {
             int[] v = tag.getIntArray(s.name());
             // fiche d'avant les tailles de tatouage : on garde les motifs, en grand comme avant
-            if (s == AppearanceSection.TATTOOS && v.length == 6) v = TattooZone.migrateLegacy(v);
             // fiche d'avant les piercings : aucun piercing
             // fiche d'avant le choix de l'encre : les couleurs du motif
-            if (s == AppearanceSection.TATTOOS && v.length >= TattooZone.INK_SLOT && v.length < TattooZone.TOTAL_SLOTS) v = java.util.Arrays.copyOf(v, TattooZone.TOTAL_SLOTS);
+            if (s == AppearanceSection.TATTOOS && (v.length == 6 || (v.length >= TattooZone.INK_SLOT && v.length < TattooZone.TOTAL_SLOTS + 1))) v = TattooZone.upgrade(v);
             if (s == AppearanceSection.PIERCINGS && v.length < Catalog.slots(s).size()) {
                 v = java.util.Arrays.copyOf(v, Catalog.slots(s).size());
             }

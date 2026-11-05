@@ -45,7 +45,8 @@ class TattooDesignTest {
             case BACK -> sized(32, 20, size, true);
             case RIGHT_ARM -> sized(44, 20, size, false);
             case LEFT_ARM -> sized(36, 52, size, false);
-            case LEGS -> sized(4, 20, size, false);
+            case RIGHT_LEG -> sized(4, 20, size, false);
+            case LEFT_LEG -> sized(20, 52, size, false);
         };
     }
 
@@ -78,7 +79,6 @@ class TattooDesignTest {
                         int[] p = tattoo(g, zone, m, size);
                         int[] r = region(zone, size);
                         int in = inside(base, p, r);
-                        if (zone == TattooZone.LEGS) in += inside(base, p, new int[]{20, 52 + (r[1] - 20), r[2], r[3]});
                         assertEquals(total(base, p), in, g + " " + zone + " taille " + size + " motif " + m + " déborde de sa zone");
                     }
                 }

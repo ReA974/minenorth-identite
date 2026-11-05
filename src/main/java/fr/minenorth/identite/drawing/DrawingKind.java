@@ -14,7 +14,9 @@ public enum DrawingKind {
     TATTOO_BACK("Tatouage du dos", AppearanceSection.TATTOOS, 8, 12, inkPalette()),
     TATTOO_RIGHT_ARM("Tatouage du bras droit", AppearanceSection.TATTOOS, 4, 12, inkPalette()),
     TATTOO_LEFT_ARM("Tatouage du bras gauche", AppearanceSection.TATTOOS, 4, 12, inkPalette()),
-    TATTOO_LEGS("Tatouage des jambes", AppearanceSection.TATTOOS, 4, 12, inkPalette());
+    /** La jambe droite (le nom date d'avant la séparation des jambes ; il reste pour garder les dessins enregistrés). */
+    TATTOO_LEGS("Tatouage de la jambe droite", AppearanceSection.TATTOOS, 4, 12, inkPalette()),
+    TATTOO_LEFT_LEG("Tatouage de la jambe gauche", AppearanceSection.TATTOOS, 4, 12, inkPalette());
 
     private final String label;
     private final AppearanceSection section;

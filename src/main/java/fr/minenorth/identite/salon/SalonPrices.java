@@ -36,7 +36,8 @@ public final class SalonPrices {
             case BACK -> new int[]{3, 4, TattooZone.BACK_X_SLOT, TattooZone.BACK_Y_SLOT};
             case RIGHT_ARM -> new int[]{5, 6, TattooZone.RIGHT_ARM_FACE_SLOT, TattooZone.RIGHT_ARM_HEIGHT_SLOT};
             case LEFT_ARM -> new int[]{7, 8, TattooZone.LEFT_ARM_FACE_SLOT, TattooZone.LEFT_ARM_HEIGHT_SLOT};
-            case LEGS -> new int[]{9, 10, TattooZone.LEG_SIDE_SLOT};
+            case RIGHT_LEG -> new int[]{9, 10};
+            case LEFT_LEG -> new int[]{20, 21};
         };
     }
 

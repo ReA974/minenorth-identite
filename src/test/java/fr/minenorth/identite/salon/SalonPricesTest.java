@@ -67,8 +67,8 @@ class SalonPricesTest {
 
     @Test
     void removingATattooCostsALaserSession() {
-        Appearance has = tattoo(BASE, TattooZone.LEGS, 3, 0, 1);
-        assertEquals(SalonPrices.REMOVAL, tattooPrice(has, tattoo(has, TattooZone.LEGS, 0, 0, 1)));
+        Appearance has = tattoo(BASE, TattooZone.RIGHT_LEG, 3, 0, 1);
+        assertEquals(SalonPrices.REMOVAL, tattooPrice(has, tattoo(has, TattooZone.RIGHT_LEG, 0, 0, 1)));
     }
 
     @Test

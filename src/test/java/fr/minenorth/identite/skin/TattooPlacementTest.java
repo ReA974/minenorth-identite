@@ -28,33 +28,34 @@ class TattooPlacementTest {
         return n;
     }
 
-    private static int[] legs(int side) {
+    private static int[] leg(TattooZone zone) {
         int[] t = new int[TattooZone.TOTAL_SLOTS];
-        t[TattooZone.LEGS.motifSlot()] = 5;
-        t[TattooZone.LEGS.sizeSlot()] = 2;
-        t[TattooZone.LEG_SIDE_SLOT] = side;
+        t[zone.motifSlot()] = 5;
+        t[zone.sizeSlot()] = 2;
         return t;
     }
 
     @Test
-    void bothLegsByDefault() {
-        int[] base = none(), p = with(legs(0));
-        assertTrue(changed(base, p, 4, 20, 4, 12) > 0, "jambe droite");
-        assertTrue(changed(base, p, 20, 52, 4, 12) > 0, "jambe gauche");
-    }
-
-    @Test
-    void rightLegOnly() {
-        int[] base = none(), p = with(legs(1));
+    void theRightLegAlone() {
+        int[] base = none(), p = with(leg(TattooZone.RIGHT_LEG));
         assertTrue(changed(base, p, 4, 20, 4, 12) > 0);
         assertEquals(0, changed(base, p, 20, 52, 4, 12));
     }
 
     @Test
-    void leftLegOnly() {
-        int[] base = none(), p = with(legs(2));
+    void theLeftLegAlone() {
+        int[] base = none(), p = with(leg(TattooZone.LEFT_LEG));
         assertEquals(0, changed(base, p, 4, 20, 4, 12));
         assertTrue(changed(base, p, 20, 52, 4, 12) > 0);
+    }
+
+    @Test
+    void eachLegKeepsItsOwnFigure() {
+        int[] t = leg(TattooZone.RIGHT_LEG);
+        t[TattooZone.LEFT_LEG.motifSlot()] = 9;
+        t[TattooZone.LEFT_LEG.sizeSlot()] = 0;
+        int[] both = with(t);
+        assertTrue(changed(none(), both, 4, 20, 4, 12) > changed(none(), both, 20, 52, 4, 12));
     }
 
     private static int[] torso(int size, int x, int y) {

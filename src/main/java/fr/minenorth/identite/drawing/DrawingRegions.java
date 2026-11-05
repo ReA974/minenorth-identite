@@ -15,6 +15,7 @@ public final class DrawingRegions {
             case TATTOO_RIGHT_ARM -> 44;
             case TATTOO_LEFT_ARM -> 36;
             case TATTOO_LEGS -> 4;
+            case TATTOO_LEFT_LEG -> 20;
         };
     }
 
@@ -22,7 +23,7 @@ public final class DrawingRegions {
         return switch (kind) {
             case FACE, BEARD -> 8;
             case TATTOO_TORSO, TATTOO_BACK, TATTOO_RIGHT_ARM, TATTOO_LEGS -> 20;
-            case TATTOO_LEFT_ARM -> 52;
+            case TATTOO_LEFT_ARM, TATTOO_LEFT_LEG -> 52;
         };
     }
 

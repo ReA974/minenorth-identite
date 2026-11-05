@@ -26,15 +26,14 @@ public final class TattooSalonScreen extends Screen {
     private record Hit(int x, int y, int w, int h, Runnable action) {}
 
     private static final TattooZone[] ZONES = {TattooZone.FACE_NECK, TattooZone.TORSO, TattooZone.BACK,
-            TattooZone.RIGHT_ARM, TattooZone.LEFT_ARM, TattooZone.LEGS};
-    private static final String[] ZONE_NAMES = {"Visage", "Torse", "Dos", "Bras droit", "Bras gauche", "Jambes"};
+            TattooZone.RIGHT_ARM, TattooZone.LEFT_ARM, TattooZone.RIGHT_LEG, TattooZone.LEFT_LEG};
+    private static final String[] ZONE_NAMES = {"Visage", "Torse", "Dos", "Bras droit", "Bras gauche", "Jambe droite", "Jambe gauche"};
     /** Caméra de l'aperçu pour chaque zone (indices de PreviewRenderer.CAMS). */
-    private static final int[] ZONE_CAMS = {2, 1, 3, 5, 4, 6};
+    private static final int[] ZONE_CAMS = {2, 1, 3, 5, 4, 6, 6};
     private static final String[] VIEW_NAMES = {"Face", "Dos", "Bras D", "Bras G"};
     private static final int[] VIEW_CAMS = {0, 3, 5, 4};
     private static final String[] SIZES = {"Petit", "Moyen", "Grand"};
     private static final String[] INKS = {"Couleurs", "Noir", "Gris"};
-    private static final String[] LEGS = {"Les deux", "Droite", "Gauche"};
     private static final String[] FACES = {"Avant", "Ext.", "Int.", "Arrière"};
     private static final String[] HEIGHTS = {"Centré", "Épaule", "Bras", "Avant-bras", "Poignet"};
 
@@ -94,7 +93,8 @@ public final class TattooSalonScreen extends Screen {
             case BACK -> fr.minenorth.identite.drawing.DrawingKind.TATTOO_BACK;
             case RIGHT_ARM -> fr.minenorth.identite.drawing.DrawingKind.TATTOO_RIGHT_ARM;
             case LEFT_ARM -> fr.minenorth.identite.drawing.DrawingKind.TATTOO_LEFT_ARM;
-            case LEGS -> fr.minenorth.identite.drawing.DrawingKind.TATTOO_LEGS;
+            case RIGHT_LEG -> fr.minenorth.identite.drawing.DrawingKind.TATTOO_LEGS;
+            case LEFT_LEG -> fr.minenorth.identite.drawing.DrawingKind.TATTOO_LEFT_LEG;
         };
     }
 
@@ -250,14 +250,11 @@ public final class TattooSalonScreen extends Screen {
             final int index = i;
             chip(g, mx, my, x + (i % 3) * (optW / 3), y + (i / 3) * 18, optW / 3 - 3, ZONE_NAMES[i], zone == i, () -> chooseZone(index));
         }
-        y += 40;
+        y += 58;
         if (zone().hasSize()) {
             y = row(g, mx, my, x, y, "Taille", SIZES, t[zone().sizeSlot()], zone().sizeSlot(), 3);
         }
         y = row(g, mx, my, x, y, "Encre", INKS, t[TattooZone.INK_SLOT], TattooZone.INK_SLOT, 3);
-        if (zone() == TattooZone.LEGS) {
-            row(g, mx, my, x, y, "Jambe", LEGS, t[TattooZone.LEG_SIDE_SLOT], TattooZone.LEG_SIDE_SLOT, 3);
-        }
         if (isPlaceable()) drawPad(g, mx, my, x, y);
         if (isArm()) {
             y = row(g, mx, my, x, y, "Face du bras", FACES, t[faceSlot()], faceSlot(), 4);

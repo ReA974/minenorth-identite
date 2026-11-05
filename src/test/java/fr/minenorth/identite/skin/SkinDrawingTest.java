@@ -109,12 +109,16 @@ class SkinDrawingTest {
     }
 
     @Test
-    void legTattooAppearsOnBothLegs() {
+    void eachLegHasItsOwnDrawnTattoo() {
         int[] naked = SkinComposer.compose(Gender.MALE, bare(Gender.MALE));
-        int[] p = SkinComposer.compose(Gender.MALE, drawn(Gender.MALE, DrawingKind.TATTOO_LEGS, 2, 5, 1));
-        assertNotEquals(px(naked, 4 + 2, 20 + 5), px(p, 4 + 2, 20 + 5));
-        assertNotEquals(px(naked, 20 + 2, 52 + 5), px(p, 20 + 2, 52 + 5));
-        assertEquals(2, diffCount(naked, p));
+        int[] right = SkinComposer.compose(Gender.MALE, drawn(Gender.MALE, DrawingKind.TATTOO_LEGS, 2, 5, 1));
+        assertNotEquals(px(naked, 4 + 2, 20 + 5), px(right, 4 + 2, 20 + 5));
+        assertEquals(px(naked, 20 + 2, 52 + 5), px(right, 20 + 2, 52 + 5));
+        assertEquals(1, diffCount(naked, right));
+        int[] left = SkinComposer.compose(Gender.MALE, drawn(Gender.MALE, DrawingKind.TATTOO_LEFT_LEG, 2, 5, 1));
+        assertNotEquals(px(naked, 20 + 2, 52 + 5), px(left, 20 + 2, 52 + 5));
+        assertEquals(px(naked, 4 + 2, 20 + 5), px(left, 4 + 2, 20 + 5));
+        assertEquals(1, diffCount(naked, left));
     }
 
     @Test

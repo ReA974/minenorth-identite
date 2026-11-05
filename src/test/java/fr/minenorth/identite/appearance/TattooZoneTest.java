@@ -56,15 +56,18 @@ class TattooZoneTest {
         CompoundTag tag = Catalog.defaults(Gender.MALE).toTag();
         tag.putIntArray(AppearanceSection.TATTOOS.name(), new int[]{3, 5, 7, 9, 11, 12});
         int[] t = Appearance.fromTag(tag).get(AppearanceSection.TATTOOS);
-        assertEquals(21, t.length);
+        assertEquals(22, t.length);
         assertEquals(3, t[TattooZone.FACE_NECK.motifSlot()]);
         assertEquals(5, t[TattooZone.TORSO.motifSlot()]);
         assertEquals(2, t[TattooZone.TORSO.sizeSlot()]);
         assertEquals(7, t[TattooZone.BACK.motifSlot()]);
         assertEquals(9, t[TattooZone.RIGHT_ARM.motifSlot()]);
         assertEquals(11, t[TattooZone.LEFT_ARM.motifSlot()]);
-        assertEquals(12, t[TattooZone.LEGS.motifSlot()]);
-        assertEquals(2, t[TattooZone.LEGS.sizeSlot()]);
+        // les deux jambes partageaient un tatouage : il est gardé sur chacune
+        assertEquals(12, t[TattooZone.RIGHT_LEG.motifSlot()]);
+        assertEquals(2, t[TattooZone.RIGHT_LEG.sizeSlot()]);
+        assertEquals(12, t[TattooZone.LEFT_LEG.motifSlot()]);
+        assertEquals(2, t[TattooZone.LEFT_LEG.sizeSlot()]);
     }
 
     @Test

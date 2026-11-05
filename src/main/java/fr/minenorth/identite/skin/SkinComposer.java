@@ -614,7 +614,7 @@ public final class SkinComposer {
         drawGrid(c, drawings, DrawingKind.TATTOO_RIGHT_ARM, rArm.front(), true);
         drawGrid(c, drawings, DrawingKind.TATTOO_LEFT_ARM, lArm.front(), true);
         drawGrid(c, drawings, DrawingKind.TATTOO_LEGS, R_LEG.front(), true);
-        drawGrid(c, drawings, DrawingKind.TATTOO_LEGS, L_LEG.front(), true);
+        drawGrid(c, drawings, DrawingKind.TATTOO_LEFT_LEG, L_LEG.front(), true);
     }
 
     /** Le volume d'une barbe dessinée : même case sur la couche extérieure de la tête, un peu éclaircie. */
@@ -849,8 +849,8 @@ public final class SkinComposer {
         sized(c, BODY.back(), t, TattooZone.BACK, true);
         sized(c, armFace(rArm, true, t[TattooZone.RIGHT_ARM_FACE_SLOT]), t, TattooZone.RIGHT_ARM, false, t[TattooZone.RIGHT_ARM_HEIGHT_SLOT]);
         sized(c, armFace(lArm, false, t[TattooZone.LEFT_ARM_FACE_SLOT]), t, TattooZone.LEFT_ARM, false, t[TattooZone.LEFT_ARM_HEIGHT_SLOT]);
-        if (t[TattooZone.LEG_SIDE_SLOT] != 2) sized(c, R_LEG.front(), t, TattooZone.LEGS, false);
-        if (t[TattooZone.LEG_SIDE_SLOT] != 1) sized(c, L_LEG.front(), t, TattooZone.LEGS, false);
+        sized(c, R_LEG.front(), t, TattooZone.RIGHT_LEG, false);
+        sized(c, L_LEG.front(), t, TattooZone.LEFT_LEG, false);
     }
 
     /** Torse et dos : figure réduite à 4×4 ou 6×6 au centre de la poitrine ; bras et jambes : 4 de large, 4, 6 ou 8 de haut. */
