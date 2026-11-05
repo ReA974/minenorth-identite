@@ -49,7 +49,7 @@ public final class OptionLabels {
                     "Macarons", "Chignon bas", "Lob", "Frange rideau", "Mulet", "Banane haute", "Dreadlocks",
                     "Chignon haut", "Coupe au bol", "Frange emo"}),
             Map.entry("FACIAL_HAIR/style", new String[]{"Aucune", "Barbe de trois jours", "Ombre légère", "Moustache",
-                    "Moustache en croc", "Bouc", "Mouche", "Collier", "Barbe courte", "Barbe pleine", "Favoris", "Van Dyke"}),
+                    "Moustache en croc", "Bouc", "Mouche", "Collier", "Barbe courte", "Barbe pleine", "Impériale", "Van Dyke", "Moustache guidon", "Barbe de bûcheron", "Barbe viking", "Ancre", "Fu Manchu"}),
             Map.entry("MAKEUP/lips", new String[]{"Aucun", "Fin", "Plein", "Brillant", "Dégradé", "Mat sombre"}),
             Map.entry("MAKEUP/eyes", new String[]{"Aucun", "Léger", "Smoky", "Eye-liner", "Eye-liner ailé", "Pailleté"}),
             Map.entry("MAKEUP/blush", new String[]{"Aucun", "Léger", "Pommettes", "Soleil", "Intense"}),

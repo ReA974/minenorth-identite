@@ -46,7 +46,7 @@ public final class Catalog {
                 new Slot("color", 12)));
         // pilosité : 1 à 11 réservés aux hommes
         SLOTS.put(AppearanceSection.FACIAL_HAIR, List.of(
-                new Slot("style", 12, Set.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11), Set.of()), new Slot("color", 12)));
+                new Slot("style", 17, Set.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16), Set.of()), new Slot("color", 12)));
         SLOTS.put(AppearanceSection.MAKEUP, List.of(
                 new Slot("lips", 6), new Slot("lipColor", 8), new Slot("eyes", 6), new Slot("eyeColor", 8),
                 new Slot("blush", 5), new Slot("blushColor", 6)));

@@ -14,13 +14,16 @@ public final class BeardPieces {
     /** Zone des yeux à ne jamais couvrir : bas de la ligne des yeux. */
     public static final float EYES_BOTTOM = -3.0f;
 
+    /** Nombre de styles de barbe du catalogue (0 = aucune). */
+    public static final int STYLES = 17;
+
     public static List<HairPieces.Piece> forStyle(int style) {
         List<HairPieces.Piece> out = new ArrayList<>();
         switch (style) {
             case 3 -> moustache(out, 2.8f, 1.0f);
-            case 4 -> {
+            case 4 -> {   // moustache en croc : bouts relevés
                 moustache(out, 2.6f, 0.9f);
-                face(out, -3.7f, -3.0f, -4.9f, 0.9f, 0.7f, 0.7f, 0);   // pointes relevées
+                face(out, -3.7f, -3.0f, -4.9f, 0.9f, 0.7f, 0.7f, 0);
                 face(out, 2.8f, -3.0f, -4.9f, 0.9f, 0.7f, 0.7f, 0);
             }
             case 5 -> goatee(out);
@@ -32,13 +35,45 @@ public final class BeardPieces {
             }
             case 8 -> fullBeard(out, 0.9f, 0.9f);
             case 9 -> fullBeard(out, 1.3f, 1.8f);
-            case 10 -> {   // favoris
-                face(out, -4.9f, -6.0f, -4.6f, 1.0f, 5.2f, 3.6f, 0);
-                face(out, 3.9f, -6.0f, -4.6f, 1.0f, 5.2f, 3.6f, 0);
+            case 10 -> {   // impériale : moustache fine et petite touffe sous la lèvre
+                moustache(out, 2.3f, 0.8f);
+                face(out, -0.5f, -0.9f, -5.0f, 1.0f, 1.7f, 0.8f, 2);
             }
             case 11 -> {   // Van Dyke : moustache et bouc
                 moustache(out, 2.4f, 0.9f);
                 goatee(out);
+            }
+            case 12 -> {   // moustache guidon : bouts enroulés vers le haut
+                moustache(out, 2.7f, 1.0f);
+                face(out, -4.0f, -2.9f, -4.9f, 1.0f, 0.9f, 0.8f, 0);
+                face(out, 3.0f, -2.9f, -4.9f, 1.0f, 0.9f, 0.8f, 0);
+                face(out, -4.3f, -3.0f, -4.8f, 0.6f, 0.6f, 0.6f, 2);
+                face(out, 3.7f, -3.0f, -4.8f, 0.6f, 0.6f, 0.6f, 2);
+            }
+            case 13 -> {   // bûcheron : grosse barbe pleine, longue
+                fullBeard(out, 1.5f, 3.0f);
+                face(out, -2.8f, 2.6f, -4.9f, 5.6f, 1.2f, 1.0f, 2);
+            }
+            case 14 -> {   // viking : longue barbe qui finit en pointe
+                moustache(out, 2.6f, 1.0f);
+                face(out, -4.4f, -3.0f, -4.6f, 2.4f, 3.2f, 1.0f, 0);
+                face(out, 2.0f, -3.0f, -4.6f, 2.4f, 3.2f, 1.0f, 0);
+                face(out, -2.0f, -0.5f, -5.2f, 4.0f, 2.4f, 1.1f, 0);
+                face(out, -1.4f, 1.9f, -5.1f, 2.8f, 2.2f, 1.0f, 0);
+                face(out, -0.8f, 4.1f, -5.0f, 1.6f, 2.0f, 0.9f, 2);
+                face(out, -0.4f, 6.0f, -4.9f, 0.8f, 1.6f, 0.8f, 2);
+            }
+            case 15 -> {   // ancre : fine ligne le long de la mâchoire, petit bouc et moustache
+                moustache(out, 2.2f, 0.8f);
+                face(out, -2.8f, -0.4f, -4.9f, 5.6f, 0.7f, 0.7f, 0);
+                face(out, -0.8f, 0.2f, -5.0f, 1.6f, 1.1f, 0.7f, 2);
+            }
+            case 16 -> {   // Fu Manchu : moustache dont les bouts tombent très bas
+                moustache(out, 2.4f, 0.9f);
+                face(out, -3.0f, -1.9f, -4.9f, 0.9f, 3.6f, 0.8f, 0);
+                face(out, 2.1f, -1.9f, -4.9f, 0.9f, 3.6f, 0.8f, 0);
+                face(out, -2.9f, 1.7f, -4.8f, 0.7f, 1.2f, 0.6f, 2);
+                face(out, 2.2f, 1.7f, -4.8f, 0.7f, 1.2f, 0.6f, 2);
             }
             default -> { }
         }

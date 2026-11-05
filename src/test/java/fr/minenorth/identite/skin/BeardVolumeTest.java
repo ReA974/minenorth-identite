@@ -50,7 +50,7 @@ class BeardVolumeTest {
 
     @Test
     void theOuterLayerAlsoReachesTheSidesForJawStyles() {
-        for (int style : new int[]{7, 8, 9, 10}) {
+        for (int style : new int[]{7, 8, 9, 13}) {
             assertTrue(outer(style, 32, 8, 8, 8, true) >= 3, "style " + style + " côté droit");
             assertTrue(outer(style, 48, 8, 8, 8, true) >= 3, "style " + style + " côté gauche");
         }

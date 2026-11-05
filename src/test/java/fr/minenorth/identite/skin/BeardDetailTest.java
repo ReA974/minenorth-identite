@@ -37,7 +37,7 @@ class BeardDetailTest {
 
     @Test
     void sideburnsAndJawStylesReachBothSidesOfTheHead() {
-        for (int style : new int[]{1, 2, 7, 8, 9, 10}) {
+        for (int style : new int[]{1, 2, 7, 8, 9, 13}) {
             assertTrue(onRightSide(style) >= 3, "style " + style + " côté droit : " + onRightSide(style));
             assertTrue(onLeftSide(style) >= 3, "style " + style + " côté gauche : " + onLeftSide(style));
         }
