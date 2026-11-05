@@ -17,14 +17,14 @@ public final class HiResTattoo {
     /** Pixels de la couche pour un pixel de skin. */
     public static final int SCALE = 4;
 
-    /** Vrai s'il y a un tatouage du catalogue ou dessiné sur le torse, le dos, un bras ou une jambe : sinon la couche n'est pas dessinée. */
+    /** Vrai s'il y a un tatouage (catalogue ou dessin) sur le corps, ou du maquillage ou une particularité de la peau : sinon la couche n'est pas dessinée. */
     public static boolean hasAny(Appearance a) {
         int[] t = a.get(AppearanceSection.TATTOOS);
         for (TattooZone zone : TattooRegions.ZONES) {
             if (t[zone.motifSlot()] > 0) return true;
             if (!blank(a.drawings().get(TattooRegions.drawing(zone)))) return true;
         }
-        return false;
+        return HiResFace.hasAny(a);
     }
 
     private static boolean blank(byte[] grid) {
@@ -46,6 +46,12 @@ public final class HiResTattoo {
                 blit(out, origin[0] + p[0] * SCALE, origin[1] + p[1] * SCALE, art, p[2] * SCALE, p[3] * SCALE, origin, TattooRegions.width(zone));
             }
             paintDrawing(out, zone, a.drawings().get(TattooRegions.drawing(zone)));
+        }
+        int[] face = HiResFace.image(a);
+        for (int y = 0; y < HiResFace.SIZE; y++) {
+            for (int x = 0; x < HiResFace.SIZE; x++) {
+                out[(TattooRegions.FACE_ORIGIN[1] + y) * TattooRegions.ATLAS_W + TattooRegions.FACE_ORIGIN[0] + x] = face[y * HiResFace.SIZE + x];
+            }
         }
         return out;
     }

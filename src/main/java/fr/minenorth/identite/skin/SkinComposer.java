@@ -112,20 +112,20 @@ public final class SkinComposer {
         boolean faceDrawn = hasFaceDrawing(a.drawings());
         int hairColor = Palette.hairColor(hair[1]);
         if (!faceDrawn) {
-            paintMarks(c, skin[1], tone);
+            if (!layeredTattoos) paintMarks(c, skin[1], tone);
             paintBrows(c, face[2], hairColor, tone);
         }
         paintFace(c, face, hairColor, tone);
         if (!faceDrawn) {
-            paintMakeup(c, makeup, tone);
+            if (!layeredTattoos) paintMakeup(c, makeup, tone);
             paintFacialHair(c, beard, tone);
         }
         paintTattoos(c, tattoos, rArm, lArm, faceDrawn, layeredTattoos);
         drawGrid(c, a.drawings(), DrawingKind.FACE, HEAD.front(), false);
         if (faceDrawn) {
-            paintMarks(c, skin[1], tone);
+            if (!layeredTattoos) paintMarks(c, skin[1], tone);
             paintBrows(c, face[2], hairColor, tone);
-            paintMakeup(c, makeup, tone);
+            if (!layeredTattoos) paintMakeup(c, makeup, tone);
             paintFacialHair(c, beard, tone);
             faceMark(c, tattoos[TattooZone.FACE_NECK.motifSlot()]);
         }

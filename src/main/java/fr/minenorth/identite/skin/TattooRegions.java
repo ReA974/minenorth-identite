@@ -11,7 +11,10 @@ import fr.minenorth.identite.drawing.DrawingKind;
 public final class TattooRegions {
     private TattooRegions() {}
 
-    public static final int ATLAS_W = 128, ATLAS_H = 144;
+    public static final int ATLAS_W = 128, ATLAS_H = 176;
+
+    /** Le coin haut gauche de l'image 32 × 32 du maquillage et des particularités de la peau ({@link HiResFace}). */
+    public static final int[] FACE_ORIGIN = {0, 144};
 
     /** Les zones qui ont une couche haute définition (le visage garde ses petites marques peintes). */
     public static final TattooZone[] ZONES = {TattooZone.TORSO, TattooZone.BACK, TattooZone.RIGHT_ARM, TattooZone.LEFT_ARM,
