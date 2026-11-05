@@ -43,12 +43,25 @@ public final class OptionPreview {
                     .with(DrawingKind.FACE, new byte[DrawingKind.FACE.width() * DrawingKind.FACE.height()])
                     .with(DrawingKind.BEARD, new byte[DrawingKind.BEARD.width() * DrawingKind.BEARD.height()]));
         }
+        if (regionFor(section, key) == Region.HEAD && (section == AppearanceSection.SKIN || section == AppearanceSection.MAKEUP)) {
+            return highDefinitionHead(SkinComposer.compose(gender, a, true), a);   // la même image que celle du jeu
+        }
         int[] skin = SkinComposer.compose(gender, a);
         return switch (regionFor(section, key)) {
             case HEAD -> enhance(region(skin, 8, 8, 40, 8, 8, 8), 1.7);
             case TORSO -> enhance(region(skin, 20, 20, 20, 36, 8, 12), 2.2);
             case FIGURE -> enhance(figure(skin, gender.slimArms()), 2.6);
         };
+    }
+
+    /** Le visage en 32 × 32 : la tête peinte agrandie, avec par-dessus le maquillage et les particularités en haute définition. */
+    private static Tile highDefinitionHead(int[] skin, Appearance a) {
+        Tile small = region(skin, 8, 8, 40, 8, 8, 8);
+        int[] out = new int[HiResFace.SIZE * HiResFace.SIZE];
+        for (int y = 0; y < HiResFace.SIZE; y++) for (int x = 0; x < HiResFace.SIZE; x++) out[y * HiResFace.SIZE + x] = small.argb[(y / 4) * 8 + x / 4];
+        int[] face = HiResFace.image(a);
+        for (int i = 0; i < out.length; i++) out[i] = HiResTattoo.over(out[i], face[i]);
+        return new Tile(HiResFace.SIZE, HiResFace.SIZE, out);
     }
 
     /** Une zone de la couche de base, avec la couche extérieure par-dessus. */

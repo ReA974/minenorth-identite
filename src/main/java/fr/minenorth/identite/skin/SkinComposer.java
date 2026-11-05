@@ -115,7 +115,8 @@ public final class SkinComposer {
             if (!layeredTattoos) paintMarks(c, skin[1], tone);
             paintBrows(c, face[2], hairColor, tone);
         }
-        paintFace(c, face, hairColor, tone);
+        // avec des lèvres en haute définition, la bouche peinte est retirée : elle ne doit pas se voir au travers
+        paintFace(c, face, hairColor, tone, layeredTattoos && makeup[0] > 0);
         if (!faceDrawn) {
             if (!layeredTattoos) paintMakeup(c, makeup, tone);
             paintFacialHair(c, beard, tone);
@@ -280,7 +281,7 @@ public final class SkinComposer {
     // ------------------------------------------------------------------ visage
 
     /** Lignes de haut en bas se terminant sur la ligne des yeux ; colonne 0 = coin extérieur. */
-    private static final String[][] EYES = {
+    static final String[][] EYES = {
             {"WI"}, {"II"}, {"WI", "WI"}, {"LL", "WI"}, {"IW"}, {" I", "WI"},
             {"L ", "WI"}, {"LL", "IW"}, {"L ", "II"}, {" L", "WI"}};
 
@@ -299,7 +300,7 @@ public final class SkinComposer {
         }
     }
 
-    private static void paintFace(Canvas c, int[] face, int hairColor, int tone) {
+    private static void paintFace(Canvas c, int[] face, int hairColor, int tone, boolean hideMouth) {
         int[] f = HEAD.front();
         int iris = Palette.eyeColor(face[1]);
         String[] rows = EYES[face[0]];
@@ -325,6 +326,7 @@ public final class SkinComposer {
             case 3 -> { c.rel(f, 3, 5, Palette.shade(tone, 0.8)); c.rel(f, 4, 5, Palette.shade(tone, 1.08)); }
             default -> { c.rel(f, 4, 4, Palette.shade(tone, 0.93)); c.rel(f, 4, 5, nose); c.rel(f, 3, 5, nose); }
         }
+        if (hideMouth) return;
         int mouth = Palette.shade(tone, 0.78);
         for (int[] p : mouthPixels(face[4])) c.rel(f, p[0], p[1], mouth);
     }

@@ -420,7 +420,10 @@ public final class CreatorScreen extends Screen {
             else for (int j = 0; j < tile.h(); j++) {
                 for (int i = 0; i < tile.w(); i++) {
                     int argb = tile.argb()[j * tile.w() + i];
-                    if (argb != 0) g.fill(x + 2 + i * scale, y + 2 + j * scale, x + 2 + (i + 1) * scale, y + 2 + (j + 1) * scale, argb);
+                    if (argb != 0) {
+                        float pixel = (tw - 4f) / tile.w();   // 5 pour une tête de 8 pixels, 1,25 pour le visage en haute définition
+                        g.fill(x + 2 + Math.round(i * pixel), y + 2 + Math.round(j * pixel), x + 2 + Math.round((i + 1) * pixel), y + 2 + Math.round((j + 1) * pixel), argb);
+                    }
                 }
             }
             if (!allowed) g.fill(x, y, x + tw, y + th, 0xCC0E0A34);

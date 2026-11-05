@@ -29,7 +29,7 @@ public final class HiResFace {
         int tone = Palette.skinTone(skin[0]);
         marks(layer, skin[1], tone);
         blush(layer, makeup[4], Palette.lipColor(makeup[5]));
-        shadow(layer, makeup[2], Palette.eyeColor(makeup[3]));
+        shadow(layer, makeup[2], Palette.eyeColor(makeup[3]), a.get(AppearanceSection.FACE)[0]);
         lips(layer, makeup[0], Palette.lipColor(makeup[1]));
         return layer.px;
     }
@@ -44,25 +44,49 @@ public final class HiResFace {
         l.soft(25.5, 22.5, radius, radius * 0.75, color, alpha);
     }
 
-    private static void shadow(Layer l, int style, int color) {
+    /** Pour chaque colonne de l'œil (0 extérieure, 1 intérieure) : la première ligne de la tête où l'œil est peint, ou -1. */
+    private static int[] eyeTops(int eyeStyle) {
+        String[] rows = SkinComposer.EYES[eyeStyle];
+        int[] top = {-1, -1};
+        for (int r = 0; r < rows.length; r++) {
+            int dy = 4 - (rows.length - 1 - r);
+            for (int c = 0; c < 2; c++) if (top[c] < 0 && rows[r].charAt(c) != ' ') top[c] = dy;
+        }
+        return top;
+    }
+
+    /** Le maquillage des yeux suit la forme de l'œil choisi : il se pose sur le haut de la paupière, où qu'il soit. */
+    private static void shadow(Layer l, int style, int color, int eyeStyle) {
         if (style <= 0) return;
+        int[] top = eyeTops(eyeStyle);
+        int highest = top[0] < 0 ? top[1] : top[1] < 0 ? top[0] : Math.min(top[0], top[1]);
+        double lid = highest * 4.0;   // bord haut de l'œil, en pixels de l'image
         for (int side = 0; side < 2; side++) {
             boolean left = side == 0;
             double cx = left ? 8 : 24, dir = left ? -1 : 1;   // dir : vers l'extérieur du visage
+            // colonnes de l'œil : extérieure puis intérieure, de 4 pixels chacune
+            double[] columnX = left ? new double[]{4, 8} : new double[]{24, 20};
             switch (style) {
-                case 1 -> l.soft(cx, 13.2, 4.8, 2.6, color, 0.38);
+                case 1 -> l.soft(cx, lid - 2.6, 4.8, 2.6, color, 0.38);
                 case 2 -> {
-                    l.soft(cx, 13.0, 5.4, 3.6, color, 0.5);
-                    l.soft(cx + dir * 1.2, 12.0, 3.4, 2.2, Palette.shade(color, 0.7), 0.45);
+                    l.soft(cx, lid - 3.0, 5.4, 3.6, color, 0.5);
+                    l.soft(cx + dir * 1.2, lid - 4.0, 3.4, 2.2, Palette.shade(color, 0.7), 0.45);
                 }
-                case 3 -> l.line(cx - 4, 15.6, cx + 4, 15.6, 1.2, Palette.shade(color, 0.3), 0.9);
-                case 4 -> {
-                    l.line(cx - 4, 15.6, cx + 4, 15.6, 1.2, Palette.shade(color, 0.3), 0.9);
-                    l.line(cx + dir * 4, 15.6, cx + dir * 6.6, 13.4, 1.1, Palette.shade(color, 0.3), 0.9);   // la pointe vers l'extérieur
+                case 3, 4 -> {
+                    int dark = Palette.shade(color, 0.3);
+                    for (int c = 0; c < 2; c++) {
+                        if (top[c] < 0) continue;
+                        double y = top[c] * 4.0 + 0.7;
+                        l.line(columnX[c], y, columnX[c] + 4, y, 1.2, dark, 0.9);
+                    }
+                    if (style == 4 && top[0] >= 0) {   // la pointe part du coin extérieur
+                        double edge = columnX[0] + (left ? 0 : 4), y = top[0] * 4.0 + 0.7;
+                        l.line(edge, y, edge + dir * 2.8, y - 2.4, 1.1, dark, 0.9);
+                    }
                 }
                 default -> {   // scintillant : un voile et un reflet clair au centre de la paupière
-                    l.soft(cx, 13.2, 4.8, 2.8, color, 0.42);
-                    l.soft(cx, 13.4, 1.8, 1.0, Palette.mix(color, 0xFFFFFFFF, 0.65), 0.7);
+                    l.soft(cx, lid - 2.6, 4.8, 2.8, color, 0.42);
+                    l.soft(cx, lid - 2.3, 1.8, 1.0, Palette.mix(color, 0xFFFFFFFF, 0.65), 0.7);
                 }
             }
         }
@@ -86,24 +110,24 @@ public final class HiResFace {
     private static void marks(Layer l, int style, int tone) {
         int dark = Palette.shade(tone, 0.5), freckle = Palette.shade(tone, 0.64);
         switch (style) {
-            case 1 -> l.soft(26.0, 22.0, 1.5, 1.5, dark, 0.95, 3.4);
+            case 1 -> l.soft(26.0, 23.0, 1.5, 1.5, dark, 0.95, 3.4);
             case 2 -> {
                 for (int i = 0; i < 18; i++) {
                     int h1 = hash(i, 1), h2 = hash(i, 2), h3 = hash(i, 3);
                     double zone = (h1 & 0xFF) / 255.0;
                     double x, y;
-                    if (zone < 0.38) { x = 4.5 + (h2 & 0xFF) / 255.0 * 8; y = 19 + (h3 & 0xFF) / 255.0 * 6; }
-                    else if (zone < 0.76) { x = 19.5 + (h2 & 0xFF) / 255.0 * 8; y = 19 + (h3 & 0xFF) / 255.0 * 6; }
-                    else { x = 13 + (h2 & 0xFF) / 255.0 * 6; y = 18.5 + (h3 & 0xFF) / 255.0 * 3.5; }
+                    if (zone < 0.38) { x = 4.5 + (h2 & 0xFF) / 255.0 * 8; y = 21.8 + (h3 & 0xFF) / 255.0 * 5; }
+                    else if (zone < 0.76) { x = 19.5 + (h2 & 0xFF) / 255.0 * 8; y = 21.8 + (h3 & 0xFF) / 255.0 * 5; }
+                    else { x = 13.5 + (h2 & 0xFF) / 255.0 * 5; y = 20.5 + (h3 & 0xFF) / 255.0 * 3; }
                     l.soft(x, y, 0.75 + (h1 >>> 8 & 3) * 0.12, 0.75 + (h1 >>> 8 & 3) * 0.12, freckle, 0.55 + (h3 >>> 8 & 7) * 0.05, 3.4);
                 }
             }
             case 3 -> {   // cicatrice en diagonale sur la joue, avec ses points de suture
                 int scar = Palette.mix(tone, 0xFFE89A9A, 0.6);
-                l.line(5.5, 21.0, 9.0, 29.0, 1.0, scar, 0.9);
-                l.line(5.5, 21.0, 9.0, 29.0, 0.4, Palette.mix(scar, 0xFFFFFFFF, 0.5), 0.8);
+                l.line(5.5, 22.0, 9.0, 29.5, 1.0, scar, 0.9);
+                l.line(5.5, 22.0, 9.0, 29.5, 0.4, Palette.mix(scar, 0xFFFFFFFF, 0.5), 0.8);
                 for (int i = 0; i < 4; i++) {
-                    double t = 0.15 + i * 0.22, px = 5.5 + 3.5 * t, py = 21 + 8 * t;
+                    double t = 0.15 + i * 0.22, px = 5.5 + 3.5 * t, py = 22 + 7.5 * t;
                     l.line(px - 1.3, py - 0.5, px + 1.3, py + 0.5, 0.5, Palette.shade(scar, 0.8), 0.8);
                 }
             }
@@ -114,8 +138,8 @@ public final class HiResFace {
                 l.line(21.0, 8.0, 25.5, 14.5, 0.4, Palette.shade(scar, 1.1), 0.7);
             }
             case 6 -> {
-                l.soft(5.0, 21.0, 1.2, 1.2, dark, 0.9, 3.4);
-                l.soft(26.5, 19.0, 1.0, 1.0, dark, 0.9, 3.4);
+                l.soft(5.0, 22.5, 1.2, 1.2, dark, 0.9, 3.4);
+                l.soft(26.5, 22.5, 1.0, 1.0, dark, 0.9, 3.4);
                 l.soft(18.0, 30.5, 1.1, 1.1, dark, 0.9, 3.4);
                 l.soft(9.0, 30.0, 0.9, 0.9, dark, 0.85, 3.4);
             }

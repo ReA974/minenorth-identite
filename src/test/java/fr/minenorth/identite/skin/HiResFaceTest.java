@@ -124,8 +124,67 @@ class HiResFaceTest {
 
     @Test
     void theLayeredSkinNoLongerPaintsMakeupOrMarksButTheOldOneStill() {
-        Appearance a = makeup(2, 3, 2).with(AppearanceSection.SKIN, new int[]{3, 2});
+        Appearance a = makeup(0, 3, 2).with(AppearanceSection.SKIN, new int[]{3, 2});
         assertArrayEquals(SkinComposer.compose(Gender.FEMALE, base(), true), SkinComposer.compose(Gender.FEMALE, a, true));
         assertFalse(java.util.Arrays.equals(SkinComposer.compose(Gender.FEMALE, base(), false), SkinComposer.compose(Gender.FEMALE, a, false)));
+    }
+
+    @Test
+    void freckleAndMoleStayBelowTheEyes() {
+        // les yeux occupent les lignes 16 à 20 de l'image : aucune particularité n'y touche (sauf la cicatrice du sourcil, au-dessus)
+        for (int style : new int[]{1, 2, 3, 4, 6}) {
+            int[] image = HiResFace.image(marks(style));
+            for (int y = 15; y <= 20; y++) {
+                for (int x = 0; x < 32; x++) {
+                    if (x >= 12 && x <= 20) continue;   // l'arête du nez, entre les yeux
+                    assertEquals(0, image[y * 32 + x] >>> 24, "particularité " + style + " sur l'œil : " + x + "," + y);
+                }
+            }
+        }
+    }
+
+    @Test
+    void theHighDefinitionLipsHideThePaintedMouth() {
+        Appearance smile = makeup(2, 0, 0).with(AppearanceSection.FACE, new int[]{0, 0, 0, 0, 1});
+        Appearance pout = makeup(2, 0, 0).with(AppearanceSection.FACE, new int[]{0, 0, 0, 0, 3});
+        // la bouche peinte (lignes 14 et 15 de la tête) ne dépend plus de la forme choisie : les lèvres la remplacent
+        int[] a = SkinComposer.compose(Gender.FEMALE, smile, true), b = SkinComposer.compose(Gender.FEMALE, pout, true);
+        for (int x = 8; x < 16; x++) for (int y = 13; y < 16; y++) assertEquals(a[y * 64 + x], b[y * 64 + x], "bouche peinte visible : " + x + "," + y);
+        // sans lèvres, la bouche peinte reste
+        int[] c = SkinComposer.compose(Gender.FEMALE, base().with(AppearanceSection.FACE, new int[]{0, 0, 0, 0, 1}), true);
+        int[] d = SkinComposer.compose(Gender.FEMALE, base().with(AppearanceSection.FACE, new int[]{0, 0, 0, 0, 3}), true);
+        assertFalse(java.util.Arrays.equals(c, d));
+    }
+
+    @Test
+    void thePreviewTileOfAMakeupOptionShowsTheHighDefinitionLips() {
+        var plain = OptionPreview.of(Gender.FEMALE, base(), AppearanceSection.MAKEUP, 0, "lips", 0);
+        var lips = OptionPreview.of(Gender.FEMALE, base(), AppearanceSection.MAKEUP, 0, "lips", 2);
+        assertEquals(32, lips.w());
+        int[] hd = HiResFace.image(makeup(2, 0, 0));
+        int changed = 0;
+        for (int j = 0; j < hd.length; j++) if ((hd[j] >>> 24) > 0x90 && plain.argb()[j] != lips.argb()[j]) changed++;
+        assertTrue(changed > 10, "les lÃ¨vres doivent se voir sur la vignette : " + changed);
+    }
+
+    @Test
+    void eyeMakeupFollowsTheShapeOfTheEyes() {
+        for (int shadow = 1; shadow <= 5; shadow++) {
+            Appearance oneRow = makeup(0, shadow, 0).with(AppearanceSection.FACE, new int[]{0, 0, 0, 0, 0});
+            Appearance twoRows = makeup(0, shadow, 0).with(AppearanceSection.FACE, new int[]{2, 0, 0, 0, 0});
+            assertFalse(java.util.Arrays.equals(HiResFace.image(oneRow), HiResFace.image(twoRows)), "fard " + shadow + " identique pour deux formes d'yeux");
+        }
+    }
+
+    @Test
+    void theLinerSitsOnTopOfTheEyeWhateverItsHeight() {
+        for (int eye = 0; eye < 10; eye++) {
+            int[] face = new int[]{eye, 0, 0, 0, 0};
+            int top = 4 - (SkinComposer.EYES[eye].length - 1);
+            int[] image = HiResFace.image(makeup(0, 3, 0).with(AppearanceSection.FACE, face));
+            boolean onTheLid = false;
+            for (int x = 0; x < 32; x++) for (int y = top * 4; y < top * 4 + 3; y++) if ((image[y * 32 + x] >>> 24) > 0x80) onTheLid = true;
+            assertTrue(onTheLid, "forme d'yeux " + eye);
+        }
     }
 }
