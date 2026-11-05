@@ -45,9 +45,9 @@ public final class OptionPreview {
         }
         int[] skin = SkinComposer.compose(gender, a);
         return switch (regionFor(section, key)) {
-            case HEAD -> region(skin, 8, 8, 40, 8, 8, 8);
-            case TORSO -> region(skin, 20, 20, 20, 36, 8, 12);
-            case FIGURE -> figure(skin, gender.slimArms());
+            case HEAD -> enhance(region(skin, 8, 8, 40, 8, 8, 8), 1.7);
+            case TORSO -> enhance(region(skin, 20, 20, 20, 36, 8, 12), 2.2);
+            case FIGURE -> enhance(figure(skin, gender.slimArms()), 2.6);
         };
     }
 
@@ -70,16 +70,43 @@ public final class OptionPreview {
         }
     }
 
-    /** Le corps de face, 16 × 32 : tête, torse, bras et jambes assemblés comme sur le skin. */
+    /**
+     * Le contraste est renforcé autour de la couleur moyenne de la vignette : les différences de modelé (corpulence, nez,
+     * grains de beauté) sont de petites variations de ton, presque invisibles à cette taille sans ça.
+     */
+    private static Tile enhance(Tile t, double factor) {
+        double[] sum = new double[3];
+        int n = 0;
+        for (int c : t.argb) {
+            if (c == 0) continue;
+            sum[0] += (c >> 16) & 0xFF;
+            sum[1] += (c >> 8) & 0xFF;
+            sum[2] += c & 0xFF;
+            n++;
+        }
+        if (n == 0) return t;
+        int[] out = new int[t.argb.length];
+        for (int i = 0; i < out.length; i++) {
+            int c = t.argb[i];
+            if (c == 0) continue;
+            int r = clamp(sum[0] / n + (((c >> 16) & 0xFF) - sum[0] / n) * factor);
+            int g = clamp(sum[1] / n + (((c >> 8) & 0xFF) - sum[1] / n) * factor);
+            int b = clamp(sum[2] / n + ((c & 0xFF) - sum[2] / n) * factor);
+            out[i] = 0xFF000000 | (r << 16) | (g << 8) | b;
+        }
+        return new Tile(t.w, t.h, out);
+    }
+
+    private static int clamp(double v) { return (int) Math.max(0, Math.min(255, Math.round(v))); }
+
+    /** Le haut du corps de face, 16 × 20 : tête, torse et bras assemblés comme sur le skin (les jambes ne changent pas avec la corpulence). */
     private static Tile figure(int[] skin, boolean slim) {
-        Tile t = new Tile(16, 32, new int[16 * 32]);
+        Tile t = new Tile(16, 20, new int[16 * 20]);
         int arm = slim ? 3 : 4;
         paste(t, skin, 8, 8, 40, 8, 8, 8, 4, 0);                       // tête
         paste(t, skin, 20, 20, 20, 36, 8, 12, 4, 8);                   // torse
         paste(t, skin, 44, 20, 44, 36, arm, 12, 4 - arm, 8);           // bras droit (à gauche de l'image)
         paste(t, skin, 36, 52, 52, 52, arm, 12, 12, 8);                // bras gauche
-        paste(t, skin, 4, 20, 4, 36, 4, 12, 4, 20);                    // jambe droite
-        paste(t, skin, 20, 52, 4, 52, 4, 12, 8, 20);                   // jambe gauche
         return t;
     }
 }

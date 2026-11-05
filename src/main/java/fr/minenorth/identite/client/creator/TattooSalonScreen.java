@@ -308,7 +308,6 @@ public final class TattooSalonScreen extends Screen {
         int[] hair = state.appearance().get(AppearanceSection.HAIR);
         PreviewRenderer.render(g, viewX, bodyTop, viewW, h, state.gender(), ClientSkins.previewLocation(),
                 cam.yaw() + yaw, cam.zoom(), cam.focus(), hair[0], hair[1]);
-        chip(g, mx, my, viewX + 2, bodyTop + 2, Math.min(96, viewW - 4), underwear ? "Sans sous-vêt." : "Avec sous-vêt.", !underwear, () -> underwear = !underwear);
         int bw = viewW / VIEW_NAMES.length;
         for (int i = 0; i < VIEW_NAMES.length; i++) {
             final int cam2 = VIEW_CAMS[i];
@@ -369,6 +368,8 @@ public final class TattooSalonScreen extends Screen {
     private void drawOptions(GuiGraphics g, int mx, int my) {
         int[] t = tattoos();
         g.drawString(font, "Zone : " + ZONE_NAMES[zone], optX, py + 46, T.accent, false);
+        // au-dessus de l'aperçu : voir les tatouages sans les sous-vêtements (la fiche n'est pas modifiée)
+        chip(g, mx, my, viewX, py + 43, viewW, underwear ? "Sous-vêt. : portés" : "Sous-vêt. : retirés", !underwear, () -> underwear = !underwear);
         drawMap(g, mx, my, optX, bodyTop);
         int colX = optX + 58, colW = optW - 58;
         int y = bodyTop;

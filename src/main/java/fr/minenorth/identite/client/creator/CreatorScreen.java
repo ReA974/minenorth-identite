@@ -387,9 +387,9 @@ public final class CreatorScreen extends Screen {
             tilesGender = state.gender();
         }
         fr.minenorth.identite.skin.OptionPreview.Region region = fr.minenorth.identite.skin.OptionPreview.regionFor(section, slot.key());
-        int scale = switch (region) { case HEAD -> 4; case TORSO -> 3; case FIGURE -> 2; };
+        int scale = switch (region) { case HEAD -> 5; case TORSO -> 4; case FIGURE -> 3; };
         int tw = (region == fr.minenorth.identite.skin.OptionPreview.Region.FIGURE ? 16 : 8) * scale + 4;
-        int th = (region == fr.minenorth.identite.skin.OptionPreview.Region.HEAD ? 8 : region == fr.minenorth.identite.skin.OptionPreview.Region.TORSO ? 12 : 32) * scale + 4;
+        int th = (region == fr.minenorth.identite.skin.OptionPreview.Region.HEAD ? 8 : region == fr.minenorth.identite.skin.OptionPreview.Region.TORSO ? 12 : 20) * scale + 4;
         int titleY = y;
         y += 12;
         String hover = null;
