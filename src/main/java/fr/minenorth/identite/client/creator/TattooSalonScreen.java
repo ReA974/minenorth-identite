@@ -57,6 +57,8 @@ public final class TattooSalonScreen extends Screen {
     private int scroll;
     private boolean mapBack;
     private boolean underwear = true;
+    private boolean piercings;
+    private int pSlot = 1;
     private Appearance previewAppearance;
     private Gender previewGender;
 
@@ -229,9 +231,16 @@ public final class TattooSalonScreen extends Screen {
         renderBackground(g);
         hits.clear();
         T.panel(g, px, py, pw, ph, "MINENORTHRP - SALON DE TATOUAGE", free ? "Choisissez un motif, une zone, puis validez." : "Choisissez un motif, une zone, puis tatouez. Paiement par carte.");
-        drawGrid(g, mx, my);
-        drawPreview(g, mx, my);
-        drawOptions(g, mx, my);
+        drawModeChips(g, mx, my);
+        if (piercings) {
+            drawPiercingGrid(g, mx, my);
+            drawPreview(g, mx, my);
+            drawPiercingOptions(g, mx, my);
+        } else {
+            drawGrid(g, mx, my);
+            drawPreview(g, mx, my);
+            drawOptions(g, mx, my);
+        }
         drawFooter(g, mx, my);
         super.render(g, mx, my, partial);
     }
@@ -241,7 +250,7 @@ public final class TattooSalonScreen extends Screen {
     private int gridRows() { return Math.max(3, (bodyBottom - bodyTop) / 28); }
 
     @Override public boolean mouseScrolled(double mx, double my, double delta) {
-        if (zone() != TattooZone.FACE_NECK && over((int) mx, (int) my, gridX, bodyTop, 5 * 28 + 6, gridRows() * 28)) {
+        if ((piercings || zone() != TattooZone.FACE_NECK) && over((int) mx, (int) my, gridX, bodyTop, 5 * 28 + 6, gridRows() * 28)) {
             scroll = Math.max(0, scroll - (int) Math.signum(delta));
             return true;
         }
@@ -249,7 +258,6 @@ public final class TattooSalonScreen extends Screen {
     }
 
     private void drawGrid(GuiGraphics g, int mx, int my) {
-        g.drawString(font, "Motifs", gridX, py + 46, T.accent, false);
         int top = bodyTop;
         int current = tattoos()[zone().motifSlot()];
         if (zone() == TattooZone.FACE_NECK) {
@@ -291,6 +299,103 @@ public final class TattooSalonScreen extends Screen {
             }
             final int value = m;
             hits.add(new Hit(x, y, 26, 26, () -> setSlot(zone().motifSlot(), value)));
+        }
+    }
+
+    // ------------------------------------------------------------------ piercings
+
+    private static final int[] P_SLOTS = {1, 2, 3, 6};
+    private static final String[] P_NAMES = {"Nez", "Sourcil", "Lèvre", "Nombril"};
+    private static final String[] METALS = {"Argent", "Or", "Noir", "Or rose", "Acier"};
+
+    private int[] pierc() { return state.appearance().get(AppearanceSection.PIERCINGS); }
+
+    private void setPierc(int slot, int value) {
+        int[] v = pierc();
+        v[slot] = value;
+        state.set(AppearanceSection.PIERCINGS, v);
+    }
+
+    private void choosePiercingZone(int slot) {
+        pSlot = slot;
+        scroll = 0;
+        camera = slot == 6 ? 1 : 2;
+        yaw = 0;
+    }
+
+    private void drawModeChips(GuiGraphics g, int mx, int my) {
+        chip(g, mx, my, gridX, py + 42, 70, "Tatouages", !piercings, () -> {
+            piercings = false;
+            scroll = 0;
+            camera = ZONE_CAMS[zone];
+        });
+        chip(g, mx, my, gridX + 74, py + 42, 70, "Piercings", piercings, () -> {
+            piercings = true;
+            choosePiercingZone(pSlot);
+        });
+    }
+
+    /** Les options du piercing choisi, chacune montrée en 3D sur le personnage avec son nom. */
+    private void drawPiercingGrid(GuiGraphics g, int mx, int my) {
+        var slot = fr.minenorth.identite.appearance.Catalog.slots(AppearanceSection.PIERCINGS).get(pSlot);
+        int tw = 70, th = 62;
+        int rowsVisible = Math.max(1, (bodyBottom - bodyTop) / (th + 2)), totalRows = (slot.options() + 1) / 2;
+        scroll = Math.max(0, Math.min(scroll, totalRows - rowsVisible));
+        if (totalRows > rowsVisible) {
+            int barH = rowsVisible * (th + 2) - 2, bx = gridX + 2 * (tw + 2) + 1;
+            g.fill(bx, bodyTop, bx + 3, bodyTop + barH, T.list);
+            int thumb = Math.max(10, barH * rowsVisible / totalRows);
+            g.fill(bx, bodyTop + (barH - thumb) * scroll / (totalRows - rowsVisible), bx + 3, bodyTop + (barH - thumb) * scroll / (totalRows - rowsVisible) + thumb, T.accent);
+        }
+        for (int v = 0; v < slot.options(); v++) {
+            int row = v / 2;
+            if (row < scroll || row >= scroll + rowsVisible) continue;
+            int x = gridX + (v % 2) * (tw + 2), y = bodyTop + (row - scroll) * (th + 2);
+            boolean selected = pierc()[pSlot] == v, hover = over(mx, my, x, y, tw, th);
+            g.fill(x, y, x + tw, y + th, selected ? T.accent : hover ? T.hover : T.chip);
+            g.fill(x + 1, y + 1, x + tw - 1, y + th - 13, 0xFF120E34);
+            int[] values = pierc();
+            values[pSlot] = v;
+            Appearance shown = state.appearance().with(AppearanceSection.PIERCINGS, values);
+            int[] hair = shown.get(AppearanceSection.HAIR), beard = shown.get(AppearanceSection.FACIAL_HAIR);
+            shown = shown.with(AppearanceSection.HAIR, new int[]{0, hair[1]}).with(AppearanceSection.FACIAL_HAIR, new int[]{0, beard[1]});
+            if (pSlot == 6) shown = shown.withOutfit(fr.minenorth.identite.clothing.Outfit.EMPTY);
+            var texture = ClientSkins.tile(state.gender().name() + "t" + shown.toTag(), state.gender(), shown);
+            PreviewRenderer.render(g, x + 1, y + 1, tw - 2, th - 14, state.gender(), texture, 0, 4.6f, pSlot == 6 ? 1.03f : 1.72f, shown);
+            String name = OptionLabels.option(AppearanceSection.PIERCINGS, slot.key(), v);
+            String text = font.plainSubstrByWidth(name, tw - 6);
+            g.drawString(font, text, x + 3, y + th - 10, selected ? T.onAccent : T.text, false);
+            final int value = v;
+            hits.add(new Hit(x, y, tw, th, () -> setPierc(pSlot, value)));
+        }
+    }
+
+    private void drawPiercingOptions(GuiGraphics g, int mx, int my) {
+        int index = 0;
+        for (int i = 0; i < P_SLOTS.length; i++) if (P_SLOTS[i] == pSlot) index = i;
+        g.drawString(font, "Piercing : " + P_NAMES[index], optX, py + 46, T.accent, false);
+        int y = bodyTop;
+        for (int i = 0; i < P_SLOTS.length; i++) {
+            final int slot = P_SLOTS[i];
+            chip(g, mx, my, optX + (i % 2) * (optW / 2), y + (i / 2) * 18, optW / 2 - 3, P_NAMES[i], pSlot == slot, () -> choosePiercingZone(slot));
+        }
+        y += 42;
+        g.drawString(font, "Métal (or et or rose : supplément)", optX, y, T.muted, false);
+        y += 10;
+        int w = optW / 3;
+        for (int i = 0; i < METALS.length; i++) {
+            final int metal = i;
+            int cx = optX + (i % 3) * w, cy = y + (i / 3) * 18;
+            chip(g, mx, my, cx, cy, w - 3, "    " + METALS[i], pierc()[4] == i, () -> setPierc(4, metal));
+            g.fill(cx + 4, cy + 4, cx + 12, cy + 12, fr.minenorth.identite.skin.Palette.metal(i) | 0xFF000000);
+        }
+        y += 42;
+        g.drawString(font, "Piercings posés", optX, y, T.muted, false);
+        y += 11;
+        for (int i = 0; i < P_SLOTS.length; i++) {
+            var slot = fr.minenorth.identite.appearance.Catalog.slots(AppearanceSection.PIERCINGS).get(P_SLOTS[i]);
+            g.drawString(font, P_NAMES[i] + " : " + OptionLabels.option(AppearanceSection.PIERCINGS, slot.key(), pierc()[P_SLOTS[i]]), optX, y, T.text, false);
+            y += 11;
         }
     }
 
@@ -436,7 +541,7 @@ public final class TattooSalonScreen extends Screen {
         hits.add(new Hit(saveX, y, sw, 20, () -> { onSave.accept(state); onClose(); }));
         MineNorthStyle.button(g, px + 8, y, 70, 20, "Défaire", T.chip, over(mx, my, px + 8, y, 70, 20), state.canUndo());
         if (state.canUndo()) hits.add(new Hit(px + 8, y, 70, 20, state::undo));
-        DrawingKind kind = drawingKind(zone());
+        DrawingKind kind = piercings ? null : drawingKind(zone());
         if (kind != null) {
             boolean has = !isBlank(state.appearance().drawings().get(kind));
             String label = (has ? "Mon dessin : " : "Dessiner : ") + ZONE_NAMES[zone];

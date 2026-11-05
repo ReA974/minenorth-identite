@@ -21,9 +21,37 @@ public final class SalonPrices {
     /** Coiffeur : coupe, couleur des cheveux, style de barbe, couleur de barbe. */
     public static final long HAIR_CUT = 2_500, HAIR_COLOR = 1_500, BEARD_STYLE = 1_000, BEARD_COLOR = 800;
 
+    /** Piercings (au salon de tatouage), par réglage : nez, sourcil, lèvre, nombril ; une ligne par option (0 = aucun). */
+    public static final long[] PIERCING_NOSE = {0, 2_000, 2_000, 3_500, 2_500, 3_000};
+    public static final long[] PIERCING_BROW = {0, 2_500, 3_000, 4_500, 5_500};
+    public static final long[] PIERCING_LIP = {0, 3_000, 3_000, 5_000, 3_000, 3_000};
+    public static final long[] PIERCING_NAVEL = {0, 3_500, 4_000, 5_000, 4_500};
+    /** Supplément pour l'or et l'or rose, et retrait d'un piercing. */
+    public static final long PRECIOUS_METAL = 1_000, PIERCING_REMOVAL = 1_000;
+
     public static long quote(SalonKind kind, Appearance before, Appearance after) {
         if (kind == null) return 0;
-        return kind == SalonKind.TATTOO ? tattoos(before, after) : hair(before, after);
+        return kind == SalonKind.TATTOO ? tattoos(before, after) + piercings(before, after) : hair(before, after);
+    }
+
+    /** Piercings : ce qui est posé ou changé se paie (et le métal s'il est précieux) ; en retirer un coûte un petit forfait. */
+    private static long piercings(Appearance before, Appearance after) {
+        int[] b = before.get(AppearanceSection.PIERCINGS), a = after.get(AppearanceSection.PIERCINGS);
+        long[][] tables = {PIERCING_NOSE, PIERCING_BROW, PIERCING_LIP, PIERCING_NAVEL};
+        int[] slots = {1, 2, 3, 6};
+        boolean precious = a[4] == 1 || a[4] == 3;
+        boolean metalChanged = a[4] != b[4];
+        long total = 0;
+        for (int i = 0; i < slots.length; i++) {
+            int slot = slots[i];
+            if (a[slot] == 0) {
+                if (b[slot] != 0) total += PIERCING_REMOVAL;
+                continue;
+            }
+            if (a[slot] == b[slot] && !metalChanged) continue;
+            total += tables[i][Math.min(a[slot], tables[i].length - 1)] + (precious ? PRECIOUS_METAL : 0);
+        }
+        return total;
     }
 
     // ------------------------------------------------------------------ tatouages

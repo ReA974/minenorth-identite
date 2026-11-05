@@ -483,6 +483,7 @@ public final class CreatorScreen extends Screen {
         if (section == AppearanceSection.TATTOOS) {
             minecraft.setScreen(TattooSalonScreen.forCreator(state.gender(), now, this, edited -> {
                 state.set(AppearanceSection.TATTOOS, edited.appearance().get(AppearanceSection.TATTOOS));
+                state.set(AppearanceSection.PIERCINGS, edited.appearance().get(AppearanceSection.PIERCINGS));
                 for (fr.minenorth.identite.drawing.DrawingKind kind : fr.minenorth.identite.drawing.DrawingKind.values()) {
                     if (kind.section() == AppearanceSection.TATTOOS) state.setDrawing(kind, edited.appearance().drawings().get(kind));
                 }

@@ -110,4 +110,40 @@ class SalonPricesTest {
         assertEquals(SalonKind.HAIR, SalonKind.forSections(SalonKind.HAIR.sections()));
         assertEquals(SalonKind.TATTOO, SalonKind.forSections(SalonKind.TATTOO.sections()));
     }
+
+    private static Appearance pierced(Appearance a, int slot, int value, int metal) {
+        int[] p = a.get(AppearanceSection.PIERCINGS);
+        p[slot] = value;
+        p[4] = metal;
+        return a.with(AppearanceSection.PIERCINGS, p);
+    }
+
+    @Test
+    void piercingsArePaidAtTheTattooSalon() {
+        assertEquals(SalonPrices.PIERCING_NOSE[1], tattooPrice(BASE, pierced(BASE, 1, 1, 0)));
+        assertEquals(SalonPrices.PIERCING_NAVEL[3], tattooPrice(BASE, pierced(BASE, 6, 3, 2)));
+        assertTrue(SalonPrices.PIERCING_LIP[3] > SalonPrices.PIERCING_LIP[1], "snake bites : deux bijoux");
+    }
+
+    @Test
+    void goldAndRoseGoldCostExtraPerPiercing() {
+        long silver = tattooPrice(BASE, pierced(BASE, 2, 1, 0));
+        assertEquals(silver + SalonPrices.PRECIOUS_METAL, tattooPrice(BASE, pierced(BASE, 2, 1, 1)));
+        assertEquals(silver + SalonPrices.PRECIOUS_METAL, tattooPrice(BASE, pierced(BASE, 2, 1, 3)));
+        assertEquals(silver, tattooPrice(BASE, pierced(BASE, 2, 1, 4)));
+    }
+
+    @Test
+    void anExistingPiercingKeptAsIsIsNotPaidAgain() {
+        Appearance has = pierced(BASE, 1, 4, 0);
+        assertEquals(0, tattooPrice(has, has));
+        assertEquals(SalonPrices.PIERCING_REMOVAL, tattooPrice(has, pierced(has, 1, 0, 0)));
+        assertEquals(SalonPrices.PIERCING_NOSE[4] + SalonPrices.PRECIOUS_METAL, tattooPrice(has, pierced(has, 1, 4, 1)), "changer de métal = refaire le piercing");
+    }
+
+    @Test
+    void tattoosAndPiercingsAddUp() {
+        Appearance both = pierced(tattoo(BASE, TattooZone.TORSO, 3, 0, 1), 6, 1, 0);
+        assertEquals(SalonPrices.TATTOO_SMALL + SalonPrices.PIERCING_NAVEL[1], tattooPrice(BASE, both));
+    }
 }
