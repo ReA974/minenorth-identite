@@ -85,6 +85,11 @@ public final class PlayerSkinEvents {
         }
     }
 
+    /** Bras fins du personnage dessiné, null s'il n'a pas de skin créé. Lu par le mod Vêtements (réflexion) : manches et montres suivent le vrai bras. */
+    public static Boolean slimArms(java.util.UUID player) {
+        return ClientSkins.active(player).map(entry -> entry.gender().slimArms()).orElse(null);
+    }
+
     private static PlayerRenderer rendererFor(AbstractClientPlayer player) {
         return ClientSkins.active(player.getUUID())
                 .map(entry -> entry.gender().slimArms() ? slimRenderer : defaultRenderer)
