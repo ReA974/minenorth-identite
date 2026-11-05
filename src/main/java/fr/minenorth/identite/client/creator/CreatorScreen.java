@@ -401,7 +401,7 @@ public final class CreatorScreen extends Screen {
             var tile = tiles.computeIfAbsent(section.name() + slotIndex + ":" + v,
                     k -> fr.minenorth.identite.skin.OptionPreview.of(state.gender(), state.appearance(), section, slotIndex, slot.key(), value));
             g.fill(x, y, x + tw, y + th, selected ? MineNorthStyle.CYAN : MineNorthStyle.FRAME);
-            g.fill(x + 1, y + 1, x + tw - 1, y + th - 1, 0xFFD9A577);
+            g.fill(x + 1, y + 1, x + tw - 1, y + th - 1, 0xFF120E34);
             for (int j = 0; j < tile.h(); j++) {
                 for (int i = 0; i < tile.w(); i++) {
                     int argb = tile.argb()[j * tile.w() + i];
