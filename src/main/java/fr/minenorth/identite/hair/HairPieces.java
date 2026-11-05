@@ -166,10 +166,12 @@ public final class HairPieces {
                 cap(out, 0.8f);
                 sides(out, 0.8f, -3.0f, -3.4f);
                 back(out, 0.8f, -3.0f);
-                for (int i = 0; i < 5; i++) {
-                    body(out, 1.7f + (i % 2) * 0.2f, -1.0f + 2.6f * i, -4.6f, 3.0f, 2.8f, 2.6f, i % 2 == 0 ? HAIR : SHADOW);
+                // mèche qui descend de la tempe sur l'épaule, puis natte fine sur le haut de la poitrine
+                head(out, 4.0f, -6.5f, -2.2f, 1.6f, 6.5f, 2.0f, HAIR);
+                for (int i = 0; i < 4; i++) {
+                    body(out, 2.2f + (i % 2) * 0.3f, -0.8f + 2.0f * i, -4.2f, 2.0f, 2.2f, 2.2f, HAIR);
                 }
-                body(out, 1.8f, 12.0f, -4.6f, 2.8f, 1.0f, 2.6f, TIE);
+                body(out, 2.3f, 7.2f, -4.1f, 1.8f, 0.9f, 2.0f, TIE);
             }
             case 29 -> {
                 cap(out, 1.0f);

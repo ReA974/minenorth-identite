@@ -477,7 +477,7 @@ public final class SkinComposer {
             hair(255, fill(3), new int[]{8, 8, 7, 7, 6, 5, 4, 3}, fill(8), new int[]{3, 4, 4, 5, 5, 4, 4, 3}),                // 25 mi-longs dégradés
             hair(255, new int[]{3, 4, 3, 4, 3, 4, 3, 4}, fill(8), fill(8), new int[]{10, 11, 10, 12, 12, 10, 11, 10}),         // 26 boucles longues
             hair(255, fill(4), new int[]{7, 7, 7, 7, 6, 5, 4, 3}, fill(7), fill(0)),                                          // 27 bob à frange
-            hair(255, fill(3), new int[]{6, 6, 5, 5, 4, 3, 2, 2}, fill(6), new int[]{6, 6, 0, 0, 0, 0, 0, 0}),                // 28 natte sur le côté
+            hair(255, fill(3), new int[]{6, 6, 5, 5, 4, 3, 2, 2}, fill(6), fill(0)),                                          // 28 natte sur le côté
             hair(255, fill(3), new int[]{7, 7, 7, 6, 5, 4, 3, 2}, fill(8), new int[]{0, 0, 5, 7, 7, 5, 0, 0}),                // 29 demi-queue
             hair(255, fill(2), new int[]{4, 4, 3, 3, 2, 2, 1, 1}, fill(5), fill(0)),                                          // 30 macarons
             hair(255, fill(3), new int[]{6, 6, 6, 5, 4, 3, 2, 2}, new int[]{6, 7, 8, 9, 9, 8, 7, 6}, fill(0)),                // 31 chignon bas

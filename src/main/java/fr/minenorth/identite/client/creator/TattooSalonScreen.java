@@ -23,6 +23,8 @@ import java.util.function.Consumer;
  */
 @OnlyIn(Dist.CLIENT)
 public final class TattooSalonScreen extends Screen {
+    private static final SalonTheme T = SalonTheme.TATTOO;
+
     private record Hit(int x, int y, int w, int h, Runnable action) {}
 
     private static final TattooZone[] ZONES = {TattooZone.FACE_NECK, TattooZone.TORSO, TattooZone.BACK,
@@ -148,16 +150,16 @@ public final class TattooSalonScreen extends Screen {
 
     /** SchÃ©ma du torse (8 Ã— 12 cases) : le carrÃ© clair montre oÃ¹ sera le tatouage ; on clique pour le dÃ©placer. */
     private void drawPad(GuiGraphics g, int mx, int my, int x, int y) {
-        g.drawString(font, "Position (cliquez)", x, y, MineNorthStyle.MUTED, false);
+        g.drawString(font, "Position (cliquez)", x, y, T.muted, false);
         padX = x;
         padY = y + 10;
-        g.fill(padX - 1, padY - 1, padX + 49, padY + 73, MineNorthStyle.CYAN);
+        g.fill(padX - 1, padY - 1, padX + 49, padY + 73, T.accent);
         g.fill(padX, padY, padX + 48, padY + 72, 0xFF6B4A38);
         int s = span(), ox = ox(), oy = oy();
         g.fill(padX + ox * 6, padY + oy * 6, padX + (ox + s) * 6, padY + (oy + s) * 6, 0xCCFFE066);
-        g.drawString(font, "Cliquez ou glissez", padX + 56, padY + 4, MineNorthStyle.MUTED, false);
-        g.drawString(font, "pour placer le", padX + 56, padY + 14, MineNorthStyle.MUTED, false);
-        g.drawString(font, "tatouage.", padX + 56, padY + 24, MineNorthStyle.MUTED, false);
+        g.drawString(font, "Cliquez ou glissez", padX + 56, padY + 4, T.muted, false);
+        g.drawString(font, "pour placer le", padX + 56, padY + 14, T.muted, false);
+        g.drawString(font, "tatouage.", padX + 56, padY + 24, T.muted, false);
     }
 
     private boolean isArm() { return zone() == TattooZone.RIGHT_ARM || zone() == TattooZone.LEFT_ARM; }
@@ -177,7 +179,7 @@ public final class TattooSalonScreen extends Screen {
     @Override public void render(GuiGraphics g, int mx, int my, float partial) {
         renderBackground(g);
         hits.clear();
-        MineNorthStyle.panel(g, px, py, pw, ph, "MINENORTHRP - SALON DE TATOUAGE", "Choisissez un motif, une zone, puis tatouez. Paiement par carte.");
+        T.panel(g, px, py, pw, ph, "MINENORTHRP - SALON DE TATOUAGE", "Choisissez un motif, une zone, puis tatouez. Paiement par carte.");
         drawGrid(g, mx, my);
         drawPreview(g, mx, my);
         drawOptions(g, mx, my);
@@ -188,7 +190,7 @@ public final class TattooSalonScreen extends Screen {
     private boolean over(int mx, int my, int x, int y, int w, int h) { return mx >= x && mx < x + w && my >= y && my < y + h; }
 
     private void drawGrid(GuiGraphics g, int mx, int my) {
-        g.drawString(font, "Motifs", gridX, bodyTop - 2, MineNorthStyle.CYAN, false);
+        g.drawString(font, "Motifs", gridX, bodyTop - 2, T.accent, false);
         int top = bodyTop + 10;
         int current = tattoos()[zone().motifSlot()];
         if (zone() == TattooZone.FACE_NECK) {
@@ -206,20 +208,20 @@ public final class TattooSalonScreen extends Screen {
         scroll = Math.max(0, Math.min(scroll, totalRows - rowsVisible));
         if (totalRows > rowsVisible) {
             int barH = rowsVisible * 28;
-            g.fill(gridX + 5 * 28, top, gridX + 5 * 28 + 3, top + barH, MineNorthStyle.LIST);
+            g.fill(gridX + 5 * 28, top, gridX + 5 * 28 + 3, top + barH, T.list);
             int thumb = Math.max(10, barH * rowsVisible / totalRows);
             int thumbY = top + (barH - thumb) * scroll / (totalRows - rowsVisible);
-            g.fill(gridX + 5 * 28, thumbY, gridX + 5 * 28 + 3, thumbY + thumb, MineNorthStyle.CYAN);
+            g.fill(gridX + 5 * 28, thumbY, gridX + 5 * 28 + 3, thumbY + thumb, T.accent);
         }
         for (int m = 0; m <= TattooZone.MOTIFS; m++) {
             int row = m / 5;
             if (row < scroll || row >= scroll + rowsVisible) continue;
             int x = gridX + (m % 5) * 28, y = top + (row - scroll) * 28;
             boolean on = current == m, hover = over(mx, my, x, y, 26, 26);
-            g.fill(x, y, x + 26, y + 26, on ? MineNorthStyle.CYAN : hover ? MineNorthStyle.HOVER : MineNorthStyle.LIST);
-            g.fill(x + 1, y + 1, x + 25, y + 25, on ? 0xFF16106A : MineNorthStyle.LIST);
+            g.fill(x, y, x + 26, y + 26, on ? T.accent : hover ? T.hover : T.list);
+            g.fill(x + 1, y + 1, x + 25, y + 25, on ? T.panel : T.list);
             if (m == 0) {
-                g.drawString(font, "X", x + 10, y + 9, MineNorthStyle.MUTED, false);
+                g.drawString(font, "X", x + 10, y + 9, T.muted, false);
             } else {
                 int[] px8 = SkinComposer.designPixels(m, ink);
                 for (int i = 0; i < 64; i++) {
@@ -268,7 +270,7 @@ public final class TattooSalonScreen extends Screen {
     private void drawOptions(GuiGraphics g, int mx, int my) {
         int[] t = tattoos();
         int x = optX, y = bodyTop - 2;
-        g.drawString(font, "Zone : " + ZONE_NAMES[zone], x, y, MineNorthStyle.CYAN, false);
+        g.drawString(font, "Zone : " + ZONE_NAMES[zone], x, y, T.accent, false);
         y += 12;
         for (int i = 0; i < ZONES.length; i++) {
             final int index = i;
@@ -288,7 +290,7 @@ public final class TattooSalonScreen extends Screen {
 
     /** Une ligne de choix : libellé puis puces sur {@code perRow} colonnes ; renvoie le y suivant. */
     private int row(GuiGraphics g, int mx, int my, int x, int y, String label, String[] names, int selected, int slot, int perRow) {
-        g.drawString(font, label, x, y, MineNorthStyle.MUTED, false);
+        g.drawString(font, label, x, y, T.muted, false);
         y += 10;
         int w = optW / perRow;
         for (int i = 0; i < names.length; i++) {
@@ -300,9 +302,9 @@ public final class TattooSalonScreen extends Screen {
 
     private void chip(GuiGraphics g, int mx, int my, int x, int y, int w, String label, boolean on, Runnable action) {
         boolean hover = over(mx, my, x, y, w, 16);
-        g.fill(x, y, x + w, y + 16, on ? MineNorthStyle.CYAN : hover ? MineNorthStyle.HOVER : MineNorthStyle.DARK);
+        g.fill(x, y, x + w, y + 16, on ? T.accent : hover ? T.hover : T.chip);
         String text = font.plainSubstrByWidth(label, w - 4);
-        g.drawString(font, text, x + (w - font.width(text)) / 2, y + 4, on ? 0xFF06103A : MineNorthStyle.TEXT, false);
+        g.drawString(font, text, x + (w - font.width(text)) / 2, y + 4, on ? T.onAccent : T.text, false);
         hits.add(new Hit(x, y, w, 16, action));
     }
 
@@ -310,18 +312,18 @@ public final class TattooSalonScreen extends Screen {
         int y = py + ph - 24, w = 90, sw = 150;
         long price = fr.minenorth.identite.salon.SalonPrices.quote(fr.minenorth.identite.salon.SalonKind.TATTOO, original, state.appearance());
         int saveX = px + pw - 8 - sw, cancelX = saveX - 6 - w;
-        MineNorthStyle.button(g, cancelX, y, w, 20, "Annuler", MineNorthStyle.DARK, over(mx, my, cancelX, y, w, 20), true);
+        MineNorthStyle.button(g, cancelX, y, w, 20, "Annuler", T.chip, over(mx, my, cancelX, y, w, 20), true);
         hits.add(new Hit(cancelX, y, w, 20, this::onClose));
-        MineNorthStyle.button(g, saveX, y, sw, 20, price > 0 ? "Tatouer · " + MineNorthStyle.euros(price) : "Tatouer", MineNorthStyle.GREEN, over(mx, my, saveX, y, sw, 20), true);
+        MineNorthStyle.button(g, saveX, y, sw, 20, price > 0 ? "Tatouer · " + MineNorthStyle.euros(price) : "Tatouer", T.confirm, over(mx, my, saveX, y, sw, 20), true);
         hits.add(new Hit(saveX, y, sw, 20, () -> { onSave.accept(state); onClose(); }));
-        MineNorthStyle.button(g, px + 8, y, 80, 20, "Défaire", MineNorthStyle.DARK, over(mx, my, px + 8, y, 80, 20), state.canUndo());
+        MineNorthStyle.button(g, px + 8, y, 80, 20, "Défaire", T.chip, over(mx, my, px + 8, y, 80, 20), state.canUndo());
         if (state.canUndo()) hits.add(new Hit(px + 8, y, 80, 20, state::undo));
         fr.minenorth.identite.drawing.DrawingKind kind = drawingKind();
         if (kind != null) {
             boolean has = !isBlank(state.appearance().drawings().get(kind));
             String label = (has ? "Mon dessin : " : "Dessiner : ") + ZONE_NAMES[zone];
             int dx = px + 92, dw = Math.min(170, font.width(label) + 16);
-            MineNorthStyle.button(g, dx, y, dw, 20, label, MineNorthStyle.PINK, over(mx, my, dx, y, dw, 20), true);
+            MineNorthStyle.button(g, dx, y, dw, 20, label, T.draw, over(mx, my, dx, y, dw, 20), true);
             hits.add(new Hit(dx, y, dw, 20, () -> openDraw(kind)));
         }
     }

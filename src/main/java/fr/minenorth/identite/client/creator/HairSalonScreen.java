@@ -23,6 +23,8 @@ import java.util.function.Consumer;
  */
 @OnlyIn(Dist.CLIENT)
 public final class HairSalonScreen extends Screen {
+    private static final SalonTheme T = SalonTheme.HAIR;
+
     private record Hit(int x, int y, int w, int h, Runnable action) {}
 
     private static final String[] VIEW_NAMES = {"Face", "Profil", "Dos", "Corps"};
@@ -81,7 +83,7 @@ public final class HairSalonScreen extends Screen {
     @Override public void render(GuiGraphics g, int mx, int my, float partial) {
         renderBackground(g);
         hits.clear();
-        MineNorthStyle.panel(g, px, py, pw, ph, "MINENORTHRP - SALON DE COIFFURE", "Choisissez une coupe, une couleur et une barbe. Paiement par carte.");
+        T.panel(g, px, py, pw, ph, "MINENORTHRP - SALON DE COIFFURE", "Choisissez une coupe, une couleur et une barbe. Paiement par carte.");
         drawMirror(g, mx, my);
         drawOptions(g, mx, my);
         drawFooter(g, mx, my);
@@ -115,7 +117,7 @@ public final class HairSalonScreen extends Screen {
             chip(g, mx, my, optX + i * tw, bodyTop - 2, tw - 3, TAB_NAMES[i], tab == i, () -> tab = index);
         }
         int y = bodyTop + 22;
-        g.drawString(font, tab == 0 ? "Coupe" : "Style de barbe", optX, y, MineNorthStyle.CYAN, false);
+        g.drawString(font, tab == 0 ? "Coupe" : "Style de barbe", optX, y, T.accent, false);
         y += 11;
         Catalog.Slot style = Catalog.slots(section()).get(0);
         int[] v = values();
@@ -128,14 +130,14 @@ public final class HairSalonScreen extends Screen {
             n++;
         }
         y += ((n + cols - 1) / cols) * 18 + 6;
-        g.drawString(font, "Couleur", optX, y, MineNorthStyle.CYAN, false);
+        g.drawString(font, "Couleur", optX, y, T.accent, false);
         y += 11;
         int colors = Catalog.slots(section()).get(1).options();
         int sw = Math.min(22, optW / colors);
         for (int i = 0; i < colors; i++) {
             int x = optX + i * sw;
             boolean on = v[1] == i;
-            g.fill(x, y, x + sw - 2, y + 18, on ? MineNorthStyle.WHITE : over(mx, my, x, y, sw - 2, 18) ? MineNorthStyle.CYAN : MineNorthStyle.FRAME);
+            g.fill(x, y, x + sw - 2, y + 18, on ? MineNorthStyle.WHITE : over(mx, my, x, y, sw - 2, 18) ? T.accent : T.frame);
             g.fill(x + 1, y + 1, x + sw - 3, y + 17, Palette.hairColor(i) | 0xFF000000);
             final int value = i;
             hits.add(new Hit(x, y, sw - 2, 18, () -> set(1, value)));
@@ -144,9 +146,9 @@ public final class HairSalonScreen extends Screen {
 
     private void chip(GuiGraphics g, int mx, int my, int x, int y, int w, String label, boolean on, Runnable action) {
         boolean hover = over(mx, my, x, y, w, 16);
-        g.fill(x, y, x + w, y + 16, on ? MineNorthStyle.CYAN : hover ? MineNorthStyle.HOVER : MineNorthStyle.DARK);
+        g.fill(x, y, x + w, y + 16, on ? T.accent : hover ? T.hover : T.chip);
         String text = font.plainSubstrByWidth(label, w - 4);
-        g.drawString(font, text, x + (w - font.width(text)) / 2, y + 4, on ? 0xFF06103A : MineNorthStyle.TEXT, false);
+        g.drawString(font, text, x + (w - font.width(text)) / 2, y + 4, on ? T.onAccent : T.text, false);
         hits.add(new Hit(x, y, w, 16, action));
     }
 
@@ -154,11 +156,11 @@ public final class HairSalonScreen extends Screen {
         int y = py + ph - 24, w = 170;
         long price = fr.minenorth.identite.salon.SalonPrices.quote(fr.minenorth.identite.salon.SalonKind.HAIR, original, state.appearance());
         int saveX = px + pw - 8 - w, cancelX = saveX - 6 - 90;
-        MineNorthStyle.button(g, cancelX, y, 90, 20, "Annuler", MineNorthStyle.DARK, over(mx, my, cancelX, y, 90, 20), true);
+        MineNorthStyle.button(g, cancelX, y, 90, 20, "Annuler", T.chip, over(mx, my, cancelX, y, 90, 20), true);
         hits.add(new Hit(cancelX, y, 90, 20, this::onClose));
-        MineNorthStyle.button(g, saveX, y, w, 20, price > 0 ? "Valider · " + MineNorthStyle.euros(price) : "Valider la coupe", MineNorthStyle.GREEN, over(mx, my, saveX, y, w, 20), true);
+        MineNorthStyle.button(g, saveX, y, w, 20, price > 0 ? "Valider · " + MineNorthStyle.euros(price) : "Valider la coupe", T.confirm, over(mx, my, saveX, y, w, 20), true);
         hits.add(new Hit(saveX, y, w, 20, () -> { onSave.accept(state); onClose(); }));
-        MineNorthStyle.button(g, px + 8, y, 70, 20, "Défaire", MineNorthStyle.DARK, over(mx, my, px + 8, y, 70, 20), state.canUndo());
+        MineNorthStyle.button(g, px + 8, y, 70, 20, "Défaire", T.chip, over(mx, my, px + 8, y, 70, 20), state.canUndo());
         if (state.canUndo()) hits.add(new Hit(px + 8, y, 70, 20, state::undo));
     }
 
