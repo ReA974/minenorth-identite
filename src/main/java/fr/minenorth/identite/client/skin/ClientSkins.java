@@ -89,14 +89,14 @@ public final class ClientSkins {
     }
 
     private static DynamicTexture tattooTexture(Appearance appearance) {
-        NativeImage image = new NativeImage(NativeImage.Format.RGBA, fr.minenorth.identite.skin.HiResTattoo.ATLAS, fr.minenorth.identite.skin.HiResTattoo.ATLAS, true);
+        NativeImage image = new NativeImage(NativeImage.Format.RGBA, fr.minenorth.identite.skin.TattooRegions.ATLAS_W, fr.minenorth.identite.skin.TattooRegions.ATLAS_H, true);
         fillAtlas(image, fr.minenorth.identite.skin.HiResTattoo.atlas(appearance));
         return new DynamicTexture(image);
     }
 
     private static void fillAtlas(NativeImage image, int[] argb) {
-        int n = fr.minenorth.identite.skin.HiResTattoo.ATLAS;
-        for (int y = 0; y < n; y++) for (int x = 0; x < n; x++) image.setPixelRGBA(x, y, Palette.argbToAbgr(argb[y * n + x]));
+        int w = fr.minenorth.identite.skin.TattooRegions.ATLAS_W, h = fr.minenorth.identite.skin.TattooRegions.ATLAS_H;
+        for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) image.setPixelRGBA(x, y, Palette.argbToAbgr(argb[y * w + x]));
     }
 
     private static final Map<String, ResourceLocation> TILES = new HashMap<>();

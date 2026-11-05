@@ -26,6 +26,6 @@ public class HairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         var entry = ClientSkins.active(player.getUUID());
         if (entry.isEmpty()) return;
         boolean helmet = !player.getItemBySlot(EquipmentSlot.HEAD).isEmpty();
-        HairRenderer.drawAll(ps, buffers, light, getParentModel(), entry.get().appearance(), helmet, entry.get().tattoo());
+        HairRenderer.drawAll(ps, buffers, light, getParentModel(), entry.get().appearance(), helmet, entry.get().tattoo(), entry.get().gender().slimArms());
     }
 }

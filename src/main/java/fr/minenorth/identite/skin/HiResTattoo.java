@@ -6,24 +6,25 @@ import fr.minenorth.identite.appearance.TattooZone;
 import fr.minenorth.identite.drawing.DrawingKind;
 
 /**
- * Tatouages en haute définition (version pilote : torse et dos). Le skin ne peut pas faire mieux que 8 × 12 pixels par face ;
- * ici le tatouage est dessiné sur une fine couche posée sur la peau, quatre fois plus fine (32 × 48) : les figures du
- * catalogue sont lissées (bords adoucis), éclairées (relief) et légèrement granuleuses comme de l'encre. Code pur : le
- * rendu en jeu ne fait qu'afficher cette image.
+ * Tatouages en haute définition. Le skin ne peut pas faire mieux que 8 × 12 pixels par face ; ici le tatouage est dessiné
+ * sur une fine couche posée sur la peau (torse, dos, bras et jambes), quatre fois plus fine : les figures du catalogue
+ * sont lissées (bords adoucis), éclairées (relief) et légèrement granuleuses comme de l'encre. Code pur : le rendu en jeu
+ * ne fait qu'afficher cette image ({@link TattooRegions} dit où chaque face se trouve).
  */
 public final class HiResTattoo {
     private HiResTattoo() {}
 
     /** Pixels de la couche pour un pixel de skin. */
     public static final int SCALE = 4;
-    /** L'image de la couche : le torse de face à gauche (32 × 48), le dos à droite. */
-    public static final int ATLAS = 64, REGION_W = 32, REGION_H = 48;
 
-    /** Vrai s'il y a un tatouage du catalogue ou dessiné sur le torse ou le dos : sinon la couche n'est pas dessinée. */
+    /** Vrai s'il y a un tatouage du catalogue ou dessiné sur le torse, le dos, un bras ou une jambe : sinon la couche n'est pas dessinée. */
     public static boolean hasAny(Appearance a) {
         int[] t = a.get(AppearanceSection.TATTOOS);
-        if (t[TattooZone.TORSO.motifSlot()] > 0 || t[TattooZone.BACK.motifSlot()] > 0) return true;
-        return !blank(a.drawings().get(DrawingKind.TATTOO_TORSO)) || !blank(a.drawings().get(DrawingKind.TATTOO_BACK));
+        for (TattooZone zone : TattooRegions.ZONES) {
+            if (t[zone.motifSlot()] > 0) return true;
+            if (!blank(a.drawings().get(TattooRegions.drawing(zone)))) return true;
+        }
+        return false;
     }
 
     private static boolean blank(byte[] grid) {
@@ -31,44 +32,51 @@ public final class HiResTattoo {
         return true;
     }
 
-    /** L'image 64 × 64 ARGB de la couche (transparente là où il n'y a rien). */
+    /** L'image ARGB de la couche, {@link TattooRegions#ATLAS_W} × {@link TattooRegions#ATLAS_H} (transparente là où il n'y a rien). */
     public static int[] atlas(Appearance a) {
-        int[] out = new int[ATLAS * ATLAS];
+        int[] out = new int[TattooRegions.ATLAS_W * TattooRegions.ATLAS_H];
         int[] t = a.get(AppearanceSection.TATTOOS);
-        paintZone(out, 0, TattooZone.TORSO, t, a.drawings().get(DrawingKind.TATTOO_TORSO), DrawingKind.TATTOO_TORSO);
-        paintZone(out, REGION_W, TattooZone.BACK, t, a.drawings().get(DrawingKind.TATTOO_BACK), DrawingKind.TATTOO_BACK);
+        for (TattooZone zone : TattooRegions.ZONES) {
+            int motif = t[zone.motifSlot()];
+            if (motif > 0) {
+                int face = TattooRegions.isLimb(zone) ? t[TattooRegions.faceSlot(zone)] : 0;
+                int[] origin = TattooRegions.origin(zone, face);
+                int[] p = TattooPlacement.of(zone, t);
+                int[] art = motif(motif, t[TattooZone.INK_SLOT], p[2] * SCALE, p[3] * SCALE);
+                blit(out, origin[0] + p[0] * SCALE, origin[1] + p[1] * SCALE, art, p[2] * SCALE, p[3] * SCALE, origin, TattooRegions.width(zone));
+            }
+            paintDrawing(out, zone, a.drawings().get(TattooRegions.drawing(zone)));
+        }
         return out;
     }
 
-    private static void paintZone(int[] atlas, int originX, TattooZone zone, int[] t, byte[] drawn, DrawingKind kind) {
-        int motif = t[zone.motifSlot()];
-        if (motif > 0) {
-            int[] p = TattooPlacement.of(zone, t);
-            int[] art = motif(motif, t[TattooZone.INK_SLOT], p[2] * SCALE, p[3] * SCALE);
-            blit(atlas, originX + p[0] * SCALE, p[1] * SCALE, art, p[2] * SCALE, p[3] * SCALE);
-        }
-        // le dessin libre : chaque case de la grille 8 × 12 devient un carré net de 4 × 4
+    /** Le dessin libre : chaque case de la grille devient un carré net de 4 × 4, sur la face avant. */
+    private static void paintDrawing(int[] atlas, TattooZone zone, byte[] grid) {
+        DrawingKind kind = TattooRegions.drawing(zone);
+        int[] origin = TattooRegions.origin(zone, 0);
         for (int y = 0; y < kind.height(); y++) {
             for (int x = 0; x < kind.width(); x++) {
-                int index = drawn[y * kind.width() + x];
+                int index = grid[y * kind.width() + x];
                 if (index == 0) continue;
                 int color = (kind.color(index) & 0x00FFFFFF) | 0xE6000000;
                 for (int j = 0; j < SCALE; j++) {
                     for (int i = 0; i < SCALE; i++) {
-                        int px = originX + x * SCALE + i, py = y * SCALE + j;
-                        atlas[py * ATLAS + px] = over(atlas[py * ATLAS + px], color);
+                        int px = origin[0] + x * SCALE + i, py = origin[1] + y * SCALE + j;
+                        atlas[py * TattooRegions.ATLAS_W + px] = over(atlas[py * TattooRegions.ATLAS_W + px], color);
                     }
                 }
             }
         }
     }
 
-    private static void blit(int[] atlas, int x0, int y0, int[] art, int w, int h) {
+    /** Pose le motif ; ce qui sortirait de la face (largeur {@code faceWidth}, 48 de haut) est coupé. */
+    private static void blit(int[] atlas, int x0, int y0, int[] art, int w, int h, int[] origin, int faceWidth) {
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
                 int px = x0 + x, py = y0 + y;
-                if (px < 0 || py < 0 || px >= ATLAS || py >= ATLAS || art[y * w + x] == 0) continue;
-                atlas[py * ATLAS + px] = over(atlas[py * ATLAS + px], art[y * w + x]);
+                if (px < origin[0] || px >= origin[0] + faceWidth || py < origin[1] || py >= origin[1] + TattooRegions.HEIGHT) continue;
+                if (art[y * w + x] == 0) continue;
+                atlas[py * TattooRegions.ATLAS_W + px] = over(atlas[py * TattooRegions.ATLAS_W + px], art[y * w + x]);
             }
         }
     }
@@ -89,7 +97,8 @@ public final class HiResTattoo {
     /**
      * Le motif (1 à {@link TattooZone#MOTIFS}) en largeur × hauteur pixels ARGB. Le dessin 8 × 8 d'origine sert de guide :
      * contour, couleur principale et secondaire sont lissés séparément, le contour est un peu renforcé, les bords ont une
-     * transparence progressive, un relief éclaire les bords haut et gauche, et un grain léger imite l'encre.
+     * transparence progressive centrée sur le bord d'origine (le motif ne grossit pas), un relief éclaire les bords haut et
+     * gauche, et un grain léger imite l'encre.
      */
     public static int[] motif(int motif, int ink, int w, int h) {
         int[] out = new int[w * h];
@@ -118,7 +127,7 @@ public final class HiResTattoo {
                 double sx = (tx + 0.5) * 8.0 / w - 0.5, sy = (ty + 0.5) * 8.0 / h - 0.5;
                 double o = sample(outline, sx, sy), m = sample(main, sx, sy), s = sample(second, sx, sy);
                 int i = ty * w + tx;
-                cover[i] = smooth(0.30, 0.66, Math.min(1, o + m + s));
+                cover[i] = smooth(0.40, 0.60, Math.min(1, o + m + s));
                 wo[i] = o * 1.6;
                 wm[i] = m;
                 ws[i] = s;
@@ -129,17 +138,12 @@ public final class HiResTattoo {
                 int i = ty * w + tx;
                 if (cover[i] < 0.02) continue;
                 double sum = wo[i] + wm[i] + ws[i];
-                int color;
-                if (sum <= 0) {
-                    color = mainColor;
-                } else {
-                    color = blend(outlineColor, wo[i] / sum, mainColor, wm[i] / sum, secondColor, ws[i] / sum);
-                }
+                int color = sum <= 0 ? mainColor : blend(outlineColor, wo[i] / sum, mainColor, wm[i] / sum, secondColor, ws[i] / sum);
                 // relief : les bords tournés vers le haut et la gauche sont éclairés, les autres assombris (sauf le contour)
                 double g = at(cover, w, h, tx + 1, ty) + at(cover, w, h, tx, ty + 1) - at(cover, w, h, tx - 1, ty) - at(cover, w, h, tx, ty - 1);
                 double outlineShare = wo[i] / Math.max(sum, 1e-6);
                 double light = 1 + g * 0.16 * (1 - outlineShare);
-                // grain : une variation douce et fixe (le même sur tous les clients)
+                // grain : une variation douce et fixe (la même sur tous les clients)
                 int hash = tx * 73856093 ^ ty * 19349663 ^ motif * 83492791;
                 hash = (hash ^ (hash >>> 13)) * 1274126177;
                 double grain = 0.965 + 0.07 * ((hash >>> 8 & 0xFF) / 255.0);

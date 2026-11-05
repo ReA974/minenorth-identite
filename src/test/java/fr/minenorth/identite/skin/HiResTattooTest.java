@@ -10,8 +10,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Tatouages en haute définition du torse et du dos : figures lissées, couche de 64 × 64, torse à gauche et dos à droite. */
+/** Tatouages en haute définition : figures lissées, une image 128 × 144 avec une zone par face du corps. */
 class HiResTattooTest {
+    private static final int W = TattooRegions.ATLAS_W;
+
     private static Appearance base() { return Catalog.defaults(Gender.MALE).with(AppearanceSection.HAIR, new int[]{0, 1}); }
 
     private static Appearance tattoo(TattooZone zone, int motif, int size, int ink) {
@@ -25,6 +27,13 @@ class HiResTattooTest {
     private static int opaque(int[] px) {
         int n = 0;
         for (int v : px) if ((v >>> 24) > 0) n++;
+        return n;
+    }
+
+    /** Nombre de pixels opaques de l'image dans le rectangle donné. */
+    private static int inside(int[] atlas, int x0, int y0, int w, int h) {
+        int n = 0;
+        for (int y = y0; y < y0 + h; y++) for (int x = x0; x < x0 + w; x++) if ((atlas[y * W + x] >>> 24) > 0) n++;
         return n;
     }
 
@@ -46,8 +55,20 @@ class HiResTattooTest {
     }
 
     @Test
+    void theShapeDoesNotGrowBeyondTheOriginalDrawing() {
+        // un motif lissé couvre à peu près la même surface que le dessin d'origine (pas de bavure)
+        for (int m = 1; m <= TattooZone.MOTIFS; m++) {
+            int original = (int) java.util.Arrays.stream(SkinComposer.designPixels(m, 0)).filter(v -> v != 0).count();
+            int[] px = HiResTattoo.motif(m, 0, 32, 32);
+            double solid = 0;
+            for (int v : px) solid += (v >>> 24) / 255.0;
+            double ratio = solid / 16.0 / original;
+            assertTrue(ratio > 0.55 && ratio < 1.25, "motif " + m + " : " + ratio + " de la surface d'origine");
+        }
+    }
+
+    @Test
     void thereIsMoreDetailThanInTheSkin() {
-        // à 32 × 32, un motif a bien plus de couleurs différentes qu'à 8 × 8 (relief, grain)
         for (int m : new int[]{1, 6, 20, 31}) {
             long fine = java.util.Arrays.stream(HiResTattoo.motif(m, 0, 32, 32)).filter(v -> v != 0).distinct().count();
             long coarse = java.util.Arrays.stream(SkinComposer.designPixels(m, 0)).filter(v -> v != 0).distinct().count();
@@ -80,16 +101,26 @@ class HiResTattooTest {
     void theAtlasHoldsTheTorsoOnTheLeftAndTheBackOnTheRight() {
         int[] torso = HiResTattoo.atlas(tattoo(TattooZone.TORSO, 3, 2, 0));
         int[] back = HiResTattoo.atlas(tattoo(TattooZone.BACK, 3, 2, 0));
-        assertEquals(HiResTattoo.ATLAS * HiResTattoo.ATLAS, torso.length);
-        int tl = 0, tr = 0, bl = 0, br = 0;
-        for (int y = 0; y < HiResTattoo.ATLAS; y++) {
-            for (int x = 0; x < HiResTattoo.ATLAS; x++) {
-                if ((torso[y * 64 + x] >>> 24) > 0) { if (x < 32) tl++; else tr++; }
-                if ((back[y * 64 + x] >>> 24) > 0) { if (x < 32) bl++; else br++; }
+        assertEquals(W * TattooRegions.ATLAS_H, torso.length);
+        assertTrue(inside(torso, 0, 0, 32, 48) > 0 && inside(torso, 32, 0, 32, 48) == 0, "torse à gauche seulement");
+        assertTrue(inside(back, 32, 0, 32, 48) > 0 && inside(back, 0, 0, 32, 48) == 0, "dos à droite seulement");
+    }
+
+    @Test
+    void everyLimbHasItsOwnPlaceInTheAtlas() {
+        for (TattooZone zone : new TattooZone[]{TattooZone.RIGHT_ARM, TattooZone.LEFT_ARM, TattooZone.RIGHT_LEG, TattooZone.LEFT_LEG}) {
+            for (int face = 0; face < 4; face++) {
+                int[] t = new int[TattooZone.TOTAL_SLOTS];
+                t[zone.motifSlot()] = 7;
+                t[zone.sizeSlot()] = 2;
+                t[TattooRegions.faceSlot(zone)] = face;
+                int[] atlas = HiResTattoo.atlas(base().with(AppearanceSection.TATTOOS, t));
+                int[] o = TattooRegions.origin(zone, face);
+                int here = inside(atlas, o[0], o[1], 16, 48);
+                assertTrue(here > 0, zone + " face " + face + " vide");
+                assertEquals(opaque(atlas), here, zone + " face " + face + " déborde de sa zone");
             }
         }
-        assertTrue(tl > 0 && tr == 0, "torse à gauche seulement");
-        assertTrue(br > 0 && bl == 0, "dos à droite seulement");
     }
 
     @Test
@@ -103,12 +134,7 @@ class HiResTattooTest {
                     t[TattooZone.TORSO_X_SLOT] = x;
                     t[TattooZone.TORSO_Y_SLOT] = y;
                     int[] atlas = HiResTattoo.atlas(base().with(AppearanceSection.TATTOOS, t));
-                    for (int j = 0; j < 64; j++) {
-                        for (int i = 0; i < 64; i++) {
-                            if ((atlas[j * 64 + i] >>> 24) == 0) continue;
-                            assertTrue(i < HiResTattoo.REGION_W && j < HiResTattoo.REGION_H, "pixel hors du torse : " + i + "," + j);
-                        }
-                    }
+                    assertEquals(opaque(atlas), inside(atlas, 0, 0, 32, 48), "taille " + size + " x " + x + " y " + y);
                 }
             }
         }
@@ -121,24 +147,37 @@ class HiResTattooTest {
         Appearance a = base().withDrawings(base().drawings().with(DrawingKind.TATTOO_TORSO, grid));
         assertTrue(HiResTattoo.hasAny(a));
         int[] atlas = HiResTattoo.atlas(a);
-        for (int j = 0; j < 4; j++) for (int i = 0; i < 4; i++) assertTrue((atlas[(4 + j) * 64 + 8 + i] >>> 24) > 0xC0, "bloc " + i + "," + j);
+        for (int j = 0; j < 4; j++) for (int i = 0; i < 4; i++) assertTrue((atlas[(4 + j) * W + 8 + i] >>> 24) > 0xC0, "bloc " + i + "," + j);
         assertEquals(16, opaque(atlas));
     }
 
     @Test
-    void hasAnyOnlyForTorsoAndBack() {
-        assertFalse(HiResTattoo.hasAny(base()));
-        assertTrue(HiResTattoo.hasAny(tattoo(TattooZone.TORSO, 2, 0, 0)));
-        assertTrue(HiResTattoo.hasAny(tattoo(TattooZone.BACK, 2, 0, 0)));
-        assertFalse(HiResTattoo.hasAny(tattoo(TattooZone.RIGHT_ARM, 2, 0, 0)), "les bras restent peints sur le skin dans ce pilote");
+    void aLimbDrawingIsOnTheFrontFace() {
+        byte[] grid = new byte[DrawingKind.TATTOO_LEFT_LEG.width() * DrawingKind.TATTOO_LEFT_LEG.height()];
+        grid[0] = 3;
+        Appearance a = base().withDrawings(base().drawings().with(DrawingKind.TATTOO_LEFT_LEG, grid));
+        int[] o = TattooRegions.origin(TattooZone.LEFT_LEG, 0);
+        assertEquals(16, inside(HiResTattoo.atlas(a), o[0], o[1], 4, 4));
     }
 
     @Test
-    void theLayeredSkinSkipsTorsoAndBackTattoosButKeepsTheOthers() {
-        Appearance torso = tattoo(TattooZone.TORSO, 3, 2, 0);
-        assertFalse(java.util.Arrays.equals(SkinComposer.compose(Gender.MALE, torso, false), SkinComposer.compose(Gender.MALE, base(), false)));
-        assertArrayEquals(SkinComposer.compose(Gender.MALE, base(), true), SkinComposer.compose(Gender.MALE, torso, true), "plus de tatouage de torse peint");
-        Appearance arm = tattoo(TattooZone.RIGHT_ARM, 3, 2, 0);
-        assertFalse(java.util.Arrays.equals(SkinComposer.compose(Gender.MALE, base(), true), SkinComposer.compose(Gender.MALE, arm, true)), "le bras reste peint");
+    void hasAnyForEveryZoneExceptTheFace() {
+        assertFalse(HiResTattoo.hasAny(base()));
+        for (TattooZone zone : TattooRegions.ZONES) assertTrue(HiResTattoo.hasAny(tattoo(zone, 2, 0, 0)), zone.name());
+        int[] t = new int[TattooZone.TOTAL_SLOTS];
+        t[TattooZone.FACE_NECK.motifSlot()] = 2;
+        assertFalse(HiResTattoo.hasAny(base().with(AppearanceSection.TATTOOS, t)), "les marques du visage restent peintes");
+    }
+
+    @Test
+    void theLayeredSkinHasNoBodyTattooButKeepsFaceMarks() {
+        for (TattooZone zone : TattooRegions.ZONES) {
+            Appearance a = tattoo(zone, 3, 2, 0);
+            assertFalse(java.util.Arrays.equals(SkinComposer.compose(Gender.MALE, base(), false), SkinComposer.compose(Gender.MALE, a, false)), "peint : " + zone);
+            assertArrayEquals(SkinComposer.compose(Gender.MALE, base(), true), SkinComposer.compose(Gender.MALE, a, true), "plus peint : " + zone);
+        }
+        int[] t = new int[TattooZone.TOTAL_SLOTS];
+        t[TattooZone.FACE_NECK.motifSlot()] = 3;
+        assertFalse(java.util.Arrays.equals(SkinComposer.compose(Gender.MALE, base(), true), SkinComposer.compose(Gender.MALE, base().with(AppearanceSection.TATTOOS, t), true)));
     }
 }

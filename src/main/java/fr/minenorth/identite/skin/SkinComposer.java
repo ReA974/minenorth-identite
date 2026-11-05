@@ -81,8 +81,8 @@ public final class SkinComposer {
     public static int[] compose(Gender gender, Appearance a) { return compose(gender, a, false); }
 
     /**
-     * {@code layeredTattoos} : les tatouages du torse et du dos (catalogue et dessins) ne sont pas peints sur le skin, car le jeu
-     * les affiche en haute définition sur une couche à part ({@link HiResTattoo}).
+     * {@code layeredTattoos} : les tatouages du torse, du dos, des bras et des jambes (catalogue et dessins) ne sont pas peints sur
+     * le skin, car le jeu les affiche en haute définition sur une couche à part ({@link HiResTattoo}). Les petites marques du visage restent peintes.
      */
     public static int[] compose(Gender gender, Appearance a, boolean layeredTattoos) {
         Canvas c = new Canvas();
@@ -659,10 +659,9 @@ public final class SkinComposer {
     private static void paintDrawings(Canvas c, Drawings drawings, Box rArm, Box lArm, boolean layered) {
         drawGrid(c, drawings, DrawingKind.BEARD, HEAD.front(), false);
         drawBeardOuter(c, drawings);
-        if (!layered) {
-            drawGrid(c, drawings, DrawingKind.TATTOO_TORSO, BODY.front(), true);
-            drawGrid(c, drawings, DrawingKind.TATTOO_BACK, BODY.back(), true);
-        }
+        if (layered) return;
+        drawGrid(c, drawings, DrawingKind.TATTOO_TORSO, BODY.front(), true);
+        drawGrid(c, drawings, DrawingKind.TATTOO_BACK, BODY.back(), true);
         drawGrid(c, drawings, DrawingKind.TATTOO_RIGHT_ARM, rArm.front(), true);
         drawGrid(c, drawings, DrawingKind.TATTOO_LEFT_ARM, lArm.front(), true);
         drawGrid(c, drawings, DrawingKind.TATTOO_LEGS, R_LEG.front(), true);
@@ -839,10 +838,9 @@ public final class SkinComposer {
     /** Chaque zone a un motif et une taille : petit (4 cases), moyen (6) ou grand (8). Petit par défaut : très discret. */
     private static void paintTattoos(Canvas c, int[] t, Box rArm, Box lArm, boolean faceDrawn, boolean layered) {
         if (!faceDrawn) faceMark(c, t[TattooZone.FACE_NECK.motifSlot()]);
-        if (!layered) {
-            sized(c, BODY.front(), t, TattooZone.TORSO, true);
-            sized(c, BODY.back(), t, TattooZone.BACK, true);
-        }
+        if (layered) return;   // le reste est dessiné en haute définition sur la couche de tatouages
+        sized(c, BODY.front(), t, TattooZone.TORSO, true);
+        sized(c, BODY.back(), t, TattooZone.BACK, true);
         sized(c, armFace(rArm, true, t[TattooZone.RIGHT_ARM_FACE_SLOT]), t, TattooZone.RIGHT_ARM, false, t[TattooZone.RIGHT_ARM_HEIGHT_SLOT]);
         sized(c, armFace(lArm, false, t[TattooZone.LEFT_ARM_FACE_SLOT]), t, TattooZone.LEFT_ARM, false, t[TattooZone.LEFT_ARM_HEIGHT_SLOT]);
         sized(c, armFace(R_LEG, true, t[TattooZone.RIGHT_LEG_FACE_SLOT]), t, TattooZone.RIGHT_LEG, false, t[TattooZone.RIGHT_LEG_HEIGHT_SLOT]);

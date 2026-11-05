@@ -68,7 +68,7 @@ public final class PreviewRenderer {
         VertexConsumer vc = buffers.getBuffer(RenderType.entityTranslucent(texture));
         m.renderToBuffer(ps, vc, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
         fr.minenorth.identite.client.skin.HairRenderer.drawAll(ps, buffers, LightTexture.FULL_BRIGHT, m, appearance, false,
-                texture == ClientSkins.previewLocation() ? ClientSkins.previewTattooLocation() : null);
+                texture == ClientSkins.previewLocation() ? ClientSkins.previewTattooLocation() : null, gender.slimArms());
         g.flush();
         ps.popPose();
         Lighting.setupFor3DItems();
