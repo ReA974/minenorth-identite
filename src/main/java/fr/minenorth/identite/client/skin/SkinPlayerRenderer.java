@@ -23,6 +23,14 @@ public class SkinPlayerRenderer extends PlayerRenderer {
         addLayer(new HairLayer(this));
     }
 
+    /**
+     * Reprend le modèle du rendu vanilla. Le modèle construit ici sortait avec des bras de 3 de large, même pour un homme (vu avec
+     * /diagbras), alors que le skin est peint sur 4 : tatouages décollés, bras fins dans les manches, montre trop grosse.
+     */
+    void useModelOf(PlayerRenderer vanilla) {
+        model = vanilla.getModel();
+    }
+
     @Override
     public ResourceLocation getTextureLocation(AbstractClientPlayer player) {
         return ClientSkins.active(player.getUUID()).map(ClientSkins.Entry::texture).orElseGet(() -> super.getTextureLocation(player));

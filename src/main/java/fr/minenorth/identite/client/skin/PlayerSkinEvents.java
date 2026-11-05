@@ -30,6 +30,8 @@ public final class PlayerSkinEvents {
         var skins = Minecraft.getInstance().getEntityRenderDispatcher().getSkinMap();
         ExtraLayers.copy(skins.get("default") instanceof PlayerRenderer p ? p : null, defaultRenderer);
         ExtraLayers.copy(skins.get("slim") instanceof PlayerRenderer p ? p : null, slimRenderer);
+        if (skins.get("default") instanceof PlayerRenderer p && defaultRenderer instanceof SkinPlayerRenderer s) s.useModelOf(p);
+        if (skins.get("slim") instanceof PlayerRenderer p && slimRenderer instanceof SkinPlayerRenderer s) s.useModelOf(p);
     }
 
     @Mod.EventBusSubscriber(modid = MineNorthIdentite.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
