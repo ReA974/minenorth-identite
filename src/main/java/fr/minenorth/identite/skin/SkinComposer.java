@@ -476,13 +476,26 @@ public final class SkinComposer {
             hair(255, new int[]{3, 2, 2, 3, 3, 2, 2, 3}, new int[]{3, 3, 3, 2, 2, 2, 1, 1}, fill(3), fill(0)),                // 24 pixie
             hair(255, fill(3), new int[]{8, 8, 7, 7, 6, 5, 4, 3}, fill(8), new int[]{3, 4, 4, 5, 5, 4, 4, 3}),                // 25 mi-longs dégradés
             hair(255, new int[]{3, 4, 3, 4, 3, 4, 3, 4}, fill(8), fill(8), new int[]{10, 11, 10, 12, 12, 10, 11, 10}),         // 26 boucles longues
-            hair(255, fill(4), new int[]{7, 7, 7, 7, 6, 5, 4, 3}, fill(7), fill(0))};                                         // 27 bob à frange
+            hair(255, fill(4), new int[]{7, 7, 7, 7, 6, 5, 4, 3}, fill(7), fill(0)),                                          // 27 bob à frange
+            hair(255, fill(3), new int[]{6, 6, 5, 5, 4, 3, 2, 2}, fill(6), new int[]{6, 6, 0, 0, 0, 0, 0, 0}),                // 28 natte sur le côté
+            hair(255, fill(3), new int[]{7, 7, 7, 6, 5, 4, 3, 2}, fill(8), new int[]{0, 0, 5, 7, 7, 5, 0, 0}),                // 29 demi-queue
+            hair(255, fill(2), new int[]{4, 4, 3, 3, 2, 2, 1, 1}, fill(5), fill(0)),                                          // 30 macarons
+            hair(255, fill(3), new int[]{6, 6, 6, 5, 4, 3, 2, 2}, new int[]{6, 7, 8, 9, 9, 8, 7, 6}, fill(0)),                // 31 chignon bas
+            hair(255, fill(3), new int[]{8, 8, 8, 7, 6, 6, 5, 4}, fill(8), new int[]{3, 3, 4, 4, 4, 4, 3, 3}),                // 32 lob
+            hair(255, new int[]{5, 4, 3, 2, 2, 3, 4, 5}, new int[]{8, 8, 8, 8, 7, 6, 5, 4}, fill(8), fill(5)),                // 33 frange rideau
+            hair(255, fill(2), new int[]{4, 4, 5, 5, 4, 3, 2, 1}, new int[]{7, 8, 9, 10, 10, 9, 8, 7}, new int[]{4, 5, 6, 7, 7, 6, 5, 4}),   // 34 mulet
+            hair(255, new int[]{1, 2, 3, 4, 4, 3, 2, 1}, new int[]{3, 2, 2, 1, 1, 0, 0, 0}, fill(3), fill(0)),                // 35 banane haute
+            hair(255, fill(3), new int[]{8, 8, 8, 8, 7, 6, 6, 5}, fill(8), new int[]{9, 0, 10, 0, 9, 0, 10, 9}),              // 36 dreadlocks
+            hair(255, fill(1), new int[]{3, 3, 2, 2, 1, 1, 0, 0}, fill(2), fill(0)),                                          // 37 chignon haut
+            hair(255, fill(4), new int[]{5, 5, 5, 4, 4, 4, 3, 3}, fill(5), fill(0)),                                          // 38 coupe au bol
+            hair(255, new int[]{6, 5, 4, 3, 2, 2, 2, 2}, new int[]{8, 8, 7, 6, 5, 4, 3, 2}, fill(7), fill(2))};               // 39 frange emo
 
     /** Texture des mèches par coupe : 0 droites, 1 ondulées, 2 bouclées (par paquets), 3 lisses et brillantes. */
     private static final int[] HAIR_TEXTURE = {0,
             3, 0, 0, 3, 0, 3, 1, 3,                          // 1 à 8 : rasée, brosse, court, dégradé, crête, gominé, frange, banane
             1, 1, 2, 2, 0, 0,                                // 9 à 14 : désordonnée, mi-longue, bouclée, afro, queue basse, longs lisses
-            0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 2, 3};          // 15 à 27 : carré … bob à frange
+            0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 2, 3,          // 15 à 27 : carré … bob à frange
+            1, 3, 2, 3, 1, 3, 0, 3, 2, 3, 0, 3};         // 28 à 39 : natte … frange emo
 
     private static void paintHair(Canvas c, int[] hair) {
         if (hair[0] == 0) return;

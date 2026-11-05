@@ -39,10 +39,10 @@ public final class Catalog {
                 new Slot("eyes", 10, Set.of(), Set.of(6, 7, 8, 9)), new Slot("eyeColor", 8), new Slot("brows", 6),
                 new Slot("nose", 5), new Slot("mouth", 6, Set.of(), Set.of(4))));
         SLOTS.put(AppearanceSection.SKIN, List.of(new Slot("tone", 10), new Slot("marks", 7)));
-        // coupes : 0 aucune, 1 à 8 hommes, 9 à 14 communes, 15 à 27 femmes
+        // coupes : 0 aucune, 1 à 8 hommes, 9 à 14 communes, 15 à 27 femmes, 28 à 33 femmes, 34 et 35 hommes, 36 à 39 communes
         SLOTS.put(AppearanceSection.HAIR, List.of(
-                new Slot("style", 28, Set.of(1, 2, 3, 4, 5, 6, 7, 8),
-                        Set.of(15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27)),
+                new Slot("style", 40, Set.of(1, 2, 3, 4, 5, 6, 7, 8, 34, 35),
+                        Set.of(15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33)),
                 new Slot("color", 12)));
         // pilosité : 1 à 11 réservés aux hommes
         SLOTS.put(AppearanceSection.FACIAL_HAIR, List.of(

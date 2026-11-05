@@ -75,7 +75,7 @@ class CatalogTest {
         assertEquals(6, Catalog.slots(AppearanceSection.BODY).get(0).options());
         assertEquals(5, Catalog.slots(AppearanceSection.FACE).size());
         assertEquals(2, Catalog.slots(AppearanceSection.SKIN).size());
-        assertEquals(28, Catalog.slots(AppearanceSection.HAIR).get(0).options());
+        assertEquals(40, Catalog.slots(AppearanceSection.HAIR).get(0).options());
         assertEquals(12, Catalog.slots(AppearanceSection.FACIAL_HAIR).get(0).options());
         assertEquals(6, Catalog.slots(AppearanceSection.MAKEUP).size());
         assertEquals(22, Catalog.slots(AppearanceSection.TATTOOS).size());

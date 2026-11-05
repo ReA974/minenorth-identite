@@ -162,6 +162,107 @@ public final class HairPieces {
                 back(out, 1.2f, -2.0f);
                 bangs(out);
             }
+            case 28 -> {
+                cap(out, 0.8f);
+                sides(out, 0.8f, -3.0f, -3.4f);
+                back(out, 0.8f, -3.0f);
+                for (int i = 0; i < 5; i++) {
+                    body(out, 1.7f + (i % 2) * 0.2f, -1.0f + 2.6f * i, -4.6f, 3.0f, 2.8f, 2.6f, i % 2 == 0 ? HAIR : SHADOW);
+                }
+                body(out, 1.8f, 12.0f, -4.6f, 2.8f, 1.0f, 2.6f, TIE);
+            }
+            case 29 -> {
+                cap(out, 1.0f);
+                sides(out, 1.2f, -2.0f, -3.8f);
+                back(out, 1.2f, 0.0f);
+                body(out, -4.2f, 0f, 2.1f, 8.4f, 8f, 1.0f, HAIR);
+                head(out, -2.0f, -11.4f, 1.0f, 4.0f, 3.2f, 4.0f, HAIR);
+                head(out, -2.3f, -8.9f, 0.8f, 4.6f, 0.9f, 4.6f, TIE);
+            }
+            case 30 -> {
+                cap(out, 0.8f);
+                sides(out, 0.8f, -5.0f, -3.0f);
+                back(out, 0.8f, -4.0f);
+                for (int s : new int[]{-1, 1}) {
+                    float cx = s * 3.8f;
+                    head(out, cx - 2.2f, -12.4f, -1.4f, 4.4f, 3.9f, 4.4f, HAIR);
+                    head(out, cx - 1.4f, -13.4f, -0.6f, 2.8f, 1.0f, 2.8f, SHADOW);
+                    head(out, cx - 1.2f, -8.9f, -0.2f, 2.4f, 0.8f, 2.4f, TIE);
+                }
+            }
+            case 31 -> {
+                cap(out, 0.8f);
+                sides(out, 0.8f, -4.0f, -3.4f);
+                back(out, 0.8f, -1.5f);
+                head(out, -2.6f, -3.2f, 4.25f, 5.2f, 5.0f, 4.4f, HAIR);
+                head(out, -2.0f, -2.6f, 8.2f, 4.0f, 3.6f, 0.8f, SHADOW);
+                head(out, -2.5f, -3.8f, 4.25f, 5.0f, 0.8f, 3.8f, TIE);
+            }
+            case 32 -> {
+                cap(out, 1.2f);
+                sides(out, 1.6f, -0.5f, -3.6f);
+                back(out, 1.6f, 0.0f);
+                body(out, -4.2f, 0f, 2.1f, 8.4f, 3.2f, 1.2f, HAIR);
+                body(out, -4.0f, 3.0f, 2.1f, 8.0f, 1.4f, 0.8f, SHADOW);
+            }
+            case 33 -> {
+                cap(out, 1.0f);
+                sides(out, 1.0f, -1.5f, -3.8f);
+                back(out, 1.0f, -2.0f);
+                head(out, -4.7f, -9.4f, -5.0f, 9.4f, 1.8f, 1.0f, HAIR);
+                head(out, -4.8f, -9.4f, -5.0f, 0.8f, 7.4f, 1.0f, HAIR);
+                head(out, 4.0f, -9.4f, -5.0f, 0.8f, 7.4f, 1.0f, HAIR);
+            }
+            case 34 -> {
+                cap(out, 1.0f);
+                sides(out, 0.9f, -4.5f, -3.8f);
+                back(out, 1.4f, -1.0f);
+                body(out, -3.0f, 0f, 2.1f, 6.0f, 5.0f, 1.4f, HAIR);
+                body(out, -2.6f, 5.0f, 2.1f, 5.2f, 1.6f, 1.0f, SHADOW);
+            }
+            case 35 -> {
+                head(out, -3.8f, -13.4f, -5.2f, 7.6f, 5.0f, 6.8f, HAIR);
+                head(out, -3.0f, -14.2f, -3.6f, 6.0f, 1.0f, 4.6f, SHADOW);
+                cap(out, 0.8f);
+                sides(out, 0.8f, -5.0f, -3.0f);
+                back(out, 0.8f, -5.0f);
+            }
+            case 36 -> {
+                cap(out, 1.0f);
+                sides(out, 1.0f, -3.5f, -3.4f);
+                back(out, 1.0f, -3.0f);
+                float[] xs = {-3.6f, -1.8f, 0.0f, 1.8f, 3.6f};
+                float[] lengths = {11f, 9f, 12f, 10f, 12f};
+                for (int i = 0; i < xs.length; i++) {
+                    head(out, xs[i] - 0.7f, -4.0f, 5.2f, 1.4f, lengths[i], 1.4f, i % 2 == 0 ? HAIR : SHADOW);
+                }
+                for (int s : new int[]{-1, 1}) {
+                    head(out, s * 5.0f - 0.7f, -6.0f, -1.5f, 1.4f, 4.0f, 1.4f, HAIR);
+                    head(out, s * 5.0f - 0.7f, -6.0f, 2.0f, 1.4f, 4.0f, 1.4f, SHADOW);
+                }
+            }
+            case 37 -> {
+                cap(out, 0.8f);
+                sides(out, 0.8f, -5.5f, -3.0f);
+                back(out, 0.8f, -5.0f);
+                head(out, -2.4f, -12.0f, 0.5f, 4.8f, 4.0f, 4.8f, HAIR);
+                head(out, -1.6f, -12.8f, 1.3f, 3.2f, 0.9f, 3.2f, SHADOW);
+                head(out, -2.6f, -8.9f, 0.4f, 5.2f, 0.9f, 5.2f, TIE);
+            }
+            case 38 -> {
+                cap(out, 1.6f);
+                sides(out, 1.6f, -5.5f, -4.4f);
+                back(out, 1.6f, -5.5f);
+                head(out, -4.9f, -9.8f, -5.4f, 9.8f, 3.4f, 1.2f, HAIR);
+            }
+            case 39 -> {
+                cap(out, 1.0f);
+                sides(out, 1.2f, -1.0f, -3.8f);
+                back(out, 1.2f, -3.0f);
+                head(out, -4.7f, -9.6f, -5.2f, 9.4f, 3.2f, 1.0f, HAIR);
+                head(out, -4.8f, -9.6f, -5.2f, 0.8f, 8.6f, 1.0f, SHADOW);
+                head(out, 4.0f, -9.6f, -5.2f, 0.8f, 8.6f, 1.0f, SHADOW);
+            }
             default -> { }
         }
         return out;
