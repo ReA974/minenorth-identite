@@ -828,18 +828,43 @@ public final class SkinComposer {
             {"...##...", "..#oo#..", ".#oooo#.", "#oooooo#", "#oooooo#", ".##oo##.", "...oo...", "..####.."},   // 27 pique
             {"#..#..#.", "#..#..#.", "#o.#.o#.", ".#ooo#..", "..#o#...", "..#o#...", "..#o#...", "..###..."},   // 28 trident
             {"........", "..####..", ".#oooo#.", "#o#aa#o#", "#o#aa#o#", ".#oooo#.", "..####..", "........"},   // 29 œil
-            {".#.##.#.", "#o#oo#o#", ".#.##.#.", "..####..", ".#oooo#.", "#oooooo#", "#oo##oo#", ".##..##."}};  // 30 patte
+            {".#.##.#.", "#o#oo#o#", ".#.##.#.", "..####..", ".#oooo#.", "#oooooo#", "#oo##oo#", ".##..##."},   // 30 patte
+            {"..####..", ".#oaao#.", "#oaaaao#", "########", ".#oooo#.", "..#oo#..", "...##...", "........"},   // 31 diamant
+            {"...##...", "..#oo#..", "..#oo#..", ".#oooo#.", "#ooaooo#", "#oaaooo#", ".#oooo#.", "..####.."},   // 32 goutte
+            {".....###", "...##oo#", "..#oooo#", ".#ooaoo#", "#oooaoo#", "#oaooo#.", ".#o##...", "#..#...."},   // 33 feuille
+            {"........", "...#....", "..#o#.#.", ".#oao#o#", ".#ooo#oo", "#ooooooo", "########", "........"},   // 34 montagnes
+            {"........", "...###..", "..#ooo#.", ".#oo##o#", "#oo#.#oo", "#o#...#o", "##......", "#......."},   // 35 vague
+            {"........", "...##...", ".###oo#.", "#ooooao#", "#oaoooo#", ".######.", "........", "........"},   // 36 nuage
+            {"........", "##....##", "#o#..#o#", ".#o##o#.", "..#oo#..", "...##...", "........", "........"},   // 37 mouette
+            {"..####..", ".#oooo#.", "#oooooo#", "#oooooo#", ".#oooo#.", "..#aa#..", "..#aa#..", "..####.."},   // 38 arbre
+            {"..####..", ".#ooaa#.", "#ooo.aa#", "#oo#.aa#", "#aa.#oo#", "#aa.ooo#", ".#aaoo#.", "..####.."},   // 39 yin-yang
+            {"......##", ".....#oo", "....#oo#", "..#ooo#.", ".#oooo#.", "#aooo#..", "#aa#....", "##......"},   // 40 étoile filante
+            {"..####..", ".#oooo#.", "#oooooo#", "aaaaaaaa", "#oooooo#", ".#oooo#.", "..####..", "........"},   // 41 planète
+            {".##..##.", "#oo##oo#", "#oooo#o#", "#ooo#oo#", ".#ooo#o.", "..#oo#..", "...##...", "........"},   // 42 cœur brisé
+            {"......##", ".....#oo", "....#oo#", "...#oo#.", ".#.#o#..", ".#aa#...", "#aa#....", "##......"},   // 43 épée
+            {"########", "#oo..oo#", "#o.##.o#", "#o####o#", ".#o##o#.", ".#oooo#.", "..#oo#..", "...##..."},   // 44 bouclier
+            {"...##...", "..#oo#..", ".#oooo#.", "#o#oo#o#", "#oooooo#", ".######.", "..#aa#..", "...##..."},   // 45 fleur de lys
+            {"..####..", ".#oooo#a", "#ooooo#a", ".#oooo#a", "..####a.", "....#a..", "....#a..", "....##.."},   // 46 hache
+            {"..####..", ".#....#.", ".#....#.", "########", "#oooooo#", "#oo##oo#", "#oo##oo#", "########"},   // 47 cadenas
+            {"......##", ".....#oo", "....#o#.", "...#o#..", "..#o#...", ".#a#....", "#aa#....", "##......"},   // 48 flèche
+            {"...##...", "..#oo#..", "..#oo#..", ".#oaao#.", ".#oooo#.", "#oooooo#", "########", "........"},   // 49 pyramide
+            {"...##...", "..#..#..", "..#..#..", ".#.oo.#.", ".#.oo.#.", "#......#", "########", "........"}};  // 50 triangle
 
     /** Couleur principale et couleur secondaire de chaque motif (le contour est toujours un noir bleuté). */
     private static final int[][] DESIGN_COLORS = {
             {0xFF4A8AD0, 0xFF1A2A5A}, {0xFFD03030, 0xFFE87070}, {0xFF5A5A66, 0xFFE8E8F0}, {0xFF2A5AA0, 0xFF4A8AD0},
             {0xFFD03030, 0xFF2A6A3A}, {0xFFE8E8F0, 0xFF5A5A66}, {0xFF5A5A66, 0xFFE8E8F0}, {0xFFE08030, 0xFFE0C040},
-            {0xFFE0C040, 0xFFE08030}, {0xFFE0C040, 0xFFE08030}, {0xFFE0C040, 0xFFD03030}, {0xFF1A2A5A, 0xFF14141E},
+            {0xFFE0C040, 0xFFE08030}, {0xFFE0C040, 0xFFE08030}, {0xFFE0A020, 0xFFD03030}, {0xFF1A2A5A, 0xFF14141E},
             {0xFFE0C040, 0xFFB08030}, {0xFF4A8AD0, 0xFFD03030}, {0xFF2A6A3A, 0xFFE0C040}, {0xFFB0B0C0, 0xFFD03030},
             {0xFF4A8AD0, 0xFFE8E8F0}, {0xFF2A6A3A, 0xFF4A8AD0}, {0xFFE8E8F0, 0xFF14141E}, {0xFFE0C040, 0xFFE08030},
             {0xFFD03030, 0xFFE8E8F0}, {0xFFE08030, 0xFFE0C040}, {0xFFB0B0C0, 0xFF5A5A66}, {0xFFD06090, 0xFFE0C040},
             {0xFFE08030, 0xFFE8E8F0}, {0xFF2A5AA0, 0xFF4A8AD0}, {0xFF14141E, 0xFFD03030}, {0xFF2A5AA0, 0xFFB0B0C0},
-            {0xFF2A6A3A, 0xFFE8E8F0}, {0xFF8A5A30, 0xFFE0C040}};
+            {0xFF2A6A3A, 0xFFE8E8F0}, {0xFF8A5A30, 0xFFE0C040},
+            {0xFF4A8AD0, 0xFFB0D8F0}, {0xFF3A8AE0, 0xFF9AD0F8}, {0xFF3A9A4A, 0xFF8AD060}, {0xFF6A6A78, 0xFFE8E8F0},
+            {0xFF2A7AB0, 0xFF9AD0F0}, {0xFFB8B8C8, 0xFF8090A8}, {0xFFE8E8F0, 0xFF5A5A66}, {0xFF2A8A3A, 0xFF8A5A30},
+            {0xFF14141E, 0xFFE8E8F0}, {0xFFE8C040, 0xFFF0F0F8}, {0xFFD0A050, 0xFF8A6A3A}, {0xFFD03050, 0xFF801830},
+            {0xFFB8B8C8, 0xFF8A5A30}, {0xFF2A5AA0, 0xFFE0C040}, {0xFF6A3A9A, 0xFFE0C040}, {0xFF8A8A98, 0xFF8A5A30},
+            {0xFFA0A0B0, 0xFF5A5A66}, {0xFFB8B8C8, 0xFFD03030}, {0xFFD0A050, 0xFFF0D080}, {0xFFE0E0F0, 0xFF14141E}};
 
     private static final int OUTLINE = 0xFF14141E;
     private static final int[] REDUCED = {1, 3, 4, 6};
@@ -887,34 +912,87 @@ public final class SkinComposer {
         if (motif <= 0) return;
         int size = t[zone.sizeSlot()];
         int ink = t[TattooZone.INK_SLOT];
-        int[] cols = wide ? (size == 0 ? REDUCED : size == 1 ? SIX : FULL) : REDUCED;
-        int[] rows = size == 0 ? REDUCED : size == 1 ? SIX : FULL;
-        int ox = wide ? (8 - cols.length) / 2 : 0;
+        int w = wide ? (size == 0 ? 4 : size == 1 ? 6 : 8) : 4;
+        int h = size == 0 ? 4 : size == 1 ? 6 : 8;
+        int ox = wide ? (8 - w) / 2 : 0;
         int oy = size == 0 ? (wide ? 3 : 4) : size == 1 ? 3 : 2;
-        if (height > 0) oy = Math.min(ARM_START[height], 12 - rows.length);
+        if (height > 0) oy = Math.min(ARM_START[height], 12 - h);
         if (wide) {
             int xs = t[zone == TattooZone.TORSO ? TattooZone.TORSO_X_SLOT : TattooZone.BACK_X_SLOT];
             int ys = t[zone == TattooZone.TORSO ? TattooZone.TORSO_Y_SLOT : TattooZone.BACK_Y_SLOT];
-            if (xs > 0) ox = Math.min(xs - 1, 8 - cols.length);
-            if (ys > 0) oy = Math.min(ys - 1, 12 - rows.length);
+            if (xs > 0) ox = Math.min(xs - 1, 8 - w);
+            if (ys > 0) oy = Math.min(ys - 1, 12 - h);
         }
-        design(c, rect, ox, oy, motif, cols, rows, ink);
+        design(c, rect, ox, oy, motif, w, h, ink);
     }
 
     /**
      * Le dessin d'un motif (1 à {@link TattooZone#MOTIFS}) en 8×8 pixels ARGB, ligne par ligne ; 0 là où il n'y a rien.
      * Sert aux vignettes du salon de tatouage.
      */
-    public static int[] designPixels(int motif, int ink) {
-        int[] out = new int[64];
+    public static int[] designPixels(int motif, int ink) { return designPixels(motif, ink, 8, 8); }
+
+    /**
+     * Le motif redessiné en largeur × hauteur pixels : le dessin d'origine (8×8) est rééchantillonné par surface, ce qui
+     * garde ses formes aux petites tailles, puis une lumière automatique éclaircit les bords haut et gauche et assombrit
+     * les bords bas et droit pour donner du volume.
+     */
+    public static int[] designPixels(int motif, int ink, int w, int h) {
+        int[] out = new int[w * h];
         if (motif < 1 || motif > TattooZone.MOTIFS) return out;
-        String[] art = DESIGNS[motif - 1];
+        char[][] grid = scaled(motif, w, h);
         int[] colors = DESIGN_COLORS[motif - 1];
-        for (int y = 0; y < 8; y++) {
-            for (int x = 0; x < 8; x++) {
-                char ch = art[y].charAt(x);
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                char ch = grid[y][x];
                 if (ch == '.') continue;
-                out[y * 8 + x] = inked(ch == '#' ? OUTLINE : ch == 'o' ? colors[0] : colors[1], ch, ink);
+                int color = inked(ch == '#' ? OUTLINE : ch == 'o' ? colors[0] : colors[1], ch, ink);
+                if (ch != '#') {
+                    boolean lit = open(grid, x, y - 1) || open(grid, x - 1, y);
+                    boolean shaded = open(grid, x, y + 1) || open(grid, x + 1, y);
+                    if (lit && !shaded) color = Palette.shade(color, 1.22);
+                    else if (shaded && !lit) color = Palette.shade(color, 0.8);
+                }
+                out[y * w + x] = color;
+            }
+        }
+        return out;
+    }
+
+    /** Vrai si cette case est vide, hors du dessin, ou un contour : la lumière vient d'un bord. */
+    private static boolean open(char[][] grid, int x, int y) {
+        return y < 0 || x < 0 || y >= grid.length || x >= grid[0].length || grid[y][x] == '.' || grid[y][x] == '#';
+    }
+
+    private static final java.util.Map<Long, char[][]> SCALED = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static char[][] scaled(int motif, int w, int h) {
+        return SCALED.computeIfAbsent((long) motif * 10_000 + w * 100 + h, k -> resample(DESIGNS[motif - 1], w, h));
+    }
+
+    /** Réduit (ou agrandit) un dessin 8×8 : chaque case d'arrivée prend le type dominant de la surface qu'elle recouvre. */
+    private static char[][] resample(String[] art, int w, int h) {
+        char[][] out = new char[h][w];
+        for (int ty = 0; ty < h; ty++) {
+            for (int tx = 0; tx < w; tx++) {
+                double x0 = tx * 8.0 / w, x1 = (tx + 1) * 8.0 / w, y0 = ty * 8.0 / h, y1 = (ty + 1) * 8.0 / h;
+                double outline = 0, main = 0, second = 0, total = 0;
+                for (int sy = (int) Math.floor(y0); sy < Math.min(8, (int) Math.ceil(y1)); sy++) {
+                    for (int sx = (int) Math.floor(x0); sx < Math.min(8, (int) Math.ceil(x1)); sx++) {
+                        double wgt = (Math.min(x1, sx + 1) - Math.max(x0, sx)) * (Math.min(y1, sy + 1) - Math.max(y0, sy));
+                        total += wgt;
+                        switch (art[sy].charAt(sx)) {
+                            case '#' -> outline += wgt;
+                            case 'o' -> main += wgt;
+                            case 'a' -> second += wgt;
+                            default -> { }
+                        }
+                    }
+                }
+                double filled = outline + main + second;
+                if (filled < 0.4 * total) out[ty][tx] = '.';
+                else if (outline * 1.25 >= main && outline * 1.25 >= second) out[ty][tx] = '#';
+                else out[ty][tx] = main >= second ? 'o' : 'a';
             }
         }
         return out;
@@ -940,16 +1018,14 @@ public final class SkinComposer {
         }
     }
 
-    /** Pose le motif dans la zone ; colonnes et lignes du dessin d'origine à garder (réduction). Mélangé à la peau comme de l'encre. */
-    private static void design(Canvas c, int[] rect, int ox, int oy, int motif, int[] cols, int[] rows, int ink) {
+    /** Pose le motif (largeur × hauteur) dans la zone, mélangé à la peau comme de l'encre. */
+    private static void design(Canvas c, int[] rect, int ox, int oy, int motif, int w, int h, int ink) {
         if (motif <= 0) return;
-        String[] art = DESIGNS[motif - 1];
-        int[] colors = DESIGN_COLORS[motif - 1];
-        for (int y = 0; y < rows.length; y++) {
-            for (int x = 0; x < cols.length; x++) {
-                char ch = art[rows[y]].charAt(cols[x]);
-                if (ch == '.' || !c.inside(rect, ox + x, oy + y)) continue;
-                int color = inked(ch == '#' ? OUTLINE : ch == 'o' ? colors[0] : colors[1], ch, ink);
+        int[] px = designPixels(motif, ink, w, h);
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                int color = px[y * w + x];
+                if (color == 0 || !c.inside(rect, ox + x, oy + y)) continue;
                 c.set(rect[0] + ox + x, rect[1] + oy + y, Palette.mix(c.relGet(rect, ox + x, oy + y), color, 0.9));
             }
         }

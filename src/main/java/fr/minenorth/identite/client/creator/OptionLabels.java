@@ -61,7 +61,9 @@ public final class OptionLabels {
 
 private static final String[] TATTOO_MOTIFS = {"Aucun", "Étoile", "Cœur", "Croix", "Ancre", "Rose", "Crâne",            "Ailes", "Flamme", "Éclair", "Soleil", "Couronne", "Tribal",
             "Lune", "Papillon", "Serpent", "Poignard", "Plume", "Trèfle", "Dé", "Boussole", "Cible", "Note", "Clé", "Lotus",
-            "Poisson", "Infini", "Pique", "Trident", "Œil", "Patte"};
+            "Poisson", "Infini", "Pique", "Trident", "Œil", "Patte",
+            "Diamant", "Goutte", "Feuille", "Montagnes", "Vague", "Nuage", "Mouette", "Arbre", "Yin-yang", "Étoile filante",
+            "Planète", "Cœur brisé", "Épée", "Bouclier", "Fleur de lys", "Hache", "Cadenas", "Flèche", "Pyramide", "Triangle"};
     private static final String[] TATTOO_INKS = {"Couleurs", "Noir", "Gris ombré"};
 
     private static final String[] POSITIONS = {"Centré", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"};

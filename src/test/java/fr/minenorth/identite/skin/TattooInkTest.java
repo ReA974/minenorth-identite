@@ -23,10 +23,10 @@ class TattooInkTest {
 
     @Test
     void thereAreThirtyFigures() {
-        assertEquals(30, TattooZone.MOTIFS);
+        assertEquals(50, TattooZone.MOTIFS);
         for (TattooZone z : TattooZone.values()) {
             if (z != TattooZone.FACE_NECK) {
-                assertEquals(31, Catalog.slots(AppearanceSection.TATTOOS).get(z.motifSlot()).options());
+                assertEquals(51, Catalog.slots(AppearanceSection.TATTOOS).get(z.motifSlot()).options());
             }
         }
     }

@@ -53,7 +53,7 @@ public enum TattooZone {
     }
 
     /** Nombre de figures du catalogue. */
-    public static final int MOTIFS = 30;
+    public static final int MOTIFS = 50;
 
     private final int motifSlot;
     private final int sizeSlot;

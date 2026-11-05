@@ -202,8 +202,19 @@ public final class TattooSalonScreen extends Screen {
             return;
         }
         int ink = tattoos()[TattooZone.INK_SLOT];
+        int rowsVisible = gridRows(), totalRows = (TattooZone.MOTIFS + 5) / 5;
+        scroll = Math.max(0, Math.min(scroll, totalRows - rowsVisible));
+        if (totalRows > rowsVisible) {
+            int barH = rowsVisible * 28;
+            g.fill(gridX + 5 * 28, top, gridX + 5 * 28 + 3, top + barH, MineNorthStyle.LIST);
+            int thumb = Math.max(10, barH * rowsVisible / totalRows);
+            int thumbY = top + (barH - thumb) * scroll / (totalRows - rowsVisible);
+            g.fill(gridX + 5 * 28, thumbY, gridX + 5 * 28 + 3, thumbY + thumb, MineNorthStyle.CYAN);
+        }
         for (int m = 0; m <= TattooZone.MOTIFS; m++) {
-            int x = gridX + (m % 5) * 28, y = top + (m / 5) * 28;
+            int row = m / 5;
+            if (row < scroll || row >= scroll + rowsVisible) continue;
+            int x = gridX + (m % 5) * 28, y = top + (row - scroll) * 28;
             boolean on = current == m, hover = over(mx, my, x, y, 26, 26);
             g.fill(x, y, x + 26, y + 26, on ? MineNorthStyle.CYAN : hover ? MineNorthStyle.HOVER : MineNorthStyle.LIST);
             g.fill(x + 1, y + 1, x + 25, y + 25, on ? 0xFF16106A : MineNorthStyle.LIST);
@@ -220,6 +231,19 @@ public final class TattooSalonScreen extends Screen {
             final int value = m;
             hits.add(new Hit(x, y, 26, 26, () -> setSlot(zone().motifSlot(), value)));
         }
+    }
+
+    private int scroll;
+
+    /** Lignes de vignettes visibles : le carnet défile à la molette. */
+    private int gridRows() { return Math.max(3, (bodyBottom - (bodyTop + 10)) / 28); }
+
+    @Override public boolean mouseScrolled(double mx, double my, double delta) {
+        if (zone() != TattooZone.FACE_NECK && over((int) mx, (int) my, gridX, bodyTop + 10, 5 * 28 + 4, gridRows() * 28)) {
+            scroll = Math.max(0, scroll - (int) Math.signum(delta));
+            return true;
+        }
+        return super.mouseScrolled(mx, my, delta);
     }
 
     private void drawPreview(GuiGraphics g, int mx, int my) {
