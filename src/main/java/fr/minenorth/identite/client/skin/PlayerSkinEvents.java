@@ -90,7 +90,7 @@ public final class PlayerSkinEvents {
         return ClientSkins.active(player).map(entry -> entry.gender().slimArms()).orElse(null);
     }
 
-    private static PlayerRenderer rendererFor(AbstractClientPlayer player) {
+    static PlayerRenderer rendererFor(AbstractClientPlayer player) {
         return ClientSkins.active(player.getUUID())
                 .map(entry -> entry.gender().slimArms() ? slimRenderer : defaultRenderer)
                 .orElse(null);
