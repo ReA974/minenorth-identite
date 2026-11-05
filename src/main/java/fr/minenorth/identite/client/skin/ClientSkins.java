@@ -25,7 +25,8 @@ import java.util.UUID;
 public final class ClientSkins {
     private ClientSkins() {}
 
-    public record Entry(Gender gender, Appearance appearance, ResourceLocation texture) {}
+    /** {@code tattoo} : la couche de tatouages haute définition du torse et du dos, ou null s'il n'y en a pas. */
+    public record Entry(Gender gender, Appearance appearance, ResourceLocation texture, ResourceLocation tattoo) {}
 
     private static final Map<UUID, Entry> ENTRIES = new HashMap<>();
     private static DynamicTexture previewTexture;
@@ -36,13 +37,21 @@ public final class ClientSkins {
         remove(player);
         ResourceLocation location = new ResourceLocation(MineNorthIdentite.MOD_ID, "skin/" + player);
         Minecraft.getInstance().getTextureManager().register(location, texture(gender, appearance));
-        ENTRIES.put(player, new Entry(gender, appearance, location));
+        ResourceLocation tattoo = null;
+        if (fr.minenorth.identite.skin.HiResTattoo.hasAny(appearance)) {
+            tattoo = new ResourceLocation(MineNorthIdentite.MOD_ID, "tattoo/" + player);
+            Minecraft.getInstance().getTextureManager().register(tattoo, tattooTexture(appearance));
+        }
+        ENTRIES.put(player, new Entry(gender, appearance, location, tattoo));
     }
 
     /** Retire la fiche d'un joueur (reset) : son skin Minecraft reprend. */
     public static void remove(UUID player) {
         Entry old = ENTRIES.remove(player);
-        if (old != null) Minecraft.getInstance().getTextureManager().release(old.texture());
+        if (old != null) {
+            Minecraft.getInstance().getTextureManager().release(old.texture());
+            if (old.tattoo() != null) Minecraft.getInstance().getTextureManager().release(old.tattoo());
+        }
     }
 
     public static void clear() {
@@ -59,6 +68,36 @@ public final class ClientSkins {
     }
 
     public static ResourceLocation previewLocation() { return PREVIEW; }
+
+    private static DynamicTexture previewTattooTexture;
+    private static boolean previewHasTattoo;
+    private static final ResourceLocation PREVIEW_TATTOO = new ResourceLocation(MineNorthIdentite.MOD_ID, "preview_tattoo");
+
+    /** La couche de tatouages de l'aperçu, ou null s'il n'y a rien à montrer. */
+    public static ResourceLocation previewTattooLocation() { return previewHasTattoo ? PREVIEW_TATTOO : null; }
+
+    private static void updatePreviewTattoo(Appearance appearance) {
+        previewHasTattoo = fr.minenorth.identite.skin.HiResTattoo.hasAny(appearance);
+        if (!previewHasTattoo) return;
+        if (previewTattooTexture == null) {
+            previewTattooTexture = tattooTexture(appearance);
+            Minecraft.getInstance().getTextureManager().register(PREVIEW_TATTOO, previewTattooTexture);
+        } else {
+            fillAtlas(previewTattooTexture.getPixels(), fr.minenorth.identite.skin.HiResTattoo.atlas(appearance));
+            previewTattooTexture.upload();
+        }
+    }
+
+    private static DynamicTexture tattooTexture(Appearance appearance) {
+        NativeImage image = new NativeImage(NativeImage.Format.RGBA, fr.minenorth.identite.skin.HiResTattoo.ATLAS, fr.minenorth.identite.skin.HiResTattoo.ATLAS, true);
+        fillAtlas(image, fr.minenorth.identite.skin.HiResTattoo.atlas(appearance));
+        return new DynamicTexture(image);
+    }
+
+    private static void fillAtlas(NativeImage image, int[] argb) {
+        int n = fr.minenorth.identite.skin.HiResTattoo.ATLAS;
+        for (int y = 0; y < n; y++) for (int x = 0; x < n; x++) image.setPixelRGBA(x, y, Palette.argbToAbgr(argb[y * n + x]));
+    }
 
     private static final Map<String, ResourceLocation> TILES = new HashMap<>();
 
@@ -83,15 +122,16 @@ public final class ClientSkins {
             previewTexture = texture(gender, appearance);
             Minecraft.getInstance().getTextureManager().register(PREVIEW, previewTexture);
         } else {
-            fill(previewTexture.getPixels(), SkinComposer.compose(gender, appearance));
+            fill(previewTexture.getPixels(), SkinComposer.compose(gender, appearance, true));
             previewTexture.upload();
         }
+        updatePreviewTattoo(appearance);
         return PREVIEW;
     }
 
     private static DynamicTexture texture(Gender gender, Appearance appearance) {
         NativeImage image = new NativeImage(NativeImage.Format.RGBA, SkinComposer.SIZE, SkinComposer.SIZE, true);
-        fill(image, SkinComposer.compose(gender, appearance));
+        fill(image, SkinComposer.compose(gender, appearance, true));
         return new DynamicTexture(image);
     }
 

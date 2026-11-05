@@ -78,7 +78,13 @@ public final class SkinComposer {
         return (h & 0xFFFF) / 65535.0;
     }
 
-    public static int[] compose(Gender gender, Appearance a) {
+    public static int[] compose(Gender gender, Appearance a) { return compose(gender, a, false); }
+
+    /**
+     * {@code layeredTattoos} : les tatouages du torse et du dos (catalogue et dessins) ne sont pas peints sur le skin, car le jeu
+     * les affiche en haute définition sur une couche à part ({@link HiResTattoo}).
+     */
+    public static int[] compose(Gender gender, Appearance a, boolean layeredTattoos) {
         Canvas c = new Canvas();
         boolean slim = gender.slimArms();
         int armW = slim ? 3 : 4;
@@ -114,7 +120,7 @@ public final class SkinComposer {
             paintMakeup(c, makeup, tone);
             paintFacialHair(c, beard, tone);
         }
-        paintTattoos(c, tattoos, rArm, lArm, faceDrawn);
+        paintTattoos(c, tattoos, rArm, lArm, faceDrawn, layeredTattoos);
         drawGrid(c, a.drawings(), DrawingKind.FACE, HEAD.front(), false);
         if (faceDrawn) {
             paintMarks(c, skin[1], tone);
@@ -123,7 +129,7 @@ public final class SkinComposer {
             paintFacialHair(c, beard, tone);
             faceMark(c, tattoos[TattooZone.FACE_NECK.motifSlot()]);
         }
-        paintDrawings(c, a.drawings(), rArm, lArm);
+        paintDrawings(c, a.drawings(), rArm, lArm, layeredTattoos);
         paintOutfit(c, a.outfit());
         paintHair(c, hair);
         return c.px;
@@ -650,11 +656,13 @@ public final class SkinComposer {
      * Pose les dessins par-dessus ce que le catalogue a déjà dessiné : visage et barbe remplacent le pixel, les tatouages
      * se mélangent à la peau. Une case transparente ne change rien ; ce qui dépasse la zone (bras fins) est coupé.
      */
-    private static void paintDrawings(Canvas c, Drawings drawings, Box rArm, Box lArm) {
+    private static void paintDrawings(Canvas c, Drawings drawings, Box rArm, Box lArm, boolean layered) {
         drawGrid(c, drawings, DrawingKind.BEARD, HEAD.front(), false);
         drawBeardOuter(c, drawings);
-        drawGrid(c, drawings, DrawingKind.TATTOO_TORSO, BODY.front(), true);
-        drawGrid(c, drawings, DrawingKind.TATTOO_BACK, BODY.back(), true);
+        if (!layered) {
+            drawGrid(c, drawings, DrawingKind.TATTOO_TORSO, BODY.front(), true);
+            drawGrid(c, drawings, DrawingKind.TATTOO_BACK, BODY.back(), true);
+        }
         drawGrid(c, drawings, DrawingKind.TATTOO_RIGHT_ARM, rArm.front(), true);
         drawGrid(c, drawings, DrawingKind.TATTOO_LEFT_ARM, lArm.front(), true);
         drawGrid(c, drawings, DrawingKind.TATTOO_LEGS, R_LEG.front(), true);
@@ -746,7 +754,7 @@ public final class SkinComposer {
      * Sur le torse et le dos le dessin est posé tel quel ; sur un bras, une jambe ou la joue il est réduit en gardant
      * les colonnes et lignes 1, 3, 4 et 6 (la réduction reste symétrique).
      */
-    private static final String[][] DESIGNS = {
+    static final String[][] DESIGNS = {
             {"...##...", "..#oo#..", "###oo###", "#oooooo#", ".#oooo#.", "..#oo#..", ".#o##o#.", ".##..##."},   // 1 étoile
             {".##..##.", "#oo##oo#", "#aooooo#", "#oooooo#", ".#oooo#.", "..#oo#..", "...##...", "........"},   // 2 cœur
             {"...##...", "..#oo#..", "###oo###", "#oooooo#", "###oo###", "..#oo#..", "..#oo#..", "..####.."},   // 3 croix
@@ -799,7 +807,7 @@ public final class SkinComposer {
             {"...##...", "..#..#..", "..#..#..", ".#.oo.#.", ".#.oo.#.", "#......#", "########", "........"}};  // 50 triangle
 
     /** Couleur principale et couleur secondaire de chaque motif (le contour est toujours un noir bleuté). */
-    private static final int[][] DESIGN_COLORS = {
+    static final int[][] DESIGN_COLORS = {
             {0xFF4A8AD0, 0xFF1A2A5A}, {0xFFD03030, 0xFFE87070}, {0xFF5A5A66, 0xFFE8E8F0}, {0xFF2A5AA0, 0xFF4A8AD0},
             {0xFFD03030, 0xFF2A6A3A}, {0xFFE8E8F0, 0xFF5A5A66}, {0xFF5A5A66, 0xFFE8E8F0}, {0xFFE08030, 0xFFE0C040},
             {0xFFE0C040, 0xFFE08030}, {0xFFE0C040, 0xFFE08030}, {0xFFE0A020, 0xFFD03030}, {0xFF1A2A5A, 0xFF14141E},
@@ -814,7 +822,7 @@ public final class SkinComposer {
             {0xFFB8B8C8, 0xFF8A5A30}, {0xFF2A5AA0, 0xFFE0C040}, {0xFF6A3A9A, 0xFFE0C040}, {0xFF8A8A98, 0xFF8A5A30},
             {0xFFA0A0B0, 0xFF5A5A66}, {0xFFB8B8C8, 0xFFD03030}, {0xFFD0A050, 0xFFF0D080}, {0xFFE0E0F0, 0xFF14141E}};
 
-    private static final int OUTLINE = 0xFF14141E;
+    static final int OUTLINE = 0xFF14141E;
     private static final int[] REDUCED = {1, 3, 4, 6};
     private static final int[] FULL = {0, 1, 2, 3, 4, 5, 6, 7};
 
@@ -829,10 +837,12 @@ public final class SkinComposer {
     private static final int FACE_INK = 0xFF2A2A3A;
 
     /** Chaque zone a un motif et une taille : petit (4 cases), moyen (6) ou grand (8). Petit par défaut : très discret. */
-    private static void paintTattoos(Canvas c, int[] t, Box rArm, Box lArm, boolean faceDrawn) {
+    private static void paintTattoos(Canvas c, int[] t, Box rArm, Box lArm, boolean faceDrawn, boolean layered) {
         if (!faceDrawn) faceMark(c, t[TattooZone.FACE_NECK.motifSlot()]);
-        sized(c, BODY.front(), t, TattooZone.TORSO, true);
-        sized(c, BODY.back(), t, TattooZone.BACK, true);
+        if (!layered) {
+            sized(c, BODY.front(), t, TattooZone.TORSO, true);
+            sized(c, BODY.back(), t, TattooZone.BACK, true);
+        }
         sized(c, armFace(rArm, true, t[TattooZone.RIGHT_ARM_FACE_SLOT]), t, TattooZone.RIGHT_ARM, false, t[TattooZone.RIGHT_ARM_HEIGHT_SLOT]);
         sized(c, armFace(lArm, false, t[TattooZone.LEFT_ARM_FACE_SLOT]), t, TattooZone.LEFT_ARM, false, t[TattooZone.LEFT_ARM_HEIGHT_SLOT]);
         sized(c, armFace(R_LEG, true, t[TattooZone.RIGHT_LEG_FACE_SLOT]), t, TattooZone.RIGHT_LEG, false, t[TattooZone.RIGHT_LEG_HEIGHT_SLOT]);
@@ -947,7 +957,7 @@ public final class SkinComposer {
     }
 
     /** Encre : 0 couleurs du motif, 1 noir, 2 gris ombré (le contour reste le plus sombre). */
-    private static int inked(int color, char ch, int ink) {
+    static int inked(int color, char ch, int ink) {
         if (ink == 0 || ch == '#') return color;
         if (ink == 1) return ch == 'o' ? 0xFF262634 : 0xFF14141E;
         int lum = (int) Math.round(((color >> 16) & 0xFF) * 0.3 + ((color >> 8) & 0xFF) * 0.59 + (color & 0xFF) * 0.11);

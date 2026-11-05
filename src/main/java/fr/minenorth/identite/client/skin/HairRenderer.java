@@ -67,7 +67,8 @@ public final class HairRenderer {
 
     /** Cheveux, barbe et piercings en volume 3D sur un modèle de joueur déjà positionné. */
     public static void drawAll(PoseStack ps, MultiBufferSource buffers, int light, PlayerModel<?> model,
-                               fr.minenorth.identite.appearance.Appearance a, boolean headCovered) {
+                               fr.minenorth.identite.appearance.Appearance a, boolean headCovered, ResourceLocation tattoo) {
+        if (tattoo != null) TattooLayerRenderer.draw(ps, buffers, light, model, tattoo);
         int[] hair = a.get(fr.minenorth.identite.appearance.AppearanceSection.HAIR);
         int[] beard = a.get(fr.minenorth.identite.appearance.AppearanceSection.FACIAL_HAIR);
         int[] piercings = a.get(fr.minenorth.identite.appearance.AppearanceSection.PIERCINGS);
