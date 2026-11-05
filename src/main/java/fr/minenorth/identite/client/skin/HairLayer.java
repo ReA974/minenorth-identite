@@ -25,8 +25,7 @@ public class HairLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
         if (player.isInvisible()) return;
         var entry = ClientSkins.active(player.getUUID());
         if (entry.isEmpty()) return;
-        int[] hair = entry.get().appearance().get(AppearanceSection.HAIR);
         boolean helmet = !player.getItemBySlot(EquipmentSlot.HEAD).isEmpty();
-        HairRenderer.draw(ps, buffers, light, getParentModel(), hair[0], hair[1], helmet);
+        HairRenderer.drawAll(ps, buffers, light, getParentModel(), entry.get().appearance(), helmet);
     }
 }

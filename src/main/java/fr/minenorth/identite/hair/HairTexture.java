@@ -22,6 +22,21 @@ public final class HairTexture {
         return out;
     }
 
+    /** Texture d'un métal de piercing : métal, reflet brillant, ombre (mêmes bandes que les cheveux). */
+    public static int[] metalPixels(int metal) {
+        int[] out = new int[WIDTH * HEIGHT];
+        double[] factors = {1.0, 1.45, 0.58};
+        for (int tone = 0; tone < 3; tone++) {
+            for (int y = 0; y < BAND; y++) {
+                for (int x = 0; x < WIDTH; x++) {
+                    double sheen = 0.94 + 0.12 * (((x * 7 + y * 13) % 5) / 4.0);
+                    out[(tone * BAND + y) * WIDTH + x] = Palette.shade(metal | 0xFF000000, factors[tone] * sheen);
+                }
+            }
+        }
+        return out;
+    }
+
     private static int tonePixel(int base, int tone, int x, int y) {
         if (tone == HairPieces.TIE) return Palette.shade(Palette.mix(base, TIE_COLOR, 0.78), y % 4 == 0 ? 0.9 : 1.0);
         int h = x * 374761393 + 668265263;

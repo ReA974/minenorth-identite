@@ -47,11 +47,40 @@ public final class HairRenderer {
         });
     }
 
-    public static void draw(PoseStack ps, MultiBufferSource buffers, int light, PlayerModel<?> model,
-                            int style, int colorIndex, boolean headCovered) {
-        var pieces = HairPieces.forStyle(style);
+    private static final Map<Integer, ResourceLocation> METALS = new HashMap<>();
+
+    /** Une texture par métal de piercing. */
+    private static ResourceLocation metalTexture(int index) {
+        return METALS.computeIfAbsent(index, i -> {
+            NativeImage image = new NativeImage(NativeImage.Format.RGBA, HairTexture.WIDTH, HairTexture.HEIGHT, true);
+            int[] argb = HairTexture.metalPixels(Palette.metal(i));
+            for (int y = 0; y < HairTexture.HEIGHT; y++) {
+                for (int x = 0; x < HairTexture.WIDTH; x++) {
+                    image.setPixelRGBA(x, y, Palette.argbToAbgr(argb[y * HairTexture.WIDTH + x]));
+                }
+            }
+            ResourceLocation location = new ResourceLocation(MineNorthIdentite.MOD_ID, "metal/" + i);
+            Minecraft.getInstance().getTextureManager().register(location, new DynamicTexture(image));
+            return location;
+        });
+    }
+
+    /** Cheveux, barbe et piercings en volume 3D sur un modèle de joueur déjà positionné. */
+    public static void drawAll(PoseStack ps, MultiBufferSource buffers, int light, PlayerModel<?> model,
+                               fr.minenorth.identite.appearance.Appearance a, boolean headCovered) {
+        int[] hair = a.get(fr.minenorth.identite.appearance.AppearanceSection.HAIR);
+        int[] beard = a.get(fr.minenorth.identite.appearance.AppearanceSection.FACIAL_HAIR);
+        int[] piercings = a.get(fr.minenorth.identite.appearance.AppearanceSection.PIERCINGS);
+        drawPieces(ps, buffers, light, model, HairPieces.forStyle(hair[0]), texture(hair[1]), headCovered);
+        drawPieces(ps, buffers, light, model, fr.minenorth.identite.hair.BeardPieces.forStyle(beard[0]), texture(beard[1]), headCovered);
+        drawPieces(ps, buffers, light, model, fr.minenorth.identite.hair.PiercingPieces.of(piercings),
+                metalTexture(piercings[fr.minenorth.identite.hair.PiercingPieces.METAL]), headCovered);
+    }
+
+    private static void drawPieces(PoseStack ps, MultiBufferSource buffers, int light, PlayerModel<?> model,
+                                   java.util.List<HairPieces.Piece> pieces, ResourceLocation texture, boolean headCovered) {
         if (pieces.isEmpty()) return;
-        VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(texture(colorIndex)));
+        VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(texture));
         for (HairPieces.Piece p : pieces) {
             if (headCovered && p.part() == HairPieces.Part.HEAD) continue;
             ModelPart part = p.part() == HairPieces.Part.HEAD ? model.head : model.body;

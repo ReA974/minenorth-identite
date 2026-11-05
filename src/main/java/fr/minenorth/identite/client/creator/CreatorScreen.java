@@ -208,9 +208,7 @@ public final class CreatorScreen extends Screen {
         }
         PreviewRenderer.Cam cam = PreviewRenderer.CAMS[camera];
         PreviewRenderer.render(g, viewX, bodyTop, viewW, h, state.gender(), ClientSkins.previewLocation(),
-                cam.yaw() + yaw, cam.zoom() * zoom, cam.focus(),
-                state.appearance().get(fr.minenorth.identite.appearance.AppearanceSection.HAIR)[0],
-                state.appearance().get(fr.minenorth.identite.appearance.AppearanceSection.HAIR)[1]);
+                cam.yaw() + yaw, cam.zoom() * zoom, cam.focus(), state.appearance());
         int bw = viewW / PreviewRenderer.CAMS.length;
         for (int i = 0; i < PreviewRenderer.CAMS.length; i++) {
             int x = viewX + i * bw;
@@ -378,6 +376,22 @@ public final class CreatorScreen extends Screen {
         };
     }
 
+    /** Un piercing se voit en 3D : on le montre sur la tête (ou le ventre) du personnage, de près. */
+    private void drawPiercingTile(GuiGraphics g, int x, int y, int tw, int th, String key, int slotIndex, int value) {
+        int[] values = state.appearance().get(AppearanceSection.PIERCINGS);
+        values[slotIndex] = value;
+        Appearance shown = state.appearance().with(AppearanceSection.PIERCINGS, values);
+        int[] hair = shown.get(AppearanceSection.HAIR), beard = shown.get(AppearanceSection.FACIAL_HAIR);
+        shown = shown.with(AppearanceSection.HAIR, new int[]{0, hair[1]}).with(AppearanceSection.FACIAL_HAIR, new int[]{0, beard[1]});
+        var texture = ClientSkins.tile(state.gender().name() + "p" + shown.toTag(), state.gender(), shown);
+        PreviewRenderer.render(g, x + 2, y + 2, tw - 4, th - 4, state.gender(), texture, 0, 4.6f, key.equals("navel") ? 1.03f : 1.72f, shown);
+    }
+
+    @Override public void removed() {
+        ClientSkins.releaseTiles();
+        super.removed();
+    }
+
     /** Une rangée de vignettes : le nom de l'option survolée (ou choisie) s'affiche à côté du titre. */
     private int drawTiles(GuiGraphics g, List<Hit> hits, AppearanceSection section, Catalog.Slot slot, int slotIndex,
                           int[] values, int x0, int y, int right, int mx, int my) {
@@ -402,7 +416,8 @@ public final class CreatorScreen extends Screen {
                     k -> fr.minenorth.identite.skin.OptionPreview.of(state.gender(), state.appearance(), section, slotIndex, slot.key(), value));
             g.fill(x, y, x + tw, y + th, selected ? MineNorthStyle.CYAN : MineNorthStyle.FRAME);
             g.fill(x + 1, y + 1, x + tw - 1, y + th - 1, 0xFF120E34);
-            for (int j = 0; j < tile.h(); j++) {
+            if (section == AppearanceSection.PIERCINGS) drawPiercingTile(g, x, y, tw, th, slot.key(), slotIndex, value);
+            else for (int j = 0; j < tile.h(); j++) {
                 for (int i = 0; i < tile.w(); i++) {
                     int argb = tile.argb()[j * tile.w() + i];
                     if (argb != 0) g.fill(x + 2 + i * scale, y + 2 + j * scale, x + 2 + (i + 1) * scale, y + 2 + (j + 1) * scale, argb);

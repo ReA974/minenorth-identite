@@ -307,7 +307,7 @@ public final class TattooSalonScreen extends Screen {
         PreviewRenderer.Cam cam = PreviewRenderer.CAMS[camera];
         int[] hair = state.appearance().get(AppearanceSection.HAIR);
         PreviewRenderer.render(g, viewX, bodyTop, viewW, h, state.gender(), ClientSkins.previewLocation(),
-                cam.yaw() + yaw, cam.zoom(), cam.focus(), hair[0], hair[1]);
+                cam.yaw() + yaw, cam.zoom(), cam.focus(), shown);
         int bw = viewW / VIEW_NAMES.length;
         for (int i = 0; i < VIEW_NAMES.length; i++) {
             final int cam2 = VIEW_CAMS[i];

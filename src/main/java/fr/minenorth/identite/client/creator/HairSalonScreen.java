@@ -121,7 +121,7 @@ public final class HairSalonScreen extends Screen {
         float[] v = VIEWS[view];
         int[] hair = state.appearance().get(AppearanceSection.HAIR);
         PreviewRenderer.render(g, viewX, bodyTop, viewW, h, state.gender(), ClientSkins.previewLocation(),
-                v[0] + yaw, v[1], v[2], hair[0], hair[1]);
+                v[0] + yaw, v[1], v[2], state.appearance());
         int bw = viewW / VIEW_NAMES.length;
         for (int i = 0; i < VIEW_NAMES.length; i++) {
             final int index = i;
@@ -174,7 +174,7 @@ public final class HairSalonScreen extends Screen {
             var texture = ClientSkins.tile(state.gender().name() + shown.toTag(), state.gender(), shown);
             int[] hairNow = shown.get(AppearanceSection.HAIR);
             g.fillGradient(tx + 2, ty + 2, tx + w - 5, ty + th - 13, 0xFFFFC38A, 0xFFFFE6B8);
-            PreviewRenderer.render(g, tx + 2, ty + 2, w - 7, th - 15, state.gender(), texture, 0, 2.5f, 1.55f, hairNow[0], hairNow[1]);
+            PreviewRenderer.render(g, tx + 2, ty + 2, w - 7, th - 15, state.gender(), texture, 0, 2.5f, 1.55f, shown);
             String name = OptionLabels.option(section(), "style", value);
             String text = font.plainSubstrByWidth(name, w - 9);
             g.drawString(font, text, tx + 3, ty + th - 11, selected ? T.onAccent : T.text, false);

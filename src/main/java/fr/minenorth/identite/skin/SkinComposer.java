@@ -124,7 +124,6 @@ public final class SkinComposer {
             faceMark(c, tattoos[TattooZone.FACE_NECK.motifSlot()]);
         }
         paintDrawings(c, a.drawings(), rArm, lArm);
-        paintPiercings(c, a.get(AppearanceSection.PIERCINGS));
         paintOutfit(c, a.outfit());
         paintHair(c, hair);
         return c.px;
@@ -676,70 +675,6 @@ public final class SkinComposer {
                 c.rel(rect, x, y, blend ? Palette.mix(c.relGet(rect, x, y), color, 0.88) : color);
             }
         }
-    }
-
-    // ------------------------------------------------------------------ piercings
-
-    /**
-     * Piercings : oreilles (des deux côtés de la tête), nez, sourcil et lèvre. Chaque bijou est posé sur la tête (plus
-     * sombre) et sur la couche extérieure (métal clair), pour le relief. Ne touche jamais les yeux.
-     */
-    private static void paintPiercings(Canvas c, int[] p) {
-        int metal = Palette.metal(p[4]);
-        int[] tones = {metal, Palette.shade(metal, 1.3), Palette.shade(metal, 0.6)};
-        for (int[] px : nosePixels(p[1])) jewel(c, HEAD.front(), HEAD_O.front(), px[0], px[1], tones[px[2]]);
-        for (int[] px : browPixels(p[2])) jewel(c, HEAD.front(), HEAD_O.front(), px[0], px[1], tones[px[2]]);
-        for (int[] px : lipPixels(p[3])) jewel(c, HEAD.front(), HEAD_O.front(), px[0], px[1], tones[px[2]]);
-        for (int[] px : navelPixels(p[6])) jewel(c, BODY.front(), BODY_O.front(), px[0], px[1], tones[px[2]]);
-    }
-
-    private static void jewel(Canvas c, int[] baseRect, int[] outerRect, int dx, int dy, int color) {
-        c.rel(baseRect, dx, dy, Palette.shade(color, 0.8));
-        c.rel(outerRect, dx, dy, color);
-    }
-
-    /** Pixels {colonne, ligne, ton} : ton 0 = métal, 1 = reflet, 2 = ombre. */
-    private static int[][] nosePixels(int style) {
-        return switch (style) {
-            case 1 -> new int[][]{{2, 5, 1}};
-            case 2 -> new int[][]{{5, 5, 1}};
-            case 3 -> new int[][]{{2, 5, 1}, {5, 5, 1}};
-            case 4 -> new int[][]{{2, 5, 0}, {2, 6, 2}};
-            case 5 -> new int[][]{{3, 5, 0}, {4, 5, 0}};
-            default -> new int[0][];
-        };
-    }
-
-    private static int[][] browPixels(int style) {
-        return switch (style) {
-            case 1 -> new int[][]{{1, 2, 0}, {1, 3, 2}};
-            case 2 -> new int[][]{{1, 2, 1}, {2, 2, 1}};
-            case 3 -> new int[][]{{1, 2, 0}, {1, 3, 2}, {6, 2, 0}, {6, 3, 2}};
-            case 4 -> new int[][]{{1, 2, 1}, {2, 2, 1}, {5, 2, 1}, {6, 2, 1}};
-            default -> new int[0][];
-        };
-    }
-
-    private static int[][] lipPixels(int style) {
-        return switch (style) {
-            case 1 -> new int[][]{{3, 7, 1}};
-            case 2 -> new int[][]{{3, 7, 0}, {4, 7, 2}};
-            case 3 -> new int[][]{{2, 7, 1}, {5, 7, 1}};
-            case 4 -> new int[][]{{5, 6, 1}};
-            case 5 -> new int[][]{{3, 6, 1}};
-            default -> new int[0][];
-        };
-    }
-
-    /** Nombril : colonne 3, ligne 7 de la face avant du torse. */
-    private static int[][] navelPixels(int style) {
-        return switch (style) {
-            case 1 -> new int[][]{{3, 7, 1}};
-            case 2 -> new int[][]{{3, 7, 0}, {4, 7, 0}};
-            case 3 -> new int[][]{{3, 7, 0}, {3, 8, 2}, {3, 9, 1}};
-            case 4 -> new int[][]{{3, 7, 1}, {3, 8, 1}};
-            default -> new int[0][];
-        };
     }
 
     // ------------------------------------------------------------------ vêtements (couche extérieure)

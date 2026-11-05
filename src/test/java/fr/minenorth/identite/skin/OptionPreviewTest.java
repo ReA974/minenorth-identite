@@ -28,7 +28,6 @@ class OptionPreviewTest {
     void sizesFollowTheRegion() {
         assertEquals(8, OptionPreview.of(Gender.MALE, base(Gender.MALE), AppearanceSection.FACE, 0, "eyes", 0).w());
         assertEquals(8, OptionPreview.of(Gender.MALE, base(Gender.MALE), AppearanceSection.FACE, 0, "eyes", 0).h());
-        assertEquals(12, OptionPreview.of(Gender.MALE, base(Gender.MALE), AppearanceSection.PIERCINGS, 6, "navel", 1).h());
         assertEquals(20, OptionPreview.of(Gender.FEMALE, base(Gender.FEMALE), AppearanceSection.BODY, 0, "build", 0).h());
         assertEquals(OptionPreview.Region.FIGURE, OptionPreview.regionFor(AppearanceSection.BODY, "build"));
         assertEquals(OptionPreview.Region.HEAD, OptionPreview.regionFor(AppearanceSection.MAKEUP, "lips"));
@@ -61,15 +60,6 @@ class OptionPreviewTest {
         for (int slot : new int[]{0, 2, 4}) {
             String key = Catalog.slots(AppearanceSection.MAKEUP).get(slot).key();
             List<int[]> images = tiles(Gender.FEMALE, AppearanceSection.MAKEUP, slot, key);
-            assertEquals(images.size(), images.stream().map(java.util.Arrays::hashCode).distinct().count(), key);
-        }
-    }
-
-    @Test
-    void piercingsAreVisibleOnTheirTile() {
-        for (int slot : new int[]{1, 2, 3, 6}) {
-            String key = Catalog.slots(AppearanceSection.PIERCINGS).get(slot).key();
-            List<int[]> images = tiles(Gender.MALE, AppearanceSection.PIERCINGS, slot, key);
             assertEquals(images.size(), images.stream().map(java.util.Arrays::hashCode).distinct().count(), key);
         }
     }
