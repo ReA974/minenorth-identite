@@ -347,6 +347,11 @@ public final class CreatorScreen extends Screen {
         List<Catalog.Slot> slots = Catalog.slots(section);
         for (int i = 0; i < slots.size(); i++) {
             Catalog.Slot slot = slots.get(i);
+            if (slot.options() <= 1) continue;   // option retirée du catalogue (piercings d'oreille)
+            if (usesTiles(section, slot.key())) {
+                y = drawTiles(g, hits, section, slot, i, values, x, y, right, mx, my) + 6;
+                continue;
+            }
             g.drawString(font, OptionLabels.slot(section, slot.key()), x, y, MineNorthStyle.TEXT, false);
             y += 12;
             y = OptionLabels.isColor(slot.key())
@@ -355,6 +360,64 @@ public final class CreatorScreen extends Screen {
             y += 6;
         }
         return drawingButtons(g, hits, section, y, x, right - x);
+    }
+
+    private final java.util.Map<String, fr.minenorth.identite.skin.OptionPreview.Tile> tiles = new java.util.HashMap<>();
+    private Appearance tilesFor;
+    private Gender tilesGender;
+
+    /** Les réglages qui se voient : on montre chaque option sur le personnage plutôt qu'un simple nom. */
+    private static boolean usesTiles(AppearanceSection section, String key) {
+        return switch (section) {
+            case BODY -> key.equals("build");
+            case FACE -> !key.equals("eyeColor");
+            case SKIN -> key.equals("marks");
+            case MAKEUP -> key.equals("lips") || key.equals("eyes") || key.equals("blush");
+            case PIERCINGS -> !key.equals("metal");
+            default -> false;
+        };
+    }
+
+    /** Une rangée de vignettes : le nom de l'option survolée (ou choisie) s'affiche à côté du titre. */
+    private int drawTiles(GuiGraphics g, List<Hit> hits, AppearanceSection section, Catalog.Slot slot, int slotIndex,
+                          int[] values, int x0, int y, int right, int mx, int my) {
+        if (tilesFor == null || !state.appearance().equals(tilesFor) || tilesGender != state.gender()) {
+            tiles.clear();
+            tilesFor = state.appearance();
+            tilesGender = state.gender();
+        }
+        fr.minenorth.identite.skin.OptionPreview.Region region = fr.minenorth.identite.skin.OptionPreview.regionFor(section, slot.key());
+        int scale = switch (region) { case HEAD -> 4; case TORSO -> 3; case FIGURE -> 2; };
+        int tw = (region == fr.minenorth.identite.skin.OptionPreview.Region.FIGURE ? 16 : 8) * scale + 4;
+        int th = (region == fr.minenorth.identite.skin.OptionPreview.Region.HEAD ? 8 : region == fr.minenorth.identite.skin.OptionPreview.Region.TORSO ? 12 : 32) * scale + 4;
+        int titleY = y;
+        y += 12;
+        String hover = null;
+        int x = x0;
+        for (int v = 0; v < slot.options(); v++) {
+            if (x + tw > right) { x = x0; y += th + 3; }
+            final int value = v;
+            boolean allowed = slot.allows(state.gender(), v), selected = values[slotIndex] == v;
+            var tile = tiles.computeIfAbsent(section.name() + slotIndex + ":" + v,
+                    k -> fr.minenorth.identite.skin.OptionPreview.of(state.gender(), state.appearance(), section, slotIndex, slot.key(), value));
+            g.fill(x, y, x + tw, y + th, selected ? MineNorthStyle.CYAN : MineNorthStyle.FRAME);
+            g.fill(x + 1, y + 1, x + tw - 1, y + th - 1, 0xFFD9A577);
+            for (int j = 0; j < tile.h(); j++) {
+                for (int i = 0; i < tile.w(); i++) {
+                    int argb = tile.argb()[j * tile.w() + i];
+                    if (argb != 0) g.fill(x + 2 + i * scale, y + 2 + j * scale, x + 2 + (i + 1) * scale, y + 2 + (j + 1) * scale, argb);
+                }
+            }
+            if (!allowed) g.fill(x, y, x + tw, y + th, 0xCC0E0A34);
+            if (allowed) {
+                if (mx >= x && mx < x + tw && my >= y && my < y + th && my >= optTop && my < optBottom) hover = OptionLabels.option(section, slot.key(), v);
+                hits.add(new Hit(x, y, tw, th, () -> choose(section, slotIndex, value)));
+            }
+            x += tw + 3;
+        }
+        String name = hover != null ? hover : OptionLabels.option(section, slot.key(), values[slotIndex]);
+        g.drawString(font, OptionLabels.slot(section, slot.key()) + " : " + name, x0, titleY, MineNorthStyle.TEXT, false);
+        return y + th;
     }
 
     /** Tatouages et coiffure : un résumé et un bouton qui ouvre le même carnet que les salons (plus clair qu'une longue liste). */

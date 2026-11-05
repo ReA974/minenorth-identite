@@ -151,24 +151,40 @@ public final class HairSalonScreen extends Screen {
             hits.add(new Hit(x, y, sw - 2, 18, () -> set(1, value)));
         }
         y += 26;
-        g.drawString(font, tab == 0 ? "Coupe" : "Style de barbe", optX, y, T.accent, false);
+        int titleY = y;
         y += 11;
         listTop = y;
         Catalog.Slot style = Catalog.slots(section()).get(0);
         List<Integer> allowed = new ArrayList<>();
         for (int i = 0; i < style.options(); i++) if (style.allows(state.gender(), i)) allowed.add(i);
-        int cols = 2, w = (optW - 6) / cols;
-        int rowsVisible = Math.max(2, (bodyBottom - listTop) / 18), totalRows = (allowed.size() + cols - 1) / cols;
+        int cols = 4, w = (optW - 8) / cols, th = 68;
+        int rowsVisible = Math.max(1, (bodyBottom - listTop) / (th + 3)), totalRows = (allowed.size() + cols - 1) / cols;
         scroll = Math.max(0, Math.min(scroll, totalRows - rowsVisible));
+        String hover = null;
         for (int n = 0; n < allowed.size(); n++) {
             int row = n / cols;
             if (row < scroll || row >= scroll + rowsVisible) continue;
             final int value = allowed.get(n);
-            chip(g, mx, my, optX + (n % cols) * w, listTop + (row - scroll) * 18, w - 3,
-                    OptionLabels.option(section(), "style", value), v[0] == value, () -> set(0, value));
+            int tx = optX + (n % cols) * w, ty = listTop + (row - scroll) * (th + 3);
+            boolean selected = v[0] == value, hovered = over(mx, my, tx, ty, w - 3, th);
+            g.fill(tx, ty, tx + w - 3, ty + th, selected ? T.accent : hovered ? T.hover : T.chip);
+            int[] vals = values();
+            vals[0] = value;
+            Appearance shown = state.appearance().with(section(), vals);
+            var texture = ClientSkins.tile(state.gender().name() + shown.toTag(), state.gender(), shown);
+            int[] hairNow = shown.get(AppearanceSection.HAIR);
+            g.fillGradient(tx + 2, ty + 2, tx + w - 5, ty + th - 13, 0xFFFFC38A, 0xFFFFE6B8);
+            PreviewRenderer.render(g, tx + 2, ty + 2, w - 7, th - 15, state.gender(), texture, 0, 2.5f, 1.55f, hairNow[0], hairNow[1]);
+            String name = OptionLabels.option(section(), "style", value);
+            String text = font.plainSubstrByWidth(name, w - 9);
+            g.drawString(font, text, tx + 3, ty + th - 11, selected ? T.onAccent : T.text, false);
+            if (hovered) hover = name;
+            hits.add(new Hit(tx, ty, w - 3, th, () -> set(0, value)));
         }
+        String current = hover != null ? hover : OptionLabels.option(section(), "style", v[0]);
+        g.drawString(font, (tab == 0 ? "Coupe" : "Style de barbe") + " : " + current, optX, titleY, T.accent, false);
         if (totalRows > rowsVisible) {
-            int barH = rowsVisible * 18, bx = optX + optW - 4;
+            int barH = rowsVisible * (th + 3) - 3, bx = optX + optW - 3;
             g.fill(bx, listTop, bx + 3, listTop + barH, T.list);
             int thumb = Math.max(10, barH * rowsVisible / totalRows);
             int thumbY = listTop + (barH - thumb) * scroll / (totalRows - rowsVisible);
@@ -222,6 +238,11 @@ public final class HairSalonScreen extends Screen {
             return true;
         }
         return super.mouseDragged(mx, my, button, dx, dy);
+    }
+
+    @Override public void removed() {
+        ClientSkins.releaseTiles();
+        super.removed();
     }
 
     @Override public boolean isPauseScreen() { return false; }

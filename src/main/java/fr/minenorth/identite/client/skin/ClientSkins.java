@@ -60,6 +60,23 @@ public final class ClientSkins {
 
     public static ResourceLocation previewLocation() { return PREVIEW; }
 
+    private static final Map<String, ResourceLocation> TILES = new HashMap<>();
+
+    /** Texture d'une vignette (une coupe du salon de coiffure), créée à la demande et gardée jusqu'à {@link #releaseTiles}. */
+    public static ResourceLocation tile(String key, Gender gender, Appearance appearance) {
+        if (TILES.size() > 150) releaseTiles();
+        return TILES.computeIfAbsent(key, k -> {
+            ResourceLocation location = new ResourceLocation(MineNorthIdentite.MOD_ID, "tile/" + TILES.size() + "_" + Integer.toHexString(k.hashCode()));
+            Minecraft.getInstance().getTextureManager().register(location, texture(gender, appearance));
+            return location;
+        });
+    }
+
+    public static void releaseTiles() {
+        for (ResourceLocation location : TILES.values()) Minecraft.getInstance().getTextureManager().release(location);
+        TILES.clear();
+    }
+
     /** Texture d'aperçu de l'écran de création, régénérée à chaque appel. */
     public static ResourceLocation preview(Gender gender, Appearance appearance) {
         if (previewTexture == null) {
